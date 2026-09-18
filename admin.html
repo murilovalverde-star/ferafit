@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Administrador — Fera Fit</title>
+  <meta name="description" content="Desenho do painel administrativo do Fera Fit — sem indexação, uso interno.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="marca" href="index.html">
+        <img src="assets/img/logo.png" alt="Fera Fit">
+        <span>Fera Fit</span>
+      </a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <span style="margin-left:26px;font-weight:600;font-size:0.92rem;color:#55524e;">Painel do Administrador (uso interno)</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- LOGIN COSMÉTICO — sem autenticação real, sem sessão, sem dado nenhum. Compara só no navegador. -->
+  <section class="bloco" id="admin-login-tela">
+    <div class="container">
+      <div class="parceiro-box" style="max-width:380px;">
+        <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 18px;text-align:center;">Entrar no painel</h1>
+        <div class="campo">
+          <label for="admin-usuario">Usuário</label>
+          <input id="admin-usuario" type="text" placeholder="admin">
+        </div>
+        <div class="campo">
+          <label for="admin-senha">Senha</label>
+          <input id="admin-senha" type="password" placeholder="admin">
+        </div>
+        <p id="admin-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Usuário ou senha incorretos.</p>
+        <button class="botao-primario largura-total" type="button" onclick="entrarAdmin()">Entrar</button>
+        <p style="color:var(--texto-secundario);font-size:0.76rem;margin:14px 0 0;text-align:center;">Login de demonstração — sem conexão com nenhum sistema real.</p>
+      </div>
+    </div>
+  </section>
+
+  <main id="admin-conteudo" style="display:none;">
+    <section class="admin-header">
+      <div class="container">
+        <h1>Painel do Administrador</h1>
+        <p class="subtitle">
+          Desenho de tela para Murilo e a equipe ajustarem o app e o site sem escrever código.
+          Esta página é uma maquete estática — os botões não fazem nada ainda, e qualquer dado
+          de exemplo está marcado com <span class="tag-exemplo">exemplo</span>.
+        </p>
+        <div class="aviso-desenho">
+          ⚠ Esta é uma tela de desenho, não um painel funcional. Ver a seção "O que falta de
+          terceiros" no fim da página.
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO 1 — CATÁLOGO DE EXERCÍCIOS -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo depende">Tela pronta · publicação depende de terceiros</span>
+        <h2>Catálogo de exercícios</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 18px;">
+          Fluxo pensado para não deixar incluir um exercício sem ver a ordem atual do subgrupo —
+          é a ordem que define o rodízio do motor de treino.
+        </p>
+
+        <div class="admin-mock">
+          <div class="incluir-passo">
+            <div class="num">1</div>
+            <div class="texto"><strong>Clicar em "Incluir exercício"</strong><span>Abre o formulário do novo exercício.</span></div>
+          </div>
+          <div class="incluir-passo">
+            <div class="num">2</div>
+            <div class="texto"><strong>Escolher o Grupo</strong><span>Ex: Costas, Pernas, Ombro. Primeira pergunta, antes de qualquer outro dado.</span></div>
+          </div>
+          <div class="incluir-passo">
+            <div class="num">3</div>
+            <div class="texto">
+              <strong>Ver todos os exercícios do grupo, com as capas reais</strong>
+              <span>Mostra o subgrupo inteiro na ordem atual (POS SUBGRUPO), para não incluir às cegas.</span>
+              <div class="grid-capas">
+                <div class="capa">Remada curvada c/ barra <span class="tag-exemplo">exemplo</span></div>
+                <div class="capa">Remada cavalinho</div>
+                <div class="capa">Remada baixa</div>
+                <div class="capa">Puxada frontal</div>
+                <div class="capa">Puxada supinada</div>
+                <div class="capa nova">+ Novo exercício</div>
+              </div>
+            </div>
+          </div>
+          <div class="incluir-passo">
+            <div class="num">4</div>
+            <div class="texto"><strong>Preencher nome, fotos (4 formatos) e posicionar</strong><span>Arrastar para a posição certa dentro do subgrupo, olhando os vizinhos.</span></div>
+          </div>
+          <div class="incluir-passo">
+            <div class="num">5</div>
+            <div class="texto"><strong>Validar o motor</strong><span class="tag-tempo">responde em ~416 ms</span></div>
+          </div>
+          <div class="incluir-passo">
+            <div class="num">6</div>
+            <div class="texto"><strong>Publicar</strong><span class="tag-tempo">entra na hora</span></div>
+          </div>
+        </div>
+
+        <ul class="regra-lista">
+          <li><strong>Inclusão de exercício entra na hora</strong> — não espera virada de fase.</li>
+          <li><strong>Reordenação e remoção comum</strong> só valem na próxima virada de fase (treinos 30, 60, 100 e seguintes).</li>
+          <li><strong>Remoção de emergência</strong> — arte errada, exercício perigoso ou problema jurídico — sai na próxima abertura do app, ignorando a virada de fase. Botão separado, com confirmação extra, pra não ser usado por engano no lugar da remoção comum.</li>
+          <li><strong>Validação</strong> roda a varredura reduzida (416 ms) como portão de publicação; a varredura completa das 532.224 combinações (6,4 s) fica disponível como checagem manual, não obrigatória a cada publicação.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MÓDULO 2 — ACADEMIAS E PERSONAIS (painéis separados) -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo pronta">Tela pronta</span>
+        <h2>Academias e personais</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 8px;">
+          Dois painéis separados — academia gerencia personais e alunos; personal gerencia só os
+          próprios alunos, podendo estar em mais de uma academia.
+        </p>
+
+        <div class="admin-tabs">
+          <button class="ativa" type="button" onclick="mostrarPainel('academia')">Painel Academia</button>
+          <button type="button" onclick="mostrarPainel('personal')">Painel Personal</button>
+        </div>
+
+        <div class="admin-painel-conteudo ativa" id="painel-academia">
+          <div class="admin-mock">
+            <div class="linha-mock">
+              <span class="rotulo">Fit Center — SP <span class="tag-exemplo">exemplo</span></span>
+              <span class="tag-tempo">ativa</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">Personais vinculados <span class="tag-exemplo">exemplo</span></span>
+              <span>3</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">Alunos vinculados <span class="tag-exemplo">exemplo</span></span>
+              <span>48</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">+ Cadastrar novo personal para esta academia</span>
+              <span>→</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">+ Aprovar solicitação de vínculo de aluno</span>
+              <span>→</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-painel-conteudo" id="painel-personal">
+          <div class="admin-mock">
+            <div class="linha-mock">
+              <span class="rotulo">João Marques <span class="tag-exemplo">exemplo</span></span>
+              <span class="tag-tempo">ativo</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">Academias de atuação <span class="tag-exemplo">exemplo</span></span>
+              <span>2 de 3</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">Alunos vinculados <span class="tag-exemplo">exemplo</span></span>
+              <span>11</span>
+            </div>
+            <div class="linha-mock">
+              <span class="rotulo">+ Montar aula própria</span>
+              <span>→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO 3 — CONTATO -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo pronta">Tela pronta, sem dependência</span>
+        <h2>Caixa de contato</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 12px;">
+          Decisão de 2026-09-10: nenhuma integração por enquanto. Um link que abre o webmail do
+          Zoho em aba nova — enquanto a equipe for uma pessoa só, controle de acesso compartilhado
+          não resolve nenhum problema real. Quando existir uma segunda pessoa respondendo e-mail
+          de suporte, essa parte é reaberta como integração de verdade.
+        </p>
+        <a class="link-webmail" href="https://mail.zoho.com/" target="_blank" rel="noopener">
+          ✉ Abrir contato@ferafit.app.br no Zoho Mail →
+        </a>
+      </div>
+    </section>
+
+    <!-- O QUE FALTA DE TERCEIROS -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo depende">Depende de terceiros</span>
+        <h2>O que esta tela não resolve sozinha</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;">
+          Hoje o catálogo de exercícios é código compilado dentro do app
+          (<code>src/data/exercises.js</code>), e as imagens entram como <code>require()</code>
+          estático. Enquanto isso não mudar, "publicar" um exercício novo por este painel
+          significa, na prática, mandar uma nova versão do app para a loja — não uma
+          publicação instantânea. Três peças precisam sair de dentro do app antes deste
+          painel funcionar de verdade:
+        </p>
+        <ul class="regra-lista">
+          <li><strong>Catálogo fora do app</strong> (banco de dados em vez de arquivo compilado) — Backend Infrastructure.</li>
+          <li><strong>Imagens fora do app</strong> (servidas por URL em vez de <code>require()</code>) — Backend Infrastructure.</li>
+          <li><strong>Validação do motor acessível por API</strong>, para o painel chamar sem depender de build do app — Dev Mobile + Backend Infrastructure.</li>
+          <li><strong>Confirmação de GPS das academias de atuação do personal</strong> (Área do Parceiro) precisa de uma chave de API do Google Maps — dono ainda não definido, ver P8 no STATUS.md.</li>
+        </ul>
+        <p style="color:var(--texto-secundario);max-width:640px;">
+          A tela acima já está desenhada para o dia em que essas peças existirem. Não
+          prometo que ela funciona hoje.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; 2026 Fera Fit. Uso interno — não indexado.</span>
+      <a href="index.html">Home</a>
+    </div>
+  </footer>
+
+  <script>
+    // Login cosmético — só compara texto digitado, roda 100% no navegador.
+    // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
+    // Combinado em D009 (16/09/2026): sai do ar antes de existir login de verdade.
+    function entrarAdmin() {
+      var usuario = document.getElementById('admin-usuario').value;
+      var senha = document.getElementById('admin-senha').value;
+      var erro = document.getElementById('admin-login-erro');
+      if (usuario === 'admin' && senha === 'admin') {
+        document.getElementById('admin-login-tela').style.display = 'none';
+        document.getElementById('admin-conteudo').style.display = 'block';
+      } else {
+        erro.style.display = 'block';
+      }
+    }
+
+    function mostrarPainel(tipo) {
+      var botoes = document.querySelectorAll('.admin-tabs button');
+      botoes.forEach(function(b) { b.classList.remove('ativa'); });
+      event.target.classList.add('ativa');
+      document.getElementById('painel-academia').classList.toggle('ativa', tipo === 'academia');
+      document.getElementById('painel-personal').classList.toggle('ativa', tipo === 'personal');
+    }
+  </script>
+</body>
+</html>

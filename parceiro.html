@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Parceiro — Fera Fit</title>
+  <meta name="description" content="Entrada para academias e personal trainers parceiros do Fera Fit.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="marca" href="index.html">
+        <img src="assets/img/logo.png" alt="Fera Fit">
+        <span>Fera Fit</span>
+      </a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="apresentacao.html">Como funciona</a>
+        <a href="contato.html">Contato</a>
+        <a class="ativo" href="parceiro.html">Área do Parceiro</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="parceiro-hero">
+      <div class="container">
+        <span class="eyebrow">Área do Parceiro</span>
+        <h1>Entre para gerenciar seus alunos e suas aulas.</h1>
+      </div>
+    </section>
+
+    <section class="bloco">
+      <div class="container">
+        <div class="parceiro-box" id="caixa-parceiro">
+
+          <div class="parceiro-tabs">
+            <button class="ativo" type="button" onclick="mostrarAba('entrar')">Entrar</button>
+            <button type="button" onclick="mostrarAba('cadastro')">Quero me cadastrar</button>
+          </div>
+
+          <!-- ABA ENTRAR — login cosmético, ver nota no script no fim do arquivo -->
+          <div id="aba-entrar">
+            <div class="campo">
+              <label for="email-parceiro">Usuário (demonstração: admin)</label>
+              <input id="email-parceiro" type="text" placeholder="admin">
+            </div>
+            <div class="campo">
+              <label for="senha-parceiro">Senha (demonstração: admin)</label>
+              <input id="senha-parceiro" type="password" placeholder="admin">
+            </div>
+            <p id="parceiro-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Usuário ou senha incorretos.</p>
+
+            <button class="botao-primario largura-total" type="button" onclick="entrarParceiro()">Entrar</button>
+
+            <div class="parceiro-links">
+              <a href="#">Esqueci minha senha</a>
+              <a href="contato.html">Falar com o Fera Fit</a>
+            </div>
+          </div>
+
+          <!-- ABA CADASTRO -->
+          <div id="aba-cadastro" style="display:none;">
+
+            <div class="parceiro-tabs" style="margin-bottom:20px;">
+              <button class="ativo" type="button" onclick="mostrarTipo('academia')" id="tipo-academia">Sou academia</button>
+              <button type="button" onclick="mostrarTipo('personal')" id="tipo-personal">Sou personal</button>
+            </div>
+
+            <!-- CADASTRO ACADEMIA -->
+            <div id="cadastro-academia">
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Dados da academia</div>
+                <div class="campo">
+                  <label for="ac-nome">Nome da academia</label>
+                  <input id="ac-nome" type="text" placeholder="Ex: Fera Fit Studio" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-cnpj">CNPJ</label>
+                  <input id="ac-cnpj" type="text" placeholder="00.000.000/0000-00" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-endereco">Endereço</label>
+                  <input id="ac-endereco" type="text" placeholder="Rua, número, bairro" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-cidade">Cidade / UF</label>
+                  <input id="ac-cidade" type="text" placeholder="São Paulo / SP" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-responsavel">Nome do responsável</label>
+                  <input id="ac-responsavel" type="text" placeholder="Nome completo" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-telefone">Telefone / WhatsApp</label>
+                  <input id="ac-telefone" type="text" placeholder="(00) 00000-0000" disabled>
+                </div>
+              </div>
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Acesso</div>
+                <div class="campo">
+                  <label for="ac-email">E-mail</label>
+                  <input id="ac-email" type="email" placeholder="contato@suaacademia.com" disabled>
+                </div>
+                <div class="campo">
+                  <label for="ac-senha">Senha</label>
+                  <input id="ac-senha" type="password" placeholder="••••••••" disabled>
+                </div>
+              </div>
+              <button class="botao-primario largura-total" type="button" disabled>Criar conta de academia</button>
+            </div>
+
+            <!-- CADASTRO PERSONAL -->
+            <div id="cadastro-personal" style="display:none;">
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Dados do personal</div>
+                <div class="campo">
+                  <label for="pe-nome">Nome completo</label>
+                  <input id="pe-nome" type="text" placeholder="Seu nome completo" disabled>
+                </div>
+                <div class="campo">
+                  <label for="pe-cpf">CPF</label>
+                  <input id="pe-cpf" type="text" placeholder="000.000.000-00" disabled>
+                </div>
+                <div class="campo">
+                  <label for="pe-cref">CREF</label>
+                  <input id="pe-cref" type="text" placeholder="000000-G/SP" disabled>
+                </div>
+                <div class="campo">
+                  <label for="pe-cidade">Cidade de atuação</label>
+                  <input id="pe-cidade" type="text" placeholder="São Paulo / SP" disabled>
+                </div>
+                <div class="campo">
+                  <label for="pe-telefone">Telefone / WhatsApp</label>
+                  <input id="pe-telefone" type="text" placeholder="(00) 00000-0000" disabled>
+                </div>
+              </div>
+
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Academias de atuação (até 3)</div>
+
+                <div class="academia-atuacao">
+                  <div class="linha-topo">
+                    <span>Academia 1</span>
+                    <span class="selo-gps pendente">Ponto GPS pendente</span>
+                  </div>
+                  <input type="text" placeholder="Nome da academia" disabled>
+                </div>
+                <div class="academia-atuacao">
+                  <div class="linha-topo">
+                    <span>Academia 2 (opcional)</span>
+                    <span class="selo-gps pendente">Ponto GPS pendente</span>
+                  </div>
+                  <input type="text" placeholder="Nome da academia" disabled>
+                </div>
+                <div class="academia-atuacao">
+                  <div class="linha-topo">
+                    <span>Academia 3 (opcional)</span>
+                    <span class="selo-gps pendente">Ponto GPS pendente</span>
+                  </div>
+                  <input type="text" placeholder="Nome da academia" disabled>
+                </div>
+                <p class="campo-nota">
+                  O nome de cada academia é confirmado automaticamente contra o Google Maps para fixar
+                  o ponto de GPS — é assim que os alunos encontram o personal por proximidade. Esta é
+                  só a estrutura visual do campo; a busca e a confirmação de verdade dependem de uma
+                  chave de API do Google que ainda não existe (ver P8 no STATUS.md da IA Site).
+                </p>
+              </div>
+
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Acesso</div>
+                <div class="campo">
+                  <label for="pe-email">E-mail</label>
+                  <input id="pe-email" type="email" placeholder="seuemail@exemplo.com" disabled>
+                </div>
+                <div class="campo">
+                  <label for="pe-senha">Senha</label>
+                  <input id="pe-senha" type="password" placeholder="••••••••" disabled>
+                </div>
+              </div>
+              <button class="botao-primario largura-total" type="button" disabled>Criar conta de personal</button>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TELA PÓS-LOGIN — demonstração, sem funcionalidade real. Ver mapa completo das telas no STATUS.md (D008). -->
+        <div class="parceiro-box" id="area-logada" style="display:none;max-width:520px;text-align:center;">
+          <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 12px;">Login de demonstração feito.</h1>
+          <p style="color:var(--texto-secundario);margin:0 0 8px;">
+            Esta é só a confirmação de que o acesso funciona. As telas de gestão de alunos, catálogo de
+            exercícios do parceiro e montagem de treino individual ainda não foram desenhadas.
+          </p>
+          <p style="color:var(--texto-secundario);font-size:0.85rem;margin:0;">
+            Ver o mapa completo do que já existe e do que falta no <code>STATUS.md</code> da IA Site (entrada D008).
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; 2026 Fera Fit. Todos os direitos reservados.</span>
+      <a href="privacidade.html">Privacidade</a>
+    </div>
+  </footer>
+
+  <script>
+    // Login cosmético — só compara texto digitado, roda 100% no navegador.
+    // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
+    // Combinado em D009 (16/09/2026): sai do ar antes de existir login de verdade.
+    function entrarParceiro() {
+      var usuario = document.getElementById('email-parceiro').value;
+      var senha = document.getElementById('senha-parceiro').value;
+      var erro = document.getElementById('parceiro-login-erro');
+      if (usuario === 'admin' && senha === 'admin') {
+        document.getElementById('caixa-parceiro').style.display = 'none';
+        document.getElementById('area-logada').style.display = 'block';
+      } else {
+        erro.style.display = 'block';
+      }
+    }
+
+    function mostrarAba(aba) {
+      var botoes = document.querySelectorAll('#caixa-parceiro > .parceiro-tabs')[0].querySelectorAll('button');
+      botoes.forEach(function(b) { b.classList.remove('ativo'); });
+      event.target.classList.add('ativo');
+      document.getElementById('aba-entrar').style.display = (aba === 'entrar') ? 'block' : 'none';
+      document.getElementById('aba-cadastro').style.display = (aba === 'cadastro') ? 'block' : 'none';
+    }
+    function mostrarTipo(tipo) {
+      document.getElementById('tipo-academia').classList.toggle('ativo', tipo === 'academia');
+      document.getElementById('tipo-personal').classList.toggle('ativo', tipo === 'personal');
+      document.getElementById('cadastro-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
+      document.getElementById('cadastro-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
