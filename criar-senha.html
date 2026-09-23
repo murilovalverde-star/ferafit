@@ -39,11 +39,11 @@
 
             <div class="campo">
               <label for="senha-nova">Nova senha</label>
-              <input id="senha-nova" type="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password">
+              <input id="senha-nova" type="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password" minlength="8">
             </div>
             <div class="campo">
               <label for="senha-repetir">Repita a nova senha</label>
-              <input id="senha-repetir" type="password" placeholder="Repita a senha" autocomplete="new-password">
+              <input id="senha-repetir" type="password" placeholder="Repita a senha" autocomplete="new-password" minlength="8">
             </div>
 
             <p id="erro-formulario" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
@@ -142,6 +142,9 @@
           erroEl.style.display = "block";
           botao.disabled = false;
           botao.textContent = "Salvar nova senha";
+          // Encerra a sessão de recuperação mesmo quando a troca falha — ela não deve
+          // sobrar válida no navegador se a pessoa desistir depois de um erro (D026, 23/09/2026).
+          try { await supabaseClient.auth.signOut(); } catch (e2) {}
           return;
         }
         // Encerra a sessão de recuperação assim que a senha é trocada — ela não deve
@@ -154,6 +157,9 @@
         erroEl.style.display = "block";
         botao.disabled = false;
         botao.textContent = "Salvar nova senha";
+        // Mesmo motivo do bloco acima: não deixar a sessão de recuperação sobrando
+        // depois de uma falha inesperada (D026, 23/09/2026).
+        try { await supabaseClient.auth.signOut(); } catch (e2) {}
       }
     }
 
