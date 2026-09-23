@@ -115,76 +115,93 @@
               <button class="botao-primario largura-total" type="button" disabled>Criar conta de academia</button>
             </div>
 
-            <!-- CADASTRO PERSONAL -->
+            <!-- CADASTRO PERSONAL — campos e fluxo definidos por Murilo, D013 e D014 (2026-09-18).
+                 Só a tela: não envia para nenhum banco. O clique em "Enviar cadastro" é cosmético,
+                 só troca de tela no navegador — ver STATUS.md para a lista de campos que esta tela produz.
+                 CREF e Telefone/WhatsApp mantidos por enquanto — ver P14 no STATUS.md: a lista do D014
+                 encolheu sem explicação (mesmo padrão que "academias de atuação" no D013), então não
+                 apaguei campo nenhum sem confirmação. E-mail entrou como canal da senha provisória,
+                 com dupla digitação como reforço barato contra erro de digitação (recomendação dada no D014). -->
             <div id="cadastro-personal" style="display:none;">
+
+              <div class="aviso-desenho" style="margin:0 0 20px;">
+                ⚠ Este cadastro passa por aprovação. Depois de enviar, alguém do Fera Fit confere seus
+                dados e, se aprovado, a senha provisória para o primeiro acesso chega no seu e-mail — não
+                é automático, e pode levar alguns dias.
+              </div>
+
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Dados do personal</div>
                 <div class="campo">
                   <label for="pe-nome">Nome completo</label>
-                  <input id="pe-nome" type="text" placeholder="Seu nome completo" disabled>
+                  <input id="pe-nome" type="text" placeholder="Seu nome completo">
                 </div>
                 <div class="campo">
-                  <label for="pe-cpf">CPF</label>
-                  <input id="pe-cpf" type="text" placeholder="000.000.000-00" disabled>
+                  <label for="pe-foto">Foto</label>
+                  <input id="pe-foto" type="file" accept="image/*">
+                  <p class="campo-nota" style="margin-top:6px;">Sua foto vai aparecer publicamente na busca de personais do Fera Fit.</p>
                 </div>
                 <div class="campo">
-                  <label for="pe-cref">CREF</label>
-                  <input id="pe-cref" type="text" placeholder="000000-G/SP" disabled>
+                  <label for="pe-cref">CREF (registro profissional)</label>
+                  <input id="pe-cref" type="text" placeholder="000000-G/SP">
+                </div>
+                <div class="campo">
+                  <label for="pe-formacao">Formação</label>
+                  <input id="pe-formacao" type="text" placeholder="Ex: Educação Física — USP">
+                </div>
+                <div class="campo">
+                  <label for="pe-especializacao">Especialização</label>
+                  <input id="pe-especializacao" type="text" placeholder="Ex: Hipertrofia, reabilitação, emagrecimento">
                 </div>
                 <div class="campo">
                   <label for="pe-cidade">Cidade de atuação</label>
-                  <input id="pe-cidade" type="text" placeholder="São Paulo / SP" disabled>
+                  <input id="pe-cidade" type="text" placeholder="São Paulo / SP">
+                </div>
+                <div class="campo">
+                  <label for="pe-bairro">Bairro de atuação</label>
+                  <input id="pe-bairro" type="text" placeholder="Ex: Moema">
+                </div>
+                <div class="campo">
+                  <label for="pe-experiencias">Experiências</label>
+                  <textarea id="pe-experiencias" rows="3" placeholder="Conte um pouco da sua experiência como personal"></textarea>
                 </div>
                 <div class="campo">
                   <label for="pe-telefone">Telefone / WhatsApp</label>
-                  <input id="pe-telefone" type="text" placeholder="(00) 00000-0000" disabled>
+                  <input id="pe-telefone" type="text" placeholder="(00) 00000-0000">
                 </div>
               </div>
 
               <div class="cadastro-grupo">
-                <div class="titulo-grupo">Academias de atuação (até 3)</div>
-
-                <div class="academia-atuacao">
-                  <div class="linha-topo">
-                    <span>Academia 1</span>
-                    <span class="selo-gps pendente">Ponto GPS pendente</span>
-                  </div>
-                  <input type="text" placeholder="Nome da academia" disabled>
-                </div>
-                <div class="academia-atuacao">
-                  <div class="linha-topo">
-                    <span>Academia 2 (opcional)</span>
-                    <span class="selo-gps pendente">Ponto GPS pendente</span>
-                  </div>
-                  <input type="text" placeholder="Nome da academia" disabled>
-                </div>
-                <div class="academia-atuacao">
-                  <div class="linha-topo">
-                    <span>Academia 3 (opcional)</span>
-                    <span class="selo-gps pendente">Ponto GPS pendente</span>
-                  </div>
-                  <input type="text" placeholder="Nome da academia" disabled>
-                </div>
-                <p class="campo-nota">
-                  O nome de cada academia é confirmado automaticamente contra o Google Maps para fixar
-                  o ponto de GPS — é assim que os alunos encontram o personal por proximidade. Esta é
-                  só a estrutura visual do campo; a busca e a confirmação de verdade dependem de uma
-                  chave de API do Google que ainda não existe (ver P8 no STATUS.md da IA Site).
-                </p>
-              </div>
-
-              <div class="cadastro-grupo">
-                <div class="titulo-grupo">Acesso</div>
+                <div class="titulo-grupo">E-mail — é para onde vai a sua senha provisória</div>
                 <div class="campo">
                   <label for="pe-email">E-mail</label>
-                  <input id="pe-email" type="email" placeholder="seuemail@exemplo.com" disabled>
+                  <input id="pe-email" type="email" placeholder="seuemail@exemplo.com">
                 </div>
                 <div class="campo">
-                  <label for="pe-senha">Senha</label>
-                  <input id="pe-senha" type="password" placeholder="••••••••" disabled>
+                  <label for="pe-email-confirmar">Repita o e-mail</label>
+                  <input id="pe-email-confirmar" type="email" placeholder="Repita o e-mail">
                 </div>
+                <p id="pe-email-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Os e-mails digitados não coincidem.</p>
+                <p class="campo-nota">Confira com atenção: é para este endereço que vai a senha provisória. E-mail errado significa não conseguir entrar depois.</p>
               </div>
-              <button class="botao-primario largura-total" type="button" disabled>Criar conta de personal</button>
+
+              <p class="campo-nota">Ao enviar, sua foto e seus dados profissionais ficam visíveis na busca pública de personais do Fera Fit. A resposta sobre a aprovação vem por e-mail e pode demorar alguns dias — não é instantâneo.</p>
+
+              <button class="botao-primario largura-total" type="button" onclick="enviarCadastroPersonal()">Enviar cadastro</button>
+            </div>
+
+            <!-- ESTADO PÓS-ENVIO — D013/D014 (2026-09-18) -->
+            <div id="cadastro-personal-recebido" style="display:none;text-align:center;">
+              <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 12px;">Recebemos seu cadastro.</h1>
+              <p style="color:var(--texto-secundario);margin:0 0 8px;">
+                Um responsável do Fera Fit vai conferir seus dados. Se aprovado, a senha provisória para
+                o primeiro acesso chega no e-mail que você cadastrou, e precisa ser trocada assim que
+                você entrar.
+              </p>
+              <p style="color:var(--texto-secundario);font-size:0.85rem;margin:0;">
+                Isso pode levar alguns dias — não é automático. Fique de olho no e-mail, inclusive na
+                caixa de spam.
+              </p>
             </div>
 
           </div>
@@ -241,6 +258,24 @@
       document.getElementById('tipo-personal').classList.toggle('ativo', tipo === 'personal');
       document.getElementById('cadastro-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
       document.getElementById('cadastro-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
+      document.getElementById('cadastro-personal-recebido').style.display = 'none';
+    }
+
+    // Envio cosmético — troca de tela só no navegador, sem gravar nada em lugar nenhum.
+    // D013 (2026-09-18): "não construa o envio para o banco ainda" — a Backend está escrevendo o modelo.
+    // D014: a única validação real aqui é a dupla digitação do e-mail (reforço barato contra erro de
+    // digitação, recomendado no STATUS.md) — o resto continua maquete, sem chamada nenhuma.
+    function enviarCadastroPersonal() {
+      var email = document.getElementById('pe-email').value;
+      var emailConfirmar = document.getElementById('pe-email-confirmar').value;
+      var erro = document.getElementById('pe-email-erro');
+      if (email !== emailConfirmar) {
+        erro.style.display = 'block';
+        return;
+      }
+      erro.style.display = 'none';
+      document.getElementById('cadastro-personal').style.display = 'none';
+      document.getElementById('cadastro-personal-recebido').style.display = 'block';
     }
   </script>
 </body>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar senha — Fera Fit</title>
+  <meta name="description" content="Crie sua senha de acesso ao Fera Fit.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/favicon.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Biblioteca hospedada localmente (não via CDN de terceiro) — D010, 17/09/2026, achado da Segurança.
+       Versão baixada: @supabase/supabase-js@2.116.0 (dist/umd/supabase.js). Para atualizar, baixar de novo
+       de https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.X.X e substituir este arquivo. -->
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="marca" href="index.html">
+        <img src="assets/img/logo.png" alt="Fera Fit">
+        <span>Fera Fit</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="bloco">
+      <div class="container">
+        <div class="parceiro-box" style="max-width:420px;">
+
+          <!-- ESTADO: verificando o link -->
+          <div id="estado-carregando">
+            <p style="color:var(--texto-secundario);text-align:center;margin:0;">Verificando seu link...</p>
+          </div>
+
+          <!-- ESTADO: formulário de nova senha -->
+          <div id="estado-formulario" style="display:none;">
+            <h1 style="font-size:1.5rem;font-weight:800;margin:0 0 20px;text-align:center;">Criar nova senha</h1>
+
+            <div class="campo">
+              <label for="senha-nova">Nova senha</label>
+              <input id="senha-nova" type="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password">
+            </div>
+            <div class="campo">
+              <label for="senha-repetir">Repita a nova senha</label>
+              <input id="senha-repetir" type="password" placeholder="Repita a senha" autocomplete="new-password">
+            </div>
+
+            <p id="erro-formulario" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
+
+            <button class="botao-primario largura-total" type="button" id="botao-salvar" onclick="salvarSenha()">
+              Salvar nova senha
+            </button>
+          </div>
+
+          <!-- ESTADO: sucesso -->
+          <div id="estado-sucesso" style="display:none;text-align:center;">
+            <h1 style="font-size:1.5rem;font-weight:800;margin:0 0 12px;">Senha alterada.</h1>
+            <p style="color:var(--texto-secundario);margin:0;">Volte para o app e entre com a nova senha.</p>
+          </div>
+
+          <!-- ESTADO: link inválido/expirado -->
+          <div id="estado-invalido" style="display:none;text-align:center;">
+            <h1 style="font-size:1.5rem;font-weight:800;margin:0 0 12px;">Este link venceu.</h1>
+            <p style="color:var(--texto-secundario);margin:0;">Peça um novo pelo app, em "Esqueci minha senha".</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; 2026 Fera Fit. Todos os direitos reservados.</span>
+      <a href="privacidade.html">Privacidade</a>
+    </div>
+  </footer>
+
+  <script>
+    // Credenciais públicas do projeto Supabase (fera-fit-prod).
+    // A chave "anon" é feita para rodar no navegador — quem protege os dados é o RLS do banco.
+    // Fonte: CREDENCIAIS_supabase_prod.md (IA de Backend e Infraestrutura, 2026-09-09).
+    var SUPABASE_URL = "https://jgzbxouzqtwfjapnfooj.supabase.co";
+    var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnemJ4b3V6cXR3ZmphcG5mb29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5OTg0ODcsImV4cCI6MjEwNDU3NDQ4N30.b0bWjau8Jq5xmsCaPqynwuE3gN40RqTlbZeVzb6VsDY";
+
+    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      // persistSession: false — a sessão só existe durante a troca de senha, não sobrevive depois.
+      // Achado da Segurança (D010, 17/09/2026): sem isso, o token de recuperação ficava
+      // gravado no localStorage do navegador mesmo depois da senha trocada.
+      auth: { detectSessionInUrl: true, flowType: "pkce", persistSession: false }
+    });
+
+    var MIN_CARACTERES = 8;
+
+    function mostrarEstado(id) {
+      ["estado-carregando", "estado-formulario", "estado-sucesso", "estado-invalido"].forEach(function (e) {
+        document.getElementById(e).style.display = (e === id) ? "block" : "none";
+      });
+    }
+
+    async function verificarLink() {
+      try {
+        var resultado = await supabaseClient.auth.getSession();
+        var session = resultado.data.session;
+        if (session) {
+          mostrarEstado("estado-formulario");
+        } else {
+          mostrarEstado("estado-invalido");
+        }
+      } catch (e) {
+        mostrarEstado("estado-invalido");
+      }
+    }
+
+    async function salvarSenha() {
+      var nova = document.getElementById("senha-nova").value;
+      var repetir = document.getElementById("senha-repetir").value;
+      var erroEl = document.getElementById("erro-formulario");
+      var botao = document.getElementById("botao-salvar");
+
+      erroEl.style.display = "none";
+
+      if (nova.length < MIN_CARACTERES) {
+        erroEl.textContent = "A senha precisa de " + MIN_CARACTERES + " caracteres.";
+        erroEl.style.display = "block";
+        return;
+      }
+      if (nova !== repetir) {
+        erroEl.textContent = "As senhas não coincidem.";
+        erroEl.style.display = "block";
+        return;
+      }
+
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      try {
+        var resultado = await supabaseClient.auth.updateUser({ password: nova });
+        if (resultado.error) {
+          erroEl.textContent = "Não deu pra salvar agora. Tenta de novo em instantes.";
+          erroEl.style.display = "block";
+          botao.disabled = false;
+          botao.textContent = "Salvar nova senha";
+          return;
+        }
+        // Encerra a sessão de recuperação assim que a senha é trocada — ela não deve
+        // continuar válida no navegador depois disso (D010, achado da Segurança, 17/09/2026).
+        // A pessoa volta pro app e entra de novo com a senha nova, como o texto já orienta.
+        await supabaseClient.auth.signOut();
+        mostrarEstado("estado-sucesso");
+      } catch (e) {
+        erroEl.textContent = "Não deu pra salvar agora. Tenta de novo em instantes.";
+        erroEl.style.display = "block";
+        botao.disabled = false;
+        botao.textContent = "Salvar nova senha";
+      }
+    }
+
+    verificarLink();
+  </script>
+</body>
+</html>
