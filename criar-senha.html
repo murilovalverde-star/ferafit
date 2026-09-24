@@ -138,7 +138,16 @@
       try {
         var resultado = await supabaseClient.auth.updateUser({ password: nova });
         if (resultado.error) {
-          erroEl.textContent = "Não deu pra salvar agora. Tenta de novo em instantes.";
+          var erro = resultado.error;
+          // Achado E15 (23/09/2026): quando o Supabase recusa a senha por ela já ter
+          // aparecido em vazamentos conhecidos (checagem HaveIBeenPwned), mostra um aviso
+          // específico em vez do erro genérico. Texto definido por Murilo.
+          var senhaVazada = erro && erro.code === "weak_password" &&
+            erro.weak_password && Array.isArray(erro.weak_password.reasons) &&
+            erro.weak_password.reasons.indexOf("pwned") !== -1;
+          erroEl.textContent = senhaVazada
+            ? "Senha de fácil dedução, troque por uma senha mais segura."
+            : "Não deu pra salvar agora. Tenta de novo em instantes.";
           erroEl.style.display = "block";
           botao.disabled = false;
           botao.textContent = "Salvar nova senha";
