@@ -1,0 +1,1332 @@
+[
+{
+"id":"Reverse_crunch_declinado",
+"nome":"Abdominal reverso declinado",
+"grupo":"Abdômen",
+"subgrupo":"Inferior",
+"arquivo":"Reverse_crunch_declinado_masculino43.jpeg"
+},
+{
+"id":"Reverse_crunch_na_polia",
+"nome":"Abdominal reverso na polia",
+"grupo":"Abdômen",
+"subgrupo":"Inferior",
+"arquivo":"Reverse_crunch_na_polia_masculino43.jpeg"
+},
+{
+"id":"Reverse_crunch_no_solo",
+"nome":"Abdominal reverso no solo",
+"grupo":"Abdômen",
+"subgrupo":"Inferior",
+"arquivo":"Reverse_crunch_no_solo_masculino43.jpeg"
+},
+{
+"id":"Elevacao_de_pernas_no_banco",
+"nome":"Elevação de pernas no banco",
+"grupo":"Abdômen",
+"subgrupo":"Inferior",
+"arquivo":"Elevacao_de_pernas_no_banco_masculino43.jpeg"
+},
+{
+"id":"Elevacao_de_pernas_suspenso",
+"nome":"Elevação de pernas suspenso",
+"grupo":"Abdômen",
+"subgrupo":"Inferior",
+"arquivo":"Elevacao_de_pernas_suspenso_masculino43.jpeg"
+},
+{
+"id":"Abdominal_com_rodinha_ab_wheel_rollout",
+"nome":"Abdominal com rodinha (ab wheel rollout)",
+"grupo":"Abdômen",
+"subgrupo":"Médio",
+"arquivo":"Abdominal_com_rodinha_ab_wheel_rollout_masculino43.jpeg"
+},
+{
+"id":"Prancha_plank",
+"nome":"Prancha (plank)",
+"grupo":"Abdômen",
+"subgrupo":"Médio",
+"arquivo":"Prancha_plank_masculino43.jpeg"
+},
+{
+"id":"Prancha_com_elevacao_de_perna",
+"nome":"Prancha com elevação de perna",
+"grupo":"Abdômen",
+"subgrupo":"Médio",
+"arquivo":"Prancha_com_elevacao_de_perna_masculino43.jpeg"
+},
+{
+"id":"Crunch_declinado_com_anilha",
+"nome":"Abdominal declinado com anilha",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Crunch_declinado_com_anilha_masculino43.jpeg"
+},
+{
+"id":"Crunch_em_pe_na_polia",
+"nome":"Abdominal em pé na polia",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Crunch_em_pe_na_polia_masculino43.jpeg"
+},
+{
+"id":"Abdominal_na_maquina",
+"nome":"Abdominal na máquina",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Abdominal_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Crunch_na_polia_com_corda",
+"nome":"Abdominal na polia ajoelhado com quadril alto",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Crunch_na_polia_com_corda_masculino43.jpeg"
+},
+{
+"id":"Crunch_na_polia_ajoelhado",
+"nome":"Abdominal na polia ajoelhado sentado nos calcanhares",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Crunch_na_polia_ajoelhado_masculino43.jpeg"
+},
+{
+"id":"Abdominal_tradicional_no_solo",
+"nome":"Abdominal tradicional no solo",
+"grupo":"Abdômen",
+"subgrupo":"Superior",
+"arquivo":"Abdominal_tradicional_no_solo_masculino43.jpeg"
+},
+{
+"id":"Aducao_do_quadril_na_polia",
+"nome":"Adução do quadril na polia",
+"grupo":"Adutores",
+"subgrupo":"Adutores",
+"arquivo":"Aducao_do_quadril_na_polia_masculino43.jpeg"
+},
+{
+"id":"Agachamento_Sumo_na_Maquina",
+"nome":"Agachamento Sumô na Máquina",
+"grupo":"Adutores",
+"subgrupo":"Adutores",
+"arquivo":"Agachamento_Sumo_na_Maquina_masculino43.jpeg"
+},
+{
+"id":"Agachamento_terra_sumo",
+"nome":"Agachamento Terra Sumô",
+"grupo":"Adutores",
+"subgrupo":"Adutores",
+"arquivo":"Agachamento_terra_sumo_masculino43.jpeg"
+},
+{
+"id":"Cadeira_adutora",
+"nome":"Cadeira adutora",
+"grupo":"Adutores",
+"subgrupo":"Adutores",
+"arquivo":"Cadeira_adutora_masculino43.jpeg"
+},
+{
+"id":"Curvatura_reversa_do_punho_com_halteres",
+"nome":"Curvatura reversa do punho com halteres",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Curvatura_reversa_do_punho_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Curvatura_reversa_do_punho_na_barra_w",
+"nome":"Curvatura reversa do punho na barra W",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Curvatura_reversa_do_punho_na_barra_w_masculino43.jpeg"
+},
+{
+"id":"Curvatura_reversa_do_punho_na_barra_reta",
+"nome":"Curvatura reversa do punho na barra reta",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Curvatura_reversa_do_punho_na_barra_reta_masculino43.jpeg"
+},
+{
+"id":"Flexao_do_punho",
+"nome":"Flexao do punho",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Flexao_do_punho_masculino43.jpeg"
+},
+{
+"id":"Flexao_do_punho_com_barra_W",
+"nome":"Flexao do punho com barra",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Flexao_do_punho_com_barra_W_masculino43.jpeg"
+},
+{
+"id":"Flexao_do_punho_com_barra_reta",
+"nome":"Flexao do punho com barra reta",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Flexao_do_punho_com_barra_reta_masculino43.jpeg"
+},
+{
+"id":"Rosca_inversa_com_barra",
+"nome":"Rosca inversa com barra",
+"grupo":"Antebraço",
+"subgrupo":"Antebraço",
+"arquivo":"Rosca_inversa_com_barra_masculino43.jpeg"
+},
+{
+"id":"Rosca_inversa_na_polia",
+"nome":"Rosca inversa na polia",
+"grupo":"Bíceps",
+"subgrupo":"Braquial",
+"arquivo":"Rosca_inversa_na_polia_masculino43.jpeg"
+},
+{
+"id":"Rosca_martelo_com_halteres",
+"nome":"Rosca martelo com halteres",
+"grupo":"Bíceps",
+"subgrupo":"Braquial",
+"arquivo":"Rosca_martelo_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Rosca_martelo_na_polia_corda",
+"nome":"Rosca martelo na polia (corda)",
+"grupo":"Bíceps",
+"subgrupo":"Braquial",
+"arquivo":"Rosca_martelo_na_polia_corda_masculino43.jpeg"
+},
+{
+"id":"Rosca_alternada_com_halteres_em_pe",
+"nome":"Rosca alternada com halteres em pé",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_alternada_com_halteres_em_pe_masculino43.jpeg"
+},
+{
+"id":"Rosca_concentrada",
+"nome":"Rosca concentrada",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_concentrada_masculino43.jpeg"
+},
+{
+"id":"Rosca_na_polia_alta_dupla",
+"nome":"Rosca na polia alta (dupla)",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_na_polia_alta_dupla_masculino43.jpeg"
+},
+{
+"id":"Rosca_na_polia_alta_individual",
+"nome":"Rosca na polia alta (individual)",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_na_polia_alta_individual_masculino43.jpeg"
+},
+{
+"id":"Rosca_scott_com_barra_W",
+"nome":"Rosca scott com barra W",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_scott_com_barra_W_masculino43.jpeg"
+},
+{
+"id":"Rosca_scott_na_maquina",
+"nome":"Rosca scott na máquina",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_scott_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Rosca_scott_na_maquina_Hammer",
+"nome":"Rosca scott na máquina (Hammer)",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_scott_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Rosca_scott_na_polia",
+"nome":"Rosca scott na polia",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_scott_na_polia_masculino43.jpeg"
+},
+{
+"id":"Rosca_spider",
+"nome":"Rosca spider",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça curta",
+"arquivo":"Rosca_spider_masculino43.jpeg"
+},
+{
+"id":"Rosca_direta_com_barra",
+"nome":"Rosca direta com barra (fechada)",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça longa",
+"arquivo":"Rosca_direta_com_barra_masculino43.jpeg"
+},
+{
+"id":"Rosca_inclinada_com_halteres_alternados",
+"nome":"Rosca inclinada com halteres alternados",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça longa",
+"arquivo":"Rosca_inclinada_com_halteres_alternados_masculino43.jpeg"
+},
+{
+"id":"Rosca_inclinada_com_halteres_duplos",
+"nome":"Rosca inclinada com halteres duplos",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça longa",
+"arquivo":"Rosca_inclinada_com_halteres_duplos_masculino43.jpeg"
+},
+{
+"id":"Rosca_na_polia_pegada_fechada",
+"nome":"Rosca na polia (pegada fechada)",
+"grupo":"Bíceps",
+"subgrupo":"Cabeça longa",
+"arquivo":"Rosca_na_polia_pegada_fechada_masculino43.jpeg"
+},
+{
+"id":"Barra_fixa__Puxada_na_barra_fixa_livre",
+"nome":"Barra fixa / Puxada na barra fixa livre (sem assistência)",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Barra_fixa__Puxada_na_barra_fixa_livre_masculino43.jpeg"
+},
+{
+"id":"Barra_fixa_assistida_graviton",
+"nome":"Barra fixa assistida (graviton)",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Barra_fixa_assistida_graviton_masculino43.jpeg"
+},
+{
+"id":"Pulldown_braco_reto_barra",
+"nome":"Pulldown braço reto (barra)",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Pulldown_braco_reto_barra_masculino43.jpeg"
+},
+{
+"id":"Pulldown_braco_reto_corda",
+"nome":"Pulldown braço reto (corda)",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Pulldown_braco_reto_corda_masculino43.jpeg"
+},
+{
+"id":"Puxada_amplitude_total",
+"nome":"Puxada amplitude total",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_amplitude_total_masculino43.jpeg"
+},
+{
+"id":"Puxada_com_barra_V",
+"nome":"Puxada com barra V",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_com_barra_V_masculino43.jpeg"
+},
+{
+"id":"Puxada_fechada",
+"nome":"Puxada fechada",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_fechada_masculino43.jpeg"
+},
+{
+"id":"Puxada_frontal_aberta",
+"nome":"Puxada frontal aberta",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_frontal_aberta_masculino43.jpeg"
+},
+{
+"id":"Puxada_supinada",
+"nome":"Puxada supinada",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_supinada_masculino43.jpeg"
+},
+{
+"id":"Puxada_unilateral",
+"nome":"Puxada unilateral",
+"grupo":"Costas",
+"subgrupo":"Puxada",
+"arquivo":"Puxada_unilateral_masculino43.jpeg"
+},
+{
+"id":"Remada_Pendlay",
+"nome":"Remada Pendlay",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_Pendlay_masculino43.jpeg"
+},
+{
+"id":"Remada_T_no_aparelho",
+"nome":"Remada T no aparelho",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_T_no_aparelho_masculino43.jpeg"
+},
+{
+"id":"Remada_alta_ajoelhado_na_polia_unilateral",
+"nome":"Remada alta ajoelhado na polia",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_alta_ajoelhado_na_polia_unilateral_masculino43.jpeg"
+},
+{
+"id":"Remada_baixa_sentado",
+"nome":"Remada baixa sentado",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_baixa_sentado_masculino43.jpeg"
+},
+{
+"id":"Remada_curvada_com_barra",
+"nome":"Remada curvada com barra",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_curvada_com_barra_masculino43.jpeg"
+},
+{
+"id":"Remada_inclinada_na_barra",
+"nome":"Remada inclinada na Barra",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_inclinada_na_barra_masculino43.jpeg"
+},
+{
+"id":"Remada_inclinada_na_polia",
+"nome":"Remada inclinada na polia",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_inclinada_na_polia_masculino43.jpeg"
+},
+{
+"id":"Remada_inclinada_no_Cross",
+"nome":"Remada inclinada no Cross",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_inclinada_no_Cross_masculino43.jpeg"
+},
+{
+"id":"Remada_maquina_Hammer",
+"nome":"Remada máquina (Hammer)",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Remada_no_Smith",
+"nome":"Remada no Smith",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Remada_sentado_com_rotacao_unilateral",
+"nome":"Remada sentada com rotação unilateral",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_sentado_com_rotacao_unilateral_masculino43.jpeg"
+},
+{
+"id":"Remada_serrote_unilateral",
+"nome":"Remada serrote unilateral",
+"grupo":"Costas",
+"subgrupo":"Remada",
+"arquivo":"Remada_serrote_unilateral_masculino43.jpeg"
+},
+{
+"id":"Coice_de_burro_glute_kickback",
+"nome":"Coice de burro (glute kickback)",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo máximo",
+"arquivo":"Coice_de_burro_glute_kickback_masculino43.jpeg"
+},
+{
+"id":"Coice_na_polia",
+"nome":"Coice na polia",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo máximo",
+"arquivo":"Coice_na_polia_masculino43.jpeg"
+},
+{
+"id":"Elevacao_pelvica_na_maquina",
+"nome":"Elevação pélvica na máquina",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo máximo",
+"arquivo":"Elevacao_pelvica_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Elevacao_pelvica_no_Smith",
+"nome":"Elevação pélvica no Smith",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo máximo",
+"arquivo":"Elevacao_pelvica_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Ponte_de_gluteos",
+"nome":"Ponte de glúteos",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo máximo",
+"arquivo":"Ponte_de_gluteos_masculino43.jpeg"
+},
+{
+"id":"Abducao_de_quadril",
+"nome":"Abdução de quadril",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo médio e mínimo",
+"arquivo":"Abducao_de_quadril_masculino43.jpeg"
+},
+{
+"id":"Abducao_de_quadril_em_pe",
+"nome":"Abdução de quadril em pé",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo médio e mínimo",
+"arquivo":"Abducao_de_quadril_em_pe_masculino43.jpeg"
+},
+{
+"id":"Agachamento_lateral",
+"nome":"Agachamento lateral",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo médio e mínimo",
+"arquivo":"Agachamento_lateral_masculino43.jpeg"
+},
+{
+"id":"Cadeira_abdutora",
+"nome":"Cadeira abdutora",
+"grupo":"Glúteos",
+"subgrupo":"Glúteo médio e mínimo",
+"arquivo":"Cadeira_abdutora_masculino43.jpeg"
+},
+{
+"id":"Extensao_do_tronco_hiperextensao",
+"nome":"Extensão do tronco (hiperextensão)",
+"grupo":"Lombar",
+"subgrupo":"Lombar",
+"arquivo":"Extensao_do_tronco_hiperextensao_masculino43.jpeg"
+},
+{
+"id":"Extensao_lombar__hiperextensao_no_banco_romano",
+"nome":"Extensão lombar / hiperextensão no banco romano",
+"grupo":"Lombar",
+"subgrupo":"Lombar",
+"arquivo":"Extensao_lombar__hiperextensao_no_banco_romano_masculino43.jpeg"
+},
+{
+"id":"Levantamento_no_rack_rack_pull",
+"nome":"Levantamento no rack (rack pull)",
+"grupo":"Lombar",
+"subgrupo":"Lombar",
+"arquivo":"Levantamento_no_rack_rack_pull_masculino43.jpeg"
+},
+{
+"id":"Super_homem_com_remada",
+"nome":"Super-homem",
+"grupo":"Lombar",
+"subgrupo":"Lombar",
+"arquivo":"Super_homem_com_remada_masculino43.jpeg"
+},
+{
+"id":"Flexao_lateral_com_halter",
+"nome":"Flexão lateral com halter",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Flexao_lateral_com_halter_masculino43.jpeg"
+},
+{
+"id":"Flexao_lateral_de_tronco_no_banco_romano",
+"nome":"Flexão lateral de tronco no banco romano (oblíquos)",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Flexao_lateral_de_tronco_no_banco_romano_masculino43.jpeg"
+},
+{
+"id":"Flexao_lateral_na_polia",
+"nome":"Flexão lateral na polia",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Flexao_lateral_na_polia_masculino43.jpeg"
+},
+{
+"id":"Giro_russo_com_anilha",
+"nome":"Giro russo com anilha",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Giro_russo_com_anilha_masculino43.jpeg"
+},
+{
+"id":"Pallof_press_na_polia_anti_rotacao",
+"nome":"Pallof press na polia (anti-rotação)",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Pallof_press_na_polia_anti_rotacao_masculino43.jpeg"
+},
+{
+"id":"Prancha_lateral",
+"nome":"Prancha lateral",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Prancha_lateral_masculino43.jpeg"
+},
+{
+"id":"Rotacao_de_tronco_na_polia",
+"nome":"Rotação de tronco na polia",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Rotacao_de_tronco_na_polia_masculino43.jpeg"
+},
+{
+"id":"Torcao_russa",
+"nome":"Torcao russa",
+"grupo":"Oblíquos",
+"subgrupo":"Oblíquos",
+"arquivo":"Torcao_russa_masculino43.jpeg"
+},
+{
+"id":"Elevacao_lateral_unilateral_apoiado",
+"nome":"Elevacao lateral unilateral apoiado em banco inclinado",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Elevacao_lateral_unilateral_apoiado_masculino43.jpeg"
+},
+{
+"id":"Elevacao_lateral_com_halteres",
+"nome":"Elevação lateral com halteres",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Elevacao_lateral_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Elevacao_lateral_na_maquina",
+"nome":"Elevação lateral na máquina",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Elevacao_lateral_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Elevacao_lateral_na_maquina_polia",
+"nome":"Elevação lateral na máquina polia",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Elevacao_lateral_na_maquina_polia_masculino43.jpeg"
+},
+{
+"id":"Elevacao_lateral_na_polia",
+"nome":"Elevação lateral na polia",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Elevacao_lateral_na_polia_masculino43.jpeg"
+},
+{
+"id":"Remada_para_cima_upright_row_barra",
+"nome":"Remada para cima (upright row) Barra",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Remada_para_cima_upright_row_barra_masculino43.jpeg"
+},
+{
+"id":"Remada_para_cima_upright_row_Halteres",
+"nome":"Remada para cima (upright row) Halteres",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Remada_para_cima_upright_row_Halteres_masculino43.jpeg"
+},
+{
+"id":"Remada_para_cima_upright_row_Polia",
+"nome":"Remada para cima (upright row) Polia",
+"grupo":"Ombros",
+"subgrupo":"Lateral",
+"arquivo":"Remada_para_cima_upright_row_Polia_masculino43.jpeg"
+},
+{
+"id":"Rotacao_externa_de_ombro",
+"nome":"Rotacao externa de ombro",
+"grupo":"Ombros",
+"subgrupo":"Manguito rotador",
+"arquivo":"Rotacao_externa_de_ombro_masculino43.jpeg"
+},
+{
+"id":"Rotacao_externa_de_ombro_na_Polia",
+"nome":"Rotacao externa de ombro na Polia",
+"grupo":"Ombros",
+"subgrupo":"Manguito rotador",
+"arquivo":"Rotacao_externa_de_ombro_na_Polia_masculino43.jpeg"
+},
+{
+"id":"Rotacao_interna_de_ombro",
+"nome":"Rotacao interna de ombro",
+"grupo":"Ombros",
+"subgrupo":"Manguito rotador",
+"arquivo":"Rotacao_interna_de_ombro_masculino43.jpeg"
+},
+{
+"id":"Rotacao_interna_de_ombro_na_Polia",
+"nome":"Rotacao interna de ombro na Polia",
+"grupo":"Ombros",
+"subgrupo":"Manguito rotador",
+"arquivo":"Rotacao_interna_de_ombro_na_Polia_masculino43.jpeg"
+},
+{
+"id":"crucifixo_inverso_com_halteres",
+"nome":"Crucifixo inverso com halteres",
+"grupo":"Ombros",
+"subgrupo":"Posterior",
+"arquivo":"crucifixo_inverso_com_halteres_masculino43.jpeg"
+},
+{
+"id":"crucifixo_inverso_na_maquina",
+"nome":"Crucifixo inverso na máquina",
+"grupo":"Ombros",
+"subgrupo":"Posterior",
+"arquivo":"crucifixo_inverso_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Face_pull_na_polia",
+"nome":"Face pull na polia",
+"grupo":"Ombros",
+"subgrupo":"Posterior",
+"arquivo":"Face_pull_na_polia_masculino43.jpeg"
+},
+{
+"id":"Remada_para_deltoide_posterior_corda",
+"nome":"Remada para deltoide posterior (corda)",
+"grupo":"Ombros",
+"subgrupo":"Posterior",
+"arquivo":"Remada_para_deltoide_posterior_corda_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_Arnold",
+"nome":"Desenvolvimento Arnold",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_Arnold_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_com_halteres",
+"nome":"Desenvolvimento com halteres",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_militar_com_barra",
+"nome":"Desenvolvimento militar com barra",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_militar_com_barra_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_na_maquina",
+"nome":"Desenvolvimento na máquina",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_na_maquina_Hammer",
+"nome":"Desenvolvimento na máquina (Hammer)",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_na_polia",
+"nome":"Desenvolvimento na polia",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_na_polia_masculino43.jpeg"
+},
+{
+"id":"Desenvolvimento_no_Smith",
+"nome":"Desenvolvimento no Smith",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Desenvolvimento_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Elevacao_frontal_com_halteres",
+"nome":"Elevação frontal com halteres",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Elevacao_frontal_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Elevacao_frontal_na_polia",
+"nome":"Elevação frontal na polia",
+"grupo":"Ombros",
+"subgrupo":"Superior",
+"arquivo":"Elevacao_frontal_na_polia_masculino43.jpeg"
+},
+{
+"id":"Elevacao_de_panturrilha_em_pe",
+"nome":"Elevacao de panturrilha em pe",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Elevacao_de_panturrilha_em_pe_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_em_pe_na_maquina",
+"nome":"Panturrilha em pé na máquina",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_em_pe_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_em_pe_na_polia",
+"nome":"Panturrilha em pé na máquina na polia",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_em_pe_na_polia_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_em_pe_no_Smith",
+"nome":"Panturrilha em pé no Smith",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_em_pe_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_no_leg_press_45",
+"nome":"Panturrilha no leg press 45",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_no_leg_press_45_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_no_leg_press_Horizontal",
+"nome":"Panturrilha no leg press Horizontal",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_no_leg_press_Horizontal_masculino43.jpeg"
+},
+{
+"id":"Panturrilha_sentado",
+"nome":"Panturrilha sentado",
+"grupo":"Panturrilha",
+"subgrupo":"Panturrilha",
+"arquivo":"Panturrilha_sentado_masculino43.jpeg"
+},
+{
+"id":"Crossover_na_polia_alta",
+"nome":"Crossover na polia alta",
+"grupo":"Peito",
+"subgrupo":"Inferior",
+"arquivo":"Crossover_na_polia_alta_masculino43.jpeg"
+},
+{
+"id":"Crucifixo_halteres_no_banco_declinado_com_halteres",
+"nome":"Crucifixo halteres no banco declinado",
+"grupo":"Peito",
+"subgrupo":"Inferior",
+"arquivo":"Crucifixo_halteres_no_banco_declinado_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Supino_declinado_com_barra",
+"nome":"Supino declinado com barra",
+"grupo":"Peito",
+"subgrupo":"Inferior",
+"arquivo":"Supino_declinado_com_barra_masculino43.jpeg"
+},
+{
+"id":"Supino_declinado_na_maquina_Hammer",
+"nome":"Supino declinado na máquina (Hammer)",
+"grupo":"Peito",
+"subgrupo":"Inferior",
+"arquivo":"Supino_declinado_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Supino_declinado_no_Smith",
+"nome":"Supino declinado no Smith",
+"grupo":"Peito",
+"subgrupo":"Inferior",
+"arquivo":"Supino_declinado_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Crucifixo_no_banco_reto_com_halteres",
+"nome":"Crucifixo no banco reto com halteres",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Crucifixo_no_banco_reto_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Crucifixo_reto_na_polia",
+"nome":"Crucifixo reto na polia",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Crucifixo_reto_na_polia_masculino43.jpeg"
+},
+{
+"id":"Flexao_de_braco_push_up",
+"nome":"Flexão de braço (push-up)",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Flexao_de_braco_push_up_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_com_barra",
+"nome":"Supino reto com barra (livre, sem Smith/máquina)",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_com_barra_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_com_halteres",
+"nome":"Supino reto com halteres",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_na_maquina",
+"nome":"Supino reto na máquina",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_na_maquina_Hammer",
+"nome":"Supino reto na máquina (Hammer)",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_na_polia",
+"nome":"Supino reto na polia",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_na_polia_masculino43.jpeg"
+},
+{
+"id":"Supino_reto_no_Smith",
+"nome":"Supino reto no Smith",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Supino_reto_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Voador_Peck_deck",
+"nome":"Voador / Peck deck",
+"grupo":"Peito",
+"subgrupo":"Média",
+"arquivo":"Voador_Peck_deck_masculino43.jpeg"
+},
+{
+"id":"Crossover_na_polia_baixa",
+"nome":"Crossover na polia baixa",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Crossover_na_polia_baixa_masculino43.jpeg"
+},
+{
+"id":"Crucifixo_inclinado_na_polia",
+"nome":"Crucifixo inclinado na polia",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Crucifixo_inclinado_na_polia_masculino43.jpeg"
+},
+{
+"id":"Crucifixo_no_banco_inclinado_com_halteres",
+"nome":"Crucifixo no banco inclinado com halteres",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Crucifixo_no_banco_inclinado_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Supino_inclinado_com_barra",
+"nome":"Supino inclinado com barra",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Supino_inclinado_com_barra_masculino43.jpeg"
+},
+{
+"id":"Supino_inclinado_com_halteres",
+"nome":"Supino inclinado com halteres",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Supino_inclinado_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Supino_inclinado_na_maquina_Hammer",
+"nome":"Supino inclinado na máquina (Hammer)",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Supino_inclinado_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Supino_inclinado_na_polia",
+"nome":"Supino inclinado na polia",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Supino_inclinado_na_polia_masculino43.jpeg"
+},
+{
+"id":"Supino_inclinado_no_Smith",
+"nome":"Supino inclinado no Smith",
+"grupo":"Peito",
+"subgrupo":"Superior",
+"arquivo":"Supino_inclinado_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Bom_dia_com_barra",
+"nome":"Bom dia com barra (good morning)",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Bom_dia_com_barra_masculino43.jpeg"
+},
+{
+"id":"Cadeira_flexora_sentado",
+"nome":"Cadeira flexora (sentado)",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Cadeira_flexora_sentado_masculino43.jpeg"
+},
+{
+"id":"Flexora_em_pe",
+"nome":"Flexora em pé",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Flexora_em_pe_masculino43.jpeg"
+},
+{
+"id":"Flexora_em_pe_na_polia",
+"nome":"Flexora em pé na polia",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Flexora_em_pe_na_polia_masculino43.jpeg"
+},
+{
+"id":"Levantamento_terra_com_barra",
+"nome":"Levantamento terra com barra",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Levantamento_terra_com_barra_masculino43.jpeg"
+},
+{
+"id":"Levantamento_terra_na_maquina_Hammer",
+"nome":"Levantamento terra na máquina (Hammer)",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Levantamento_terra_na_maquina_Hammer_masculino43.jpeg"
+},
+{
+"id":"Mesa_flexora_deitado",
+"nome":"Mesa flexora (deitado)",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Mesa_flexora_deitado_masculino43.jpeg"
+},
+{
+"id":"Stiff_com_barra",
+"nome":"Stiff com barra",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Stiff_com_barra_masculino43.jpeg"
+},
+{
+"id":"Stiff_com_halteres",
+"nome":"Stiff com halteres",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Stiff_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Stiff_na_polia",
+"nome":"Stiff na polia",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Stiff_na_polia_masculino43.jpeg"
+},
+{
+"id":"Stiff_no_Smith",
+"nome":"Stiff no Smith",
+"grupo":"Posteriores de coxa",
+"subgrupo":"Posteriores de coxa",
+"arquivo":"Stiff_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Afundo_com_halteres",
+"nome":"Afundo com halteres",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Afundo_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Afundo_no_Smith",
+"nome":"Afundo no Smith",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Afundo_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Agachamento_bulgaro",
+"nome":"Agachamento bulgaro",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_bulgaro_masculino43.jpeg"
+},
+{
+"id":"Agachamento_bulgaro_no_Smith",
+"nome":"Agachamento búlgaro no Smith (afundo com pé elevado no banco)",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_bulgaro_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Agachamento_frontal_com_barra",
+"nome":"Agachamento frontal com barra (front squat)",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_frontal_com_barra_masculino43.jpeg"
+},
+{
+"id":"Agachamento_livre_com_barra",
+"nome":"Agachamento livre com barra",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_livre_com_barra_masculino43.jpeg"
+},
+{
+"id":"Agachamento_invertido_na_maquina",
+"nome":"Agachamento na máquina",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_invertido_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Agachamento_no_Smith",
+"nome":"Agachamento no Smith",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Agachamento_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Cadeira_extensora",
+"nome":"Cadeira extensora",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Cadeira_extensora_masculino43.jpeg"
+},
+{
+"id":"Hack_machine",
+"nome":"Hack machine",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Hack_machine_masculino43.jpeg"
+},
+{
+"id":"Hack_pernas_proximas",
+"nome":"Hack pernas próximas",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Hack_pernas_proximas_masculino43.jpeg"
+},
+{
+"id":"Leg_press_45",
+"nome":"Leg press 45",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Leg_press_45_masculino43.jpeg"
+},
+{
+"id":"Leg_press_90",
+"nome":"Leg press 90",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Leg_press_90_masculino43.jpeg"
+},
+{
+"id":"Leg_press_Horizontal",
+"nome":"Leg press Horizontal",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Leg_press_Horizontal_masculino43.jpeg"
+},
+{
+"id":"Leg_press_pernas_proximas",
+"nome":"Leg press pernas próximas",
+"grupo":"Quadríceps",
+"subgrupo":"Quadríceps",
+"arquivo":"Leg_press_pernas_proximas_masculino43.jpeg"
+},
+{
+"id":"Elevacao_em_Y_Y_raise",
+"nome":"Elevacao em Y (Y-raise)",
+"grupo":"Trapézio",
+"subgrupo":"Trapézio",
+"arquivo":"Elevacao_em_Y_Y_raise_masculino43.jpeg"
+},
+{
+"id":"Encolhimento_de_trapezio_com_halteres",
+"nome":"Encolhimento de trapézio com halteres",
+"grupo":"Trapézio",
+"subgrupo":"Trapézio",
+"arquivo":"Encolhimento_de_trapezio_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Encolhimento_por_tras_do_corpo",
+"nome":"Encolhimento por trás do corpo",
+"grupo":"Trapézio",
+"subgrupo":"Trapézio",
+"arquivo":"Encolhimento_por_tras_do_corpo_masculino43.jpeg"
+},
+{
+"id":"Puxada_aberta_com_enfase_em_depressao_escapular",
+"nome":"Puxada aberta com ênfase em depressão escapular",
+"grupo":"Trapézio",
+"subgrupo":"Trapézio",
+"arquivo":"Puxada_aberta_com_enfase_em_depressao_escapular_masculino43.jpeg"
+},
+{
+"id":"Triceps_frances_com_barra_reta",
+"nome":"Tríceps francês com barra reta na polia",
+"grupo":"Tríceps",
+"subgrupo":"Francês — empurrando para cima",
+"arquivo":"Triceps_frances_com_barra_reta_masculino43.jpeg"
+},
+{
+"id":"Triceps_frances_com_corda",
+"nome":"Tríceps francês com corda na polia",
+"grupo":"Tríceps",
+"subgrupo":"Francês — empurrando para cima",
+"arquivo":"Triceps_frances_com_corda_masculino43.jpeg"
+},
+{
+"id":"Triceps_frances",
+"nome":"Tríceps francês com halter",
+"grupo":"Tríceps",
+"subgrupo":"Francês — empurrando para cima",
+"arquivo":"Triceps_frances_masculino43.jpeg"
+},
+{
+"id":"Triceps_na_polia_inclinado",
+"nome":"Tríceps francês inclinado com corda na polia",
+"grupo":"Tríceps",
+"subgrupo":"Francês — empurrando para cima",
+"arquivo":"Triceps_na_polia_inclinado_masculino43.jpeg"
+},
+{
+"id":"Mergulho_em_paralelas_livre",
+"nome":"Mergulho em paralelas livre (sem assistência)",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Mergulho_em_paralelas_livre_masculino43.jpeg"
+},
+{
+"id":"Mergulho_na_maquina_dip",
+"nome":"Mergulho na máquina (dip)",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Mergulho_na_maquina_dip_masculino43.jpeg"
+},
+{
+"id":"Triceps_ajoelhado_na_polia",
+"nome":"Tríceps ajoelhado na polia",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_ajoelhado_na_polia_masculino43.jpeg"
+},
+{
+"id":"Triceps_coice_na_polia_unilateral",
+"nome":"Tríceps coice na polia (unilateral)",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_coice_na_polia_unilateral_masculino43.jpeg"
+},
+{
+"id":"Triceps_na_maquina",
+"nome":"Tríceps na máquina",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_na_maquina_masculino43.jpeg"
+},
+{
+"id":"Triceps_na_maquina_com_alavanca",
+"nome":"Tríceps na máquina com alavanca",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_na_maquina_com_alavanca_masculino43.jpeg"
+},
+{
+"id":"Triceps_pulley_barra_V",
+"nome":"Tríceps pulley barra V",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_pulley_barra_V_masculino43.jpeg"
+},
+{
+"id":"Triceps_pulley_barra_reta",
+"nome":"Tríceps pulley barra reta",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_pulley_barra_reta_masculino43.jpeg"
+},
+{
+"id":"Extensao_de_triceps_pegada_pronada_cabo_baixo",
+"nome":"Tríceps pulley barra reta com tronco inclinado",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Extensao_de_triceps_pegada_pronada_cabo_baixo_masculino43.jpeg"
+},
+{
+"id":"Triceps_pulley_com_corda",
+"nome":"Tríceps pulley com corda",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_pulley_com_corda_masculino43.jpeg"
+},
+{
+"id":"Triceps_pulley_pegada_inversa",
+"nome":"Tríceps pulley pegada inversa",
+"grupo":"Tríceps",
+"subgrupo":"Pulley — empurrando para baixo",
+"arquivo":"Triceps_pulley_pegada_inversa_masculino43.jpeg"
+},
+{
+"id":"Supino_fechado_no_Smith",
+"nome":"Supino fechado no Smith",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Supino_fechado_no_Smith_masculino43.jpeg"
+},
+{
+"id":"Triceps_testa_com_barra_W",
+"nome":"Tríceps testa com barra W",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Triceps_testa_com_barra_W_masculino43.jpeg"
+},
+{
+"id":"Triceps_testa_com_barra_na_polia_alta",
+"nome":"Tríceps testa com barra na polia",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Triceps_testa_com_barra_na_polia_alta_masculino43.jpeg"
+},
+{
+"id":"Triceps_overhead_na_polia",
+"nome":"Tríceps testa com corda na polia",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Triceps_overhead_na_polia_masculino43.jpeg"
+},
+{
+"id":"Triceps_testa_com_halteres",
+"nome":"Tríceps testa com halteres",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Triceps_testa_com_halteres_masculino43.jpeg"
+},
+{
+"id":"Triceps_deitado_na_polia",
+"nome":"Tríceps testa no banco reto com barra reta na polia",
+"grupo":"Tríceps",
+"subgrupo":"Testa — empurrando para frente",
+"arquivo":"Triceps_deitado_na_polia_masculino43.jpeg"
+}
+]
