@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
+  <div class="tarja-demo">Modo teste — dados fictícios. Área do parceiro funcional para testes internos, ainda sem login de verdade e sem indexação (noindex).</div>
 
   <header class="site-header">
     <div class="container">
@@ -208,16 +208,87 @@
 
         </div>
 
-        <!-- TELA PÓS-LOGIN — demonstração, sem funcionalidade real. Ver mapa completo das telas no STATUS.md (D008). -->
-        <div class="parceiro-box" id="area-logada" style="display:none;max-width:520px;text-align:center;">
-          <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 12px;">Login de demonstração feito.</h1>
-          <p style="color:var(--texto-secundario);margin:0 0 8px;">
-            Esta é só a confirmação de que o acesso funciona. As telas de gestão de alunos, catálogo de
-            exercícios do parceiro e montagem de treino individual ainda não foram desenhadas.
-          </p>
-          <p style="color:var(--texto-secundario);font-size:0.85rem;margin:0;">
-            Ver o mapa completo do que já existe e do que falta no <code>STATUS.md</code> da IA Site (entrada D008).
-          </p>
+        <!-- TELA PÓS-LOGIN — DEMANDA 032 (2026-09-25): áreas funcionais de teste (Academia/Personal), dados fictícios em localStorage. Ver STATUS.md (D032). -->
+        <div id="area-logada" style="display:none;">
+
+          <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
+            <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 8px;">Entrar como…</h1>
+            <p style="color:var(--texto-secundario);font-size:0.9rem;margin:0 0 20px;">
+              Login de demonstração — escolha qual painel você quer testar agora. Dá para trocar
+              depois, sem perder o que já foi cadastrado.
+            </p>
+            <button class="botao-primario largura-total" type="button" onclick="DemoUI.entrarComo('academia')" style="margin-bottom:10px;">Testar como Academia</button>
+            <button class="botao-primario largura-total" type="button" onclick="DemoUI.entrarComo('personal')" style="background:transparent;border:1px solid var(--card-border);color:var(--texto);">Testar como Personal</button>
+          </div>
+
+          <div id="painel-conta" style="display:none;max-width:920px;margin:0 auto;text-align:left;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+              <div>
+                <h1 id="painel-titulo" style="font-size:1.2rem;font-weight:800;margin:0 0 4px;"></h1>
+                <span style="color:var(--texto-secundario);font-size:0.8rem;">Dados fictícios, salvos só neste navegador — ver aviso no topo da página.</span>
+              </div>
+              <button type="button" onclick="DemoUI.trocarModo()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:999px;padding:8px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">↺ Trocar de painel</button>
+            </div>
+
+            <div class="admin-tabs" id="painel-abas">
+              <button class="ativa" type="button" data-aba="catalogo" onclick="DemoUI.mostrarAbaPainel('catalogo')">Catálogo</button>
+              <button type="button" data-aba="alunos" onclick="DemoUI.mostrarAbaPainel('alunos')">Alunos</button>
+              <button type="button" data-aba="montar" onclick="DemoUI.mostrarAbaPainel('montar')">Montar treino</button>
+            </div>
+
+            <!-- ABA CATÁLOGO — só existe para a Academia (o Personal usa o catálogo inteiro direto no montador) -->
+            <div class="admin-painel-conteudo ativa" id="aba-painel-catalogo">
+              <p style="color:var(--texto-secundario);font-size:0.88rem;max-width:640px;margin:20px 0 14px;">
+                Todo exercício começa <strong>oferecido</strong>. Desmarque aqui só os que esta
+                academia não tem como fazer — o foco é o exercício em si, não um aparelho específico:
+                o mesmo exercício costuma dar para fazer em mais de um equipamento.
+              </p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;">
+                <input type="text" id="catalogo-busca" placeholder="Buscar exercício..." oninput="DemoUI.filtrarCatalogo()" style="flex:1;min-width:180px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
+                <select id="catalogo-grupo" onchange="DemoUI.filtrarCatalogo()" style="background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
+                  <option value="">Todos os grupos</option>
+                </select>
+              </div>
+              <p id="catalogo-contagem" style="color:var(--texto-secundario);font-size:0.8rem;margin:0 0 14px;"></p>
+              <div class="grid-catalogo" id="catalogo-grid"></div>
+            </div>
+
+            <!-- ABA ALUNOS -->
+            <div class="admin-painel-conteudo" id="aba-painel-alunos">
+              <div style="display:flex;gap:10px;margin:20px 0 14px;">
+                <input type="text" id="novo-aluno-nome" placeholder="Nome do novo aluno" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
+                <button class="botao-primario" type="button" onclick="DemoUI.adicionarAluno()">+ Adicionar</button>
+              </div>
+              <p id="aluno-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-8px 0 14px;"></p>
+              <input type="text" id="aluno-busca" placeholder="Buscar aluno..." oninput="DemoUI.renderAlunos()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;margin-bottom:16px;">
+              <div id="lista-alunos"></div>
+              <div id="alunos-paginacao" style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;"></div>
+            </div>
+
+            <!-- ABA MONTAR TREINO -->
+            <div class="admin-painel-conteudo" id="aba-painel-montar">
+              <div class="campo" style="max-width:360px;margin-top:20px;">
+                <label for="montar-aluno">Aluno</label>
+                <select id="montar-aluno" onchange="DemoUI.selecionarAlunoParaTreino()">
+                  <option value="">Escolha um aluno...</option>
+                </select>
+              </div>
+              <div id="montar-sem-aluno" class="estado-vazio">Escolha um aluno acima para montar o treino dele.</div>
+              <div id="montar-conteudo" style="display:none;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:10px;">
+                  <div>
+                    <h3 style="font-size:0.95rem;margin:0 0 10px;">Catálogo disponível</h3>
+                    <input type="text" id="montar-busca" placeholder="Buscar exercício..." oninput="DemoUI.renderMontadorCatalogo()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:8px 12px;color:var(--texto);font-family:inherit;font-size:0.85rem;margin-bottom:10px;">
+                    <div id="montar-catalogo-lista" style="max-height:440px;overflow-y:auto;border:1px solid var(--card-border);border-radius:12px;padding:8px;"></div>
+                  </div>
+                  <div>
+                    <h3 style="font-size:0.95rem;margin:0 0 10px;">Treino do aluno</h3>
+                    <div id="montar-treino-lista" style="max-height:440px;overflow-y:auto;border:1px solid var(--card-border);border-radius:12px;padding:8px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -230,6 +301,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/dados-demo.js"></script>
   <script>
     // Login cosmético — só compara texto digitado, roda 100% no navegador.
     // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
@@ -277,6 +349,414 @@
       document.getElementById('cadastro-personal').style.display = 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'block';
     }
+  </script>
+  <script>
+    // ===========================================================
+    // DEMANDA 032 (2026-09-25) — telas funcionais de teste da Academia
+    // e do Personal. Toda a leitura/escrita de dado passa por
+    // DadosDemo (assets/js/dados-demo.js) — nada aqui fala direto com
+    // localStorage nem com o Supabase, exceto imagens públicas.
+    // ===========================================================
+    var DemoUI = (function () {
+      var contaAtual = null; // "academia" | "personal"
+      var catalogoCompleto = [];
+      var alunoSelecionadoId = "";
+      var paginaAlunos = 1;
+      var ALUNOS_POR_PAGINA = 8;
+      var catalogoCarregado = false;
+
+      function garantirCatalogoCarregado() {
+        if (catalogoCarregado) {
+          return Promise.resolve();
+        }
+        return DadosDemo.listarCatalogo().then(function (lista) {
+          catalogoCompleto = lista;
+          catalogoCarregado = true;
+          var select = document.getElementById("catalogo-grupo");
+          DadosDemo.listarGrupos().then(function (grupos) {
+            grupos.forEach(function (g) {
+              var opt = document.createElement("option");
+              opt.value = g;
+              opt.textContent = g;
+              select.appendChild(opt);
+            });
+          });
+        }).catch(function (erro) {
+          document.getElementById("catalogo-grid").innerHTML =
+            '<p class="estado-vazio">Não consegui carregar o catálogo de exercícios agora. Recarregue a página e tente de novo.</p>';
+          console.error(erro);
+        });
+      }
+
+      function entrarComo(tipo) {
+        contaAtual = tipo;
+        document.getElementById("escolha-modo").style.display = "none";
+        document.getElementById("painel-conta").style.display = "block";
+        document.getElementById("painel-titulo").textContent =
+          tipo === "academia" ? "Painel da Academia (teste)" : "Painel do Personal (teste)";
+
+        var abaCatalogoBotao = document.querySelector('#painel-abas button[data-aba="catalogo"]');
+        var abaCatalogoConteudo = document.getElementById("aba-painel-catalogo");
+        if (tipo === "personal") {
+          // O Personal não cura o catálogo por academia — ele monta treino com
+          // tudo disponível, direto na aba "Montar treino" (D032).
+          abaCatalogoBotao.style.display = "none";
+          abaCatalogoConteudo.classList.remove("ativa");
+          mostrarAbaPainel("alunos");
+        } else {
+          abaCatalogoBotao.style.display = "";
+          mostrarAbaPainel("catalogo");
+        }
+
+        garantirCatalogoCarregado().then(function () {
+          filtrarCatalogo();
+          renderAlunos();
+          renderSelectAlunosMontador();
+        });
+      }
+
+      function trocarModo() {
+        document.getElementById("painel-conta").style.display = "none";
+        document.getElementById("escolha-modo").style.display = "block";
+        document.getElementById("montar-conteudo").style.display = "none";
+        document.getElementById("montar-sem-aluno").style.display = "block";
+        alunoSelecionadoId = "";
+      }
+
+      function mostrarAbaPainel(nome) {
+        var botoes = document.querySelectorAll("#painel-abas button");
+        botoes.forEach(function (b) {
+          b.classList.toggle("ativa", b.getAttribute("data-aba") === nome);
+        });
+        ["catalogo", "alunos", "montar"].forEach(function (n) {
+          document.getElementById("aba-painel-" + n).classList.toggle("ativa", n === nome);
+        });
+        if (nome === "alunos") {
+          renderAlunos();
+        } else if (nome === "montar") {
+          renderSelectAlunosMontador();
+        }
+      }
+
+      // --- Catálogo (Academia) ---
+
+      function filtrarCatalogo() {
+        var termo = (document.getElementById("catalogo-busca").value || "").trim().toLowerCase();
+        var grupo = document.getElementById("catalogo-grupo").value;
+        var lista = catalogoCompleto.filter(function (ex) {
+          var bateBusca = !termo || ex.nome.toLowerCase().indexOf(termo) !== -1;
+          var bateGrupo = !grupo || ex.grupo === grupo;
+          return bateBusca && bateGrupo;
+        });
+
+        var totalOferecidos = DadosDemo.contarOferecidos(catalogoCompleto.length);
+        document.getElementById("catalogo-contagem").textContent =
+          "Mostrando " + lista.length + " de " + catalogoCompleto.length +
+          " exercícios do catálogo — " + totalOferecidos + " oferecidos nesta academia.";
+
+        var grid = document.getElementById("catalogo-grid");
+        grid.innerHTML = "";
+        if (lista.length === 0) {
+          grid.innerHTML = '<p class="estado-vazio">Nenhum exercício encontrado com esse filtro.</p>';
+          return;
+        }
+        lista.forEach(function (ex) {
+          grid.appendChild(criarCardCatalogo(ex));
+        });
+      }
+
+      function criarCardCatalogo(ex) {
+        var oferecido = DadosDemo.exercicioEstaOferecido(ex.id);
+        var card = document.createElement("div");
+        card.className = "catalogo-card " + (oferecido ? "oferecido" : "nao-oferecido");
+        card.setAttribute("data-id", ex.id);
+
+        var img = document.createElement("img");
+        img.className = "capa-imagem";
+        img.loading = "lazy";
+        img.alt = ex.nome;
+        img.src = DadosDemo.urlDaImagem(ex.arquivo);
+
+        var info = document.createElement("div");
+        info.className = "capa-info";
+
+        var nome = document.createElement("span");
+        nome.className = "capa-nome";
+        nome.textContent = ex.nome;
+
+        var grupoSpan = document.createElement("span");
+        grupoSpan.className = "capa-grupo";
+        grupoSpan.textContent = ex.grupo + " · " + ex.subgrupo;
+
+        var check = document.createElement("div");
+        check.className = "capa-check";
+        check.textContent = oferecido ? "✓ Oferecido" : "Não oferecido";
+
+        info.appendChild(nome);
+        info.appendChild(grupoSpan);
+        info.appendChild(check);
+        card.appendChild(img);
+        card.appendChild(info);
+
+        card.addEventListener("click", function () {
+          var agoraOferecido = DadosDemo.alternarExercicioOferecido(ex.id);
+          card.className = "catalogo-card " + (agoraOferecido ? "oferecido" : "nao-oferecido");
+          check.textContent = agoraOferecido ? "✓ Oferecido" : "Não oferecido";
+          var totalOferecidos = DadosDemo.contarOferecidos(catalogoCompleto.length);
+          var contagemEl = document.getElementById("catalogo-contagem");
+          var partes = contagemEl.textContent.split(" — ");
+          contagemEl.textContent = partes[0] + " — " + totalOferecidos + " oferecidos nesta academia.";
+        });
+
+        return card;
+      }
+
+      // --- Alunos ---
+
+      function adicionarAluno() {
+        var campo = document.getElementById("novo-aluno-nome");
+        var erroEl = document.getElementById("aluno-erro");
+        erroEl.style.display = "none";
+        try {
+          DadosDemo.adicionarAluno(contaAtual, campo.value);
+          campo.value = "";
+          paginaAlunos = 1;
+          renderAlunos();
+          renderSelectAlunosMontador();
+        } catch (e) {
+          erroEl.textContent = e.message || "Não deu para adicionar esse aluno.";
+          erroEl.style.display = "block";
+        }
+      }
+
+      function removerAluno(idAluno) {
+        DadosDemo.removerAluno(contaAtual, idAluno);
+        renderAlunos();
+        renderSelectAlunosMontador();
+        if (alunoSelecionadoId === idAluno) {
+          alunoSelecionadoId = "";
+          document.getElementById("montar-aluno").value = "";
+          document.getElementById("montar-conteudo").style.display = "none";
+          document.getElementById("montar-sem-aluno").style.display = "block";
+        }
+      }
+
+      function renderAlunos() {
+        var termo = document.getElementById("aluno-busca").value;
+        var todos = DadosDemo.listarAlunos(contaAtual, termo);
+        var totalPaginas = Math.max(1, Math.ceil(todos.length / ALUNOS_POR_PAGINA));
+        if (paginaAlunos > totalPaginas) {
+          paginaAlunos = totalPaginas;
+        }
+        var inicio = (paginaAlunos - 1) * ALUNOS_POR_PAGINA;
+        var pagina = todos.slice(inicio, inicio + ALUNOS_POR_PAGINA);
+
+        var container = document.getElementById("lista-alunos");
+        container.innerHTML = "";
+        if (todos.length === 0) {
+          container.innerHTML = '<p class="estado-vazio">Nenhum aluno cadastrado ainda. Use o campo acima para adicionar o primeiro.</p>';
+        } else {
+          pagina.forEach(function (aluno) {
+            var linha = document.createElement("div");
+            linha.className = "linha-aluno";
+
+            var infoDiv = document.createElement("div");
+            var nomeSpan = document.createElement("div");
+            nomeSpan.className = "aluno-nome";
+            nomeSpan.textContent = aluno.nome;
+            var metaSpan = document.createElement("div");
+            metaSpan.className = "aluno-meta";
+            var qtdExercicios = aluno.treino.length;
+            metaSpan.textContent = qtdExercicios === 0
+              ? "Sem treino montado ainda"
+              : qtdExercicios + " exercício(s) no treino";
+            infoDiv.appendChild(nomeSpan);
+            infoDiv.appendChild(metaSpan);
+
+            var acoesDiv = document.createElement("div");
+            acoesDiv.className = "aluno-acoes";
+
+            var botaoMontar = document.createElement("button");
+            botaoMontar.type = "button";
+            botaoMontar.textContent = "Montar treino";
+            botaoMontar.addEventListener("click", function () {
+              mostrarAbaPainel("montar");
+              document.getElementById("montar-aluno").value = aluno.id;
+              selecionarAlunoParaTreino();
+            });
+
+            var botaoRemover = document.createElement("button");
+            botaoRemover.type = "button";
+            botaoRemover.className = "remover";
+            botaoRemover.textContent = "Remover";
+            botaoRemover.addEventListener("click", function () {
+              removerAluno(aluno.id);
+            });
+
+            acoesDiv.appendChild(botaoMontar);
+            acoesDiv.appendChild(botaoRemover);
+            linha.appendChild(infoDiv);
+            linha.appendChild(acoesDiv);
+            container.appendChild(linha);
+          });
+        }
+
+        var paginacao = document.getElementById("alunos-paginacao");
+        paginacao.innerHTML = "";
+        if (todos.length > ALUNOS_POR_PAGINA) {
+          var btnAnterior = document.createElement("button");
+          btnAnterior.className = "paginacao-botao";
+          btnAnterior.textContent = "← Anterior";
+          btnAnterior.disabled = paginaAlunos <= 1;
+          btnAnterior.addEventListener("click", function () {
+            paginaAlunos--;
+            renderAlunos();
+          });
+
+          var info = document.createElement("span");
+          info.className = "paginacao-info";
+          info.textContent = "Página " + paginaAlunos + " de " + totalPaginas;
+
+          var btnProximo = document.createElement("button");
+          btnProximo.className = "paginacao-botao";
+          btnProximo.textContent = "Próxima →";
+          btnProximo.disabled = paginaAlunos >= totalPaginas;
+          btnProximo.addEventListener("click", function () {
+            paginaAlunos++;
+            renderAlunos();
+          });
+
+          paginacao.appendChild(btnAnterior);
+          paginacao.appendChild(info);
+          paginacao.appendChild(btnProximo);
+        }
+      }
+
+      // --- Montador de treino ---
+
+      function renderSelectAlunosMontador() {
+        var select = document.getElementById("montar-aluno");
+        var valorAtual = select.value;
+        select.innerHTML = '<option value="">Escolha um aluno...</option>';
+        DadosDemo.listarAlunos(contaAtual, "").forEach(function (aluno) {
+          var opt = document.createElement("option");
+          opt.value = aluno.id;
+          opt.textContent = aluno.nome;
+          select.appendChild(opt);
+        });
+        if (valorAtual && DadosDemo.buscarAluno(contaAtual, valorAtual)) {
+          select.value = valorAtual;
+        }
+      }
+
+      function selecionarAlunoParaTreino() {
+        var select = document.getElementById("montar-aluno");
+        alunoSelecionadoId = select.value;
+        if (!alunoSelecionadoId) {
+          document.getElementById("montar-conteudo").style.display = "none";
+          document.getElementById("montar-sem-aluno").style.display = "block";
+          return;
+        }
+        document.getElementById("montar-sem-aluno").style.display = "none";
+        document.getElementById("montar-conteudo").style.display = "block";
+        renderMontadorCatalogo();
+        renderMontadorTreino();
+      }
+
+      function renderMontadorCatalogo() {
+        if (!alunoSelecionadoId) {
+          return;
+        }
+        var termo = (document.getElementById("montar-busca").value || "").trim().toLowerCase();
+        DadosDemo.listarExerciciosDisponiveis(contaAtual).then(function (disponiveis) {
+          var lista = disponiveis.filter(function (ex) {
+            return !termo || ex.nome.toLowerCase().indexOf(termo) !== -1;
+          });
+          var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+          var noTreino = aluno ? aluno.treino : [];
+
+          var container = document.getElementById("montar-catalogo-lista");
+          container.innerHTML = "";
+          if (lista.length === 0) {
+            container.innerHTML = '<p class="estado-vazio">Nenhum exercício disponível com esse filtro.</p>';
+            return;
+          }
+          lista.forEach(function (ex) {
+            var jaNoTreino = noTreino.indexOf(ex.id) !== -1;
+            container.appendChild(criarChipExercicio(ex, jaNoTreino, function () {
+              if (jaNoTreino) {
+                DadosDemo.removerExercicioDoTreino(contaAtual, alunoSelecionadoId, ex.id);
+              } else {
+                DadosDemo.adicionarExercicioAoTreino(contaAtual, alunoSelecionadoId, ex.id);
+              }
+              renderMontadorCatalogo();
+              renderMontadorTreino();
+              renderAlunos();
+            }));
+          });
+        });
+      }
+
+      function renderMontadorTreino() {
+        if (!alunoSelecionadoId) {
+          return;
+        }
+        var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+        var container = document.getElementById("montar-treino-lista");
+        container.innerHTML = "";
+        if (!aluno || aluno.treino.length === 0) {
+          container.innerHTML = '<p class="estado-vazio">Nenhum exercício no treino ainda. Clique nos exercícios ao lado para adicionar.</p>';
+          return;
+        }
+        aluno.treino.forEach(function (idExercicio) {
+          var ex = catalogoCompleto.filter(function (e) { return e.id === idExercicio; })[0];
+          if (!ex) {
+            return;
+          }
+          container.appendChild(criarChipExercicio(ex, true, function () {
+            DadosDemo.removerExercicioDoTreino(contaAtual, alunoSelecionadoId, ex.id);
+            renderMontadorCatalogo();
+            renderMontadorTreino();
+            renderAlunos();
+          }));
+        });
+      }
+
+      function criarChipExercicio(ex, noTreino, aoClicar) {
+        var chip = document.createElement("div");
+        chip.className = "chip-exercicio" + (noTreino ? " no-treino" : "");
+
+        var img = document.createElement("img");
+        img.loading = "lazy";
+        img.alt = ex.nome;
+        img.src = DadosDemo.urlDaImagem(ex.arquivo);
+
+        var nome = document.createElement("span");
+        nome.className = "chip-nome";
+        nome.textContent = ex.nome;
+
+        var acao = document.createElement("span");
+        acao.className = "chip-acao";
+        acao.textContent = noTreino ? "− remover" : "+ adicionar";
+
+        chip.appendChild(img);
+        chip.appendChild(nome);
+        chip.appendChild(acao);
+        chip.addEventListener("click", aoClicar);
+        return chip;
+      }
+
+      return {
+        entrarComo: entrarComo,
+        trocarModo: trocarModo,
+        mostrarAbaPainel: mostrarAbaPainel,
+        filtrarCatalogo: filtrarCatalogo,
+        adicionarAluno: adicionarAluno,
+        renderAlunos: renderAlunos,
+        selecionarAlunoParaTreino: selecionarAlunoParaTreino,
+        renderMontadorCatalogo: renderMontadorCatalogo
+      };
+    })();
   </script>
 </body>
 </html>
