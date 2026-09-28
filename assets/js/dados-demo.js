@@ -62,6 +62,13 @@
         // O personal trabalha com o catálogo inteiro — não existe curadoria
         // de exercício por aparelho do lado dele (D032).
         alunos: []
+      },
+      // Portfólio de parceiros (D032 item C / D033 item 2, 2026-09-28): quem
+      // enviou o cadastro de personal pela aba "Quero me cadastrar" de
+      // parceiro.html. Decisão de Murilo (P20): dado só local por enquanto —
+      // só aparece pra quem abrir admin.html no mesmo navegador do cadastro.
+      portfolio: {
+        personais: []
       }
     };
   }
@@ -81,6 +88,10 @@
       var estado = JSON.parse(bruto);
       if (!estado || estado.versao !== 1) {
         return estadoPadrao();
+      }
+      // Compatibilidade: estado salvo antes do portfólio de parceiros existir.
+      if (!estado.portfolio) {
+        estado.portfolio = { personais: [] };
       }
       return estado;
     } catch (e) {
@@ -252,6 +263,54 @@
         alunos[i].treino = alunos[i].treino.filter(function (id) {
           return id !== idExercicio;
         });
+        break;
+      }
+    }
+    salvarEstado(estado);
+  };
+
+  // --- Portfólio de parceiros (cadastros de personal recebidos) ---
+
+  DadosDemo.cadastrarPersonalPendente = function (dados) {
+    var estado = carregarEstado();
+    var registro = {
+      id: gerarId("portfolio_personal"),
+      criadoEm: Date.now(),
+      status: "pendente",
+      nome: (dados.nome || "").trim(),
+      cref: (dados.cref || "").trim(),
+      formacao: (dados.formacao || "").trim(),
+      especializacao: (dados.especializacao || "").trim(),
+      cidade: (dados.cidade || "").trim(),
+      bairro: (dados.bairro || "").trim(),
+      experiencias: (dados.experiencias || "").trim(),
+      telefone: (dados.telefone || "").trim(),
+      email: (dados.email || "").trim(),
+      temFoto: !!dados.temFoto
+    };
+    if (!estado.portfolio) {
+      estado.portfolio = { personais: [] };
+    }
+    estado.portfolio.personais.push(registro);
+    salvarEstado(estado);
+    return registro;
+  };
+
+  DadosDemo.listarPortfolioPersonais = function () {
+    var estado = carregarEstado();
+    var lista = (estado.portfolio && estado.portfolio.personais) || [];
+    // Mais recente primeiro.
+    return lista.slice().sort(function (a, b) {
+      return b.criadoEm - a.criadoEm;
+    });
+  };
+
+  DadosDemo.definirStatusPersonalPortfolio = function (id, status) {
+    var estado = carregarEstado();
+    var lista = (estado.portfolio && estado.portfolio.personais) || [];
+    for (var i = 0; i < lista.length; i++) {
+      if (lista[i].id === id) {
+        lista[i].status = status;
         break;
       }
     }
