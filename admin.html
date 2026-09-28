@@ -8,6 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="assets/img/favicon.png">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/dados-demo.js"></script>
 </head>
 <body>
   <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
@@ -181,6 +182,26 @@
       </div>
     </section>
 
+    <!-- MÓDULO 2.5 — PORTFÓLIO DE PARCEIROS (D032 item C / D033 item 2, 2026-09-28) -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo pronta">Tela pronta — dado só local (mesmo navegador)</span>
+        <h2>Portfólio de parceiros</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 8px;">
+          Lista de quem enviou o cadastro de personal pela aba "Quero me cadastrar" em
+          <code>parceiro.html</code>. Por decisão de Murilo (P20, D032), por enquanto é um dado
+          só local: sem backend, só aparece pra quem abrir esta página no mesmo navegador em que
+          o cadastro foi enviado — não dá pra ver de outro aparelho nem de aba anônima.
+        </p>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 18px;">
+          Aprovar/Recusar aqui só muda o status guardado neste navegador — não envia e-mail nem
+          afeta nenhum sistema real ainda. A aprovação por e-mail que a tela de cadastro promete
+          depende do backend (ver "O que esta tela não resolve sozinha" no fim da página).
+        </p>
+        <div id="portfolio-lista"></div>
+      </div>
+    </section>
+
     <!-- MÓDULO 3 — CONTATO -->
     <section class="admin-modulo">
       <div class="container">
@@ -243,6 +264,7 @@
       if (usuario === 'admin' && senha === 'admin') {
         document.getElementById('admin-login-tela').style.display = 'none';
         document.getElementById('admin-conteudo').style.display = 'block';
+        renderPortfolio();
       } else {
         erro.style.display = 'block';
       }
@@ -254,6 +276,66 @@
       event.target.classList.add('ativa');
       document.getElementById('painel-academia').classList.toggle('ativa', tipo === 'academia');
       document.getElementById('painel-personal').classList.toggle('ativa', tipo === 'personal');
+    }
+  </script>
+  <script>
+    // ===========================================================
+    // D033 item 2 (2026-09-28) — Portfólio de parceiros. Só lê/escreve
+    // via DadosDemo (assets/js/dados-demo.js) — mesma camada isolada
+    // usada em parceiro.html (D032); quando entrar backend de verdade,
+    // é só esse arquivo que muda.
+    // ===========================================================
+    function escaparHtml(texto) {
+      var div = document.createElement('div');
+      div.textContent = texto || '';
+      return div.innerHTML;
+    }
+
+    function renderPortfolio() {
+      var container = document.getElementById('portfolio-lista');
+      if (!container) {
+        return;
+      }
+      var lista = DadosDemo.listarPortfolioPersonais();
+      if (!lista.length) {
+        container.innerHTML = '<p class="estado-vazio">Nenhum cadastro de personal recebido ainda neste navegador. Envie um teste pela aba "Quero me cadastrar" em parceiro.html.</p>';
+        return;
+      }
+      var html = '';
+      lista.forEach(function (p) {
+        var rotuloStatus = p.status === 'aprovado' ? 'Aprovado' : (p.status === 'recusado' ? 'Recusado' : 'Aguardando aprovação');
+        var classeStatus = p.status === 'aprovado' ? 'aprovado' : (p.status === 'recusado' ? 'recusado' : 'pendente');
+        var linhaMeta1 = [];
+        if (p.cref) { linhaMeta1.push('CREF ' + escaparHtml(p.cref)); }
+        if (p.formacao) { linhaMeta1.push(escaparHtml(p.formacao)); }
+        var local = escaparHtml(p.cidade) + (p.bairro ? ' — ' + escaparHtml(p.bairro) : '');
+        if (p.cidade) { linhaMeta1.push(local); }
+        var linhaMeta3 = [];
+        if (p.telefone) { linhaMeta3.push(escaparHtml(p.telefone)); }
+        if (p.email) { linhaMeta3.push(escaparHtml(p.email)); }
+        linhaMeta3.push(p.temFoto ? 'foto enviada' : 'sem foto');
+        html += '<div class="linha-portfolio">'
+          + '<div class="portfolio-principal">'
+          + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
+          + '<span class="portfolio-status ' + classeStatus + '">' + rotuloStatus + '</span>'
+          + '</div>'
+          + (linhaMeta1.length ? '<div class="portfolio-meta">' + linhaMeta1.join(' · ') + '</div>' : '')
+          + (p.especializacao ? '<div class="portfolio-meta">Especialização: ' + escaparHtml(p.especializacao) + '</div>' : '')
+          + (p.experiencias ? '<div class="portfolio-meta">' + escaparHtml(p.experiencias) + '</div>' : '')
+          + '<div class="portfolio-meta">' + linhaMeta3.join(' · ') + '</div>'
+          + '<div class="portfolio-acoes">'
+          + '<button type="button" onclick="definirStatusPortfolio(\'' + p.id + '\',\'aprovado\')">Aprovar</button>'
+          + '<button type="button" class="recusar" onclick="definirStatusPortfolio(\'' + p.id + '\',\'recusado\')">Recusar</button>'
+          + (p.status !== 'pendente' ? '<button type="button" onclick="definirStatusPortfolio(\'' + p.id + '\',\'pendente\')">Reabrir</button>' : '')
+          + '</div>'
+          + '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function definirStatusPortfolio(id, status) {
+      DadosDemo.definirStatusPersonalPortfolio(id, status);
+      renderPortfolio();
     }
   </script>
 </body>
