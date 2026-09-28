@@ -333,10 +333,12 @@
       document.getElementById('cadastro-personal-recebido').style.display = 'none';
     }
 
-    // Envio cosmético — troca de tela só no navegador, sem gravar nada em lugar nenhum.
-    // D013 (2026-09-18): "não construa o envio para o banco ainda" — a Backend está escrevendo o modelo.
-    // D014: a única validação real aqui é a dupla digitação do e-mail (reforço barato contra erro de
-    // digitação, recomendado no STATUS.md) — o resto continua maquete, sem chamada nenhuma.
+    // D013 (2026-09-18): "não construa o envio para o banco ainda" — continua valendo, isto NÃO
+    // fala com o Supabase nem com nenhum backend. D033 item 2 (2026-09-28) mudou só uma coisa: o
+    // cadastro agora fica salvo no localStorage deste navegador via DadosDemo (assets/js/dados-demo.js),
+    // pra alimentar o "Portfólio de parceiros" em admin.html — decisão de Murilo em P20 (D032), dado
+    // só local por enquanto. D014: a única validação real aqui é a dupla digitação do e-mail (reforço
+    // barato contra erro de digitação, recomendado no STATUS.md).
     function enviarCadastroPersonal() {
       var email = document.getElementById('pe-email').value;
       var emailConfirmar = document.getElementById('pe-email-confirmar').value;
@@ -346,6 +348,19 @@
         return;
       }
       erro.style.display = 'none';
+      var arquivoFoto = document.getElementById('pe-foto').files;
+      DadosDemo.cadastrarPersonalPendente({
+        nome: document.getElementById('pe-nome').value,
+        cref: document.getElementById('pe-cref').value,
+        formacao: document.getElementById('pe-formacao').value,
+        especializacao: document.getElementById('pe-especializacao').value,
+        cidade: document.getElementById('pe-cidade').value,
+        bairro: document.getElementById('pe-bairro').value,
+        experiencias: document.getElementById('pe-experiencias').value,
+        telefone: document.getElementById('pe-telefone').value,
+        email: email,
+        temFoto: !!(arquivoFoto && arquivoFoto.length)
+      });
       document.getElementById('cadastro-personal').style.display = 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'block';
     }
