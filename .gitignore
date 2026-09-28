@@ -1,0 +1,6 @@
+# Backups datados (regra_nunca_apagar) e rascunhos locais — não publicar
+_backups_*/
+_scratch_upload/
+_antigos/
+apresentacao-opcao*.html
+*.png.bak
