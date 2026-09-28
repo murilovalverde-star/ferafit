@@ -79,12 +79,13 @@
 
   <script>
     // Credenciais públicas do projeto Supabase (fera-fit-prod).
-    // A chave "anon" é feita para rodar no navegador — quem protege os dados é o RLS do banco.
-    // Fonte: CREDENCIAIS_supabase_prod.md (IA de Backend e Infraestrutura, 2026-09-09).
+    // A chave "publishable" é feita para rodar no navegador — quem protege os dados é o RLS do banco.
+    // Trocada de "anon" (formato antigo) para "publishable" (formato novo) em 2026-09-28, D034 do Orquestrador.
+    // Fonte: Supabase → Settings → API Keys → Publishable key (IA de Backend e Infraestrutura, D070).
     var SUPABASE_URL = "https://jgzbxouzqtwfjapnfooj.supabase.co";
-    var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnemJ4b3V6cXR3ZmphcG5mb29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5OTg0ODcsImV4cCI6MjEwNDU3NDQ4N30.b0bWjau8Jq5xmsCaPqynwuE3gN40RqTlbZeVzb6VsDY";
+    var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_vKEyW3okSfWu_RtxR-vbuw_Vl711Dy_";
 
-    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       // persistSession: false — a sessão só existe durante a troca de senha, não sobrevive depois.
       // Achado da Segurança (D010, 17/09/2026): sem isso, o token de recuperação ficava
       // gravado no localStorage do navegador mesmo depois da senha trocada.
