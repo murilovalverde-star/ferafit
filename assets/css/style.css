@@ -1758,6 +1758,81 @@ footer.site-footer a:hover {
   text-align: center;
 }
 
+/* D033 item 2 (2026-09-28) — Portfólio de parceiros (admin.html) */
+.linha-portfolio {
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.linha-portfolio .portfolio-principal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.linha-portfolio .portfolio-nome {
+  font-weight: 700;
+}
+
+.linha-portfolio .portfolio-status {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  color: var(--texto-secundario);
+}
+
+.linha-portfolio .portfolio-status.pendente {
+  color: var(--ambar);
+  border-color: rgba(255, 178, 56, 0.4);
+}
+
+.linha-portfolio .portfolio-status.aprovado {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.linha-portfolio .portfolio-status.recusado {
+  color: #ff6a6a;
+  border-color: rgba(255, 106, 106, 0.4);
+}
+
+.linha-portfolio .portfolio-meta {
+  color: var(--texto-secundario);
+  font-size: 0.78rem;
+  margin-bottom: 2px;
+}
+
+.linha-portfolio .portfolio-acoes {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.linha-portfolio .portfolio-acoes button {
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--texto);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.linha-portfolio .portfolio-acoes button.recusar {
+  color: #ff6a6a;
+  border-color: rgba(255, 106, 106, 0.3);
+}
+
 @media (max-width: 720px) {
   #painel-conta > div[style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
