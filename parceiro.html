@@ -258,19 +258,21 @@
               <div class="grid-catalogo" id="catalogo-grid"></div>
             </div>
 
-            <!-- ABA ALUNOS -->
+            <!-- ABA ALUNOS — cadastro completo (22 campos Academia / 30 Personal,
+                 conforme Modelo_Cadastro_Academia_e_Personal.xlsx; pedido direto
+                 de Murilo, 2026-09-29, sem número de demanda formal) -->
             <div class="admin-painel-conteudo" id="aba-painel-alunos">
-              <div style="display:flex;gap:10px;margin:20px 0 14px;">
-                <input type="text" id="novo-aluno-nome" placeholder="Nome do novo aluno" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
-                <button class="botao-primario" type="button" onclick="DemoUI.adicionarAluno()">+ Adicionar</button>
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:20px 0 14px;">
+                <input type="text" id="aluno-busca" placeholder="Buscar por nome, CPF, ID ou WhatsApp..." oninput="DemoUI.renderAlunos()" style="flex:1;min-width:220px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
+                <button class="botao-primario" type="button" onclick="DemoUI.abrirFormularioAluno()">+ Cadastrar aluno</button>
               </div>
-              <p id="aluno-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-8px 0 14px;"></p>
-              <input type="text" id="aluno-busca" placeholder="Buscar aluno..." oninput="DemoUI.renderAlunos()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;margin-bottom:16px;">
               <div id="lista-alunos"></div>
               <div id="alunos-paginacao" style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;"></div>
             </div>
 
-            <!-- ABA MONTAR TREINO -->
+            <!-- ABA MONTAR TREINO — cartão de info só-leitura, gerador de treino
+                 oficial pré-preenchido, treinos-base e sugestão de exercício
+                 (pedido direto de Murilo, 2026-09-29) -->
             <div class="admin-painel-conteudo" id="aba-painel-montar">
               <div class="campo" style="max-width:360px;margin-top:20px;">
                 <label for="montar-aluno">Aluno</label>
@@ -280,11 +282,67 @@
               </div>
               <div id="montar-sem-aluno" class="estado-vazio">Escolha um aluno acima para montar o treino dele.</div>
               <div id="montar-conteudo" style="display:none;">
+
+                <div class="info-aluno-card" id="montar-info-aluno"></div>
+
+                <div class="gerador-treino-caixa">
+                  <h3>Pré-preencher com o treino oficial do app</h3>
+                  <p class="campo-nota" style="margin:0;">Replica grupo muscular e ordem de prioridade iguais aos do app (fase ouro); a escolha fina do exercício vem do catálogo deste site — exclua, altere ou inclua exercícios depois, à vontade.</p>
+                  <div class="gerador-treino-grade">
+                    <div class="campo">
+                      <label for="gerador-tipo">Tipo de treino</label>
+                      <select id="gerador-tipo" onchange="DemoUI.atualizarDiasGerador()"></select>
+                    </div>
+                    <div class="campo">
+                      <label for="gerador-dia">Dia</label>
+                      <select id="gerador-dia"></select>
+                    </div>
+                    <div class="campo">
+                      <label for="gerador-tempo">Tempo (min)</label>
+                      <select id="gerador-tempo"></select>
+                    </div>
+                    <div class="campo">
+                      <label for="gerador-series">Séries</label>
+                      <select id="gerador-series"></select>
+                    </div>
+                    <div class="campo">
+                      <label for="gerador-descanso">Descanso (s)</label>
+                      <select id="gerador-descanso"></select>
+                    </div>
+                  </div>
+                  <button class="botao-primario" type="button" onclick="DemoUI.aplicarGeradorTreino()">Gerar treino pré-definido</button>
+                  <p id="gerador-resultado" class="campo-nota" style="display:none;margin:12px 0 0;"></p>
+                </div>
+
+                <div class="treino-base-caixa">
+                  <h3>Treinos-base (até 20 salvos por profissional)</h3>
+                  <p class="campo-nota" style="margin:0 0 12px;">Aplicar um base ao aluno e depois editar não altera o base salvo — vira "personalizado" só para este aluno.</p>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="campo" style="flex:1;min-width:200px;margin-bottom:0;">
+                      <label for="treino-base-select">Aplicar um treino-base salvo</label>
+                      <select id="treino-base-select"></select>
+                    </div>
+                    <button class="botao-primario" type="button" onclick="DemoUI.aplicarTreinoBase()">Aplicar ao aluno</button>
+                    <button type="button" class="botao-secundario" onclick="DemoUI.removerTreinoBaseSelecionado()">Apagar este base</button>
+                  </div>
+                  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                    <input type="text" id="treino-base-nome" placeholder="Nome do novo base (ex: Base iniciante)" style="flex:1;min-width:200px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;color:var(--texto);font-family:inherit;">
+                    <button class="botao-primario" type="button" onclick="DemoUI.salvarTreinoAtualComoBase()">Salvar treino atual como base</button>
+                  </div>
+                  <p id="treino-base-erro" class="campo-nota" style="display:none;color:#ff6a6a;margin:10px 0 0;"></p>
+                </div>
+
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:10px;">
                   <div>
                     <h3 style="font-size:0.95rem;margin:0 0 10px;">Catálogo disponível</h3>
-                    <input type="text" id="montar-busca" placeholder="Buscar exercício..." oninput="DemoUI.renderMontadorCatalogo()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:8px 12px;color:var(--texto);font-family:inherit;font-size:0.85rem;margin-bottom:10px;">
+                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                      <input type="text" id="montar-busca" placeholder="Buscar exercício..." oninput="DemoUI.renderMontadorCatalogo()" style="flex:1;min-width:140px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:8px 12px;color:var(--texto);font-family:inherit;font-size:0.85rem;">
+                      <select id="montar-grupo" onchange="DemoUI.renderMontadorCatalogo()" style="background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:12px;padding:8px 12px;color:var(--texto);font-family:inherit;font-size:0.85rem;">
+                        <option value="">Todos os grupos</option>
+                      </select>
+                    </div>
                     <div id="montar-catalogo-lista" style="max-height:440px;overflow-y:auto;border:1px solid var(--card-border);border-radius:12px;padding:8px;"></div>
+                    <button type="button" class="link-sugestao" onclick="DemoUI.abrirSugestaoExercicio()">+ Sugerir um exercício que falta no catálogo</button>
                   </div>
                   <div>
                     <h3 style="font-size:0.95rem;margin:0 0 10px;">Treino do aluno</h3>
@@ -305,6 +363,13 @@
       <a href="privacidade.html">Privacidade</a>
     </div>
   </footer>
+
+  <div class="modal-overlay" id="modal-overlay" style="display:none;">
+    <div class="modal-caixa">
+      <button type="button" class="modal-fechar" onclick="DemoUI.fecharModal()" aria-label="Fechar">✕</button>
+      <div id="modal-corpo"></div>
+    </div>
+  </div>
 
   <script src="assets/js/dados-demo.js"></script>
   <script>
@@ -373,6 +438,132 @@
     // DadosDemo (assets/js/dados-demo.js) — nada aqui fala direto com
     // localStorage nem com o Supabase, exceto imagens públicas.
     // ===========================================================
+
+    // -----------------------------------------------------------
+    // 2026-09-29 (pedido direto de Murilo) — campos do formulário de
+    // cadastro completo de aluno, replicando EXATAMENTE
+    // Modelo_Cadastro_Academia_e_Personal.xlsx. "sexo" entra como
+    // obrigatório nas duas abas (RESUMO_TREINOS_PARA_SITE.md, seção 8,
+    // item 2 — precisa bater com o cadastro do app). "id" não aparece
+    // aqui: é gerado pelo sistema (confirmado por Murilo).
+    // -----------------------------------------------------------
+
+    function getPath(obj, caminho) {
+      return caminho.split(".").reduce(function (acc, k) {
+        return acc && acc[k] !== undefined ? acc[k] : undefined;
+      }, obj);
+    }
+
+    function setPath(obj, caminho, valor) {
+      var partes = caminho.split(".");
+      var alvo = obj;
+      for (var i = 0; i < partes.length - 1; i++) {
+        if (!alvo[partes[i]]) alvo[partes[i]] = {};
+        alvo = alvo[partes[i]];
+      }
+      alvo[partes[partes.length - 1]] = valor;
+    }
+
+    var OPCOES_PLANO_ACADEMIA = ["Mensal", "Trimestral", "Semestral", "Anual"];
+    var OPCOES_PLANO_PERSONAL = ["Pacote de 4 sessões", "Pacote de 8 sessões", "Pacote de 12 sessões", "Mensal (ilimitado)"];
+    var OPCOES_PAGAMENTO = ["Cartão de crédito", "Débito automático", "Pix", "Boleto"];
+    var OPCOES_OBJETIVO = ["Hipertrofia", "Emagrecimento", "Condicionamento"];
+    var OPCOES_NIVEL = ["Sedentário", "Iniciante", "Intermediário", "Avançado"];
+    var DIAS_SEMANA = [
+      { chave: "seg", rotulo: "Seg" }, { chave: "ter", rotulo: "Ter" }, { chave: "qua", rotulo: "Qua" },
+      { chave: "qui", rotulo: "Qui" }, { chave: "sex", rotulo: "Sex" }, { chave: "sab", rotulo: "Sáb" },
+      { chave: "dom", rotulo: "Dom" }
+    ];
+
+    function camposIdentificacaoAluno() {
+      return [
+        { chave: "nome", rotulo: "Nome completo", tipo: "texto", obrigatorio: true },
+        { chave: "dataNascimento", rotulo: "Data de nascimento", tipo: "data", obrigatorio: true },
+        { chave: "cpf", rotulo: "CPF", tipo: "texto", obrigatorio: true },
+        { chave: "sexo", rotulo: "Sexo", tipo: "select", opcoes: ["Masculino", "Feminino"], obrigatorio: true },
+        { chave: "email", rotulo: "E-mail", tipo: "email", obrigatorio: true },
+        { chave: "telefone", rotulo: "Telefone / WhatsApp", tipo: "tel", obrigatorio: true },
+        { chave: "endereco.cep", rotulo: "CEP", tipo: "texto", obrigatorio: true },
+        { chave: "endereco.rua", rotulo: "Rua", tipo: "texto", obrigatorio: true, largo: true },
+        { chave: "endereco.numero", rotulo: "Número", tipo: "texto", obrigatorio: true },
+        { chave: "endereco.bairro", rotulo: "Bairro", tipo: "texto", obrigatorio: true },
+        { chave: "endereco.cidade", rotulo: "Cidade", tipo: "texto", obrigatorio: true },
+        { chave: "contatoEmergenciaNome", rotulo: "Contato de emergência — nome", tipo: "texto", obrigatorio: true },
+        { chave: "contatoEmergenciaTelefone", rotulo: "Contato de emergência — telefone", tipo: "tel", obrigatorio: true },
+        { chave: "rg", rotulo: "RG", tipo: "texto", obrigatorio: false }
+      ];
+    }
+
+    var CAMPOS_MEDIDAS = [
+      { chave: "altura", rotulo: "Altura (cm)" },
+      { chave: "peso", rotulo: "Peso (kg)" },
+      { chave: "percentualGordura", rotulo: "% de gordura" },
+      { chave: "abdomen", rotulo: "Abdômen (cm)" },
+      { chave: "quadril", rotulo: "Quadril (cm)" },
+      { chave: "peito", rotulo: "Peito (cm)" },
+      { chave: "braco", rotulo: "Braço (cm)" },
+      { chave: "coxa", rotulo: "Coxa (cm)" }
+    ];
+
+    var FORMULARIO_ALUNO = {
+      academia: {
+        secoes: [
+          { titulo: "Identificação", campos: camposIdentificacaoAluno() },
+          { titulo: "Contrato e financeiro", campos: [
+            { chave: "contrato.plano", rotulo: "Plano", tipo: "select", opcoes: OPCOES_PLANO_ACADEMIA, obrigatorio: true },
+            { chave: "contrato.formaPagamento", rotulo: "Forma de pagamento", tipo: "select", opcoes: OPCOES_PAGAMENTO, obrigatorio: true },
+            { chave: "contrato.dataInicio", rotulo: "Data de início", tipo: "data", obrigatorio: true },
+            { chave: "contrato.termoResponsabilidade", rotulo: "Termo de responsabilidade / liberação médica assinado", tipo: "checkbox", obrigatorio: true }
+          ]},
+          { titulo: "Anamnese (opcional)", campos: [
+            { chave: "anamnese.objetivo", rotulo: "Objetivo", tipo: "select", opcoes: OPCOES_OBJETIVO, obrigatorio: false },
+            { chave: "anamnese.nivelExperiencia", rotulo: "Nível de experiência", tipo: "select", opcoes: OPCOES_NIVEL, obrigatorio: false },
+            { chave: "anamnese.frequenciaSemanalDesejada", rotulo: "Frequência semanal desejada", tipo: "numero", obrigatorio: false },
+            { chave: "anamnese.doencas", rotulo: "Doenças pré-existentes", tipo: "texto", obrigatorio: false, largo: true },
+            { chave: "anamnese.lesoes", rotulo: "Lesões atuais ou anteriores", tipo: "texto", obrigatorio: false, largo: true },
+            { chave: "anamnese.medicamentos", rotulo: "Uso de medicamentos", tipo: "texto", obrigatorio: false, largo: true }
+          ]},
+          { titulo: "Avaliação física (opcional)", medidas: true, campos: [
+            { chave: "avaliacaoFisica.temFoto", rotulo: "Já existe uma foto inicial registrada (formato de envio a definir)", tipo: "checkbox", obrigatorio: false }
+          ]},
+          { titulo: "Dias de treino na academia", dias: "comAcademia" }
+        ]
+      },
+      personal: {
+        secoes: [
+          { titulo: "Identificação", campos: camposIdentificacaoAluno() },
+          { titulo: "Anamnese", campos: [
+            { chave: "anamnese.objetivo", rotulo: "Objetivo principal", tipo: "select", opcoes: OPCOES_OBJETIVO, obrigatorio: true },
+            { chave: "anamnese.nivelExperiencia", rotulo: "Nível de experiência", tipo: "select", opcoes: OPCOES_NIVEL, obrigatorio: true },
+            { chave: "anamnese.historicoAtividade", rotulo: "Histórico de atividade física", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.doencas", rotulo: "Doenças pré-existentes", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.lesoes", rotulo: "Lesões atuais ou anteriores", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.medicamentos", rotulo: "Uso de medicamentos", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.restricoesMedicas", rotulo: "Restrições médicas", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.gestacaoPosParto", rotulo: "Gestação / pós-parto (se aplicável)", tipo: "texto", obrigatorio: true, largo: true },
+            { chave: "anamnese.habitos", rotulo: "Hábitos (sono, alimentação, tabagismo, álcool)", tipo: "texto", obrigatorio: true, largo: true }
+          ]},
+          { titulo: "Avaliação física", medidas: true, medidasObrigatorias: ["altura", "peso"], campos: [
+            { chave: "avaliacaoFisica.testesFisicos", rotulo: "Testes de flexibilidade, força e resistência (opcional)", tipo: "texto", obrigatorio: false, largo: true },
+            { chave: "avaliacaoFisica.temFoto", rotulo: "Já existe uma foto inicial registrada (formato de envio a definir)", tipo: "checkbox", obrigatorio: false }
+          ]},
+          { titulo: "Contrato e financeiro", campos: [
+            { chave: "contrato.plano", rotulo: "Plano / pacote de sessões", tipo: "select", opcoes: OPCOES_PLANO_PERSONAL, obrigatorio: true },
+            { chave: "contrato.formaPagamento", rotulo: "Forma de pagamento", tipo: "select", opcoes: OPCOES_PAGAMENTO, obrigatorio: true },
+            { chave: "contrato.dataInicio", rotulo: "Data de início", tipo: "data", obrigatorio: true },
+            { chave: "contrato.termoResponsabilidade", rotulo: "Termo de responsabilidade / liberação médica assinado", tipo: "checkbox", obrigatorio: true },
+            { chave: "contrato.atestadoMedico", rotulo: "Atestado / liberação médica (documento) recebido", tipo: "checkbox", obrigatorio: true }
+          ]},
+          { titulo: "Contato complementar (opcional)", campos: [
+            { chave: "profissao", rotulo: "Profissão", tipo: "texto", obrigatorio: false },
+            { chave: "redesSociais", rotulo: "Redes sociais", tipo: "texto", obrigatorio: false },
+            { chave: "preferenciaHorario", rotulo: "Preferência de horário", tipo: "texto", obrigatorio: false }
+          ]},
+          { titulo: "Dias de treino", dias: "presencial-e-app" }
+        ]
+      }
+    };
+
     var DemoUI = (function () {
       var contaAtual = null; // "academia" | "personal"
       var catalogoCompleto = [];
@@ -380,6 +571,7 @@
       var paginaAlunos = 1;
       var ALUNOS_POR_PAGINA = 8;
       var catalogoCarregado = false;
+      var geradorInicializado = false;
 
       function garantirCatalogoCarregado() {
         if (catalogoCarregado) {
@@ -388,13 +580,18 @@
         return DadosDemo.listarCatalogo().then(function (lista) {
           catalogoCompleto = lista;
           catalogoCarregado = true;
-          var select = document.getElementById("catalogo-grupo");
           DadosDemo.listarGrupos().then(function (grupos) {
+            var selectCatalogo = document.getElementById("catalogo-grupo");
+            var selectMontar = document.getElementById("montar-grupo");
             grupos.forEach(function (g) {
-              var opt = document.createElement("option");
-              opt.value = g;
-              opt.textContent = g;
-              select.appendChild(opt);
+              var opt1 = document.createElement("option");
+              opt1.value = g;
+              opt1.textContent = g;
+              selectCatalogo.appendChild(opt1);
+              var opt2 = document.createElement("option");
+              opt2.value = g;
+              opt2.textContent = g;
+              selectMontar.appendChild(opt2);
             });
           });
         }).catch(function (erro) {
@@ -529,18 +726,267 @@
 
       // --- Alunos ---
 
-      function adicionarAluno() {
-        var campo = document.getElementById("novo-aluno-nome");
-        var erroEl = document.getElementById("aluno-erro");
+      function fecharModal() {
+        document.getElementById("modal-overlay").style.display = "none";
+      }
+
+      function obterValorMedicaoRecente(alunoExistente, chave) {
+        if (!alunoExistente) return undefined;
+        var medicoes = (alunoExistente.avaliacaoFisica && alunoExistente.avaliacaoFisica.medicoes) || [];
+        if (medicoes.length === 0) return undefined;
+        var ultima = medicoes[medicoes.length - 1];
+        return ultima[chave] || undefined;
+      }
+
+      function criarCampoFormulario(campo, alunoExistente, valorPreenchido) {
+        var wrap = document.createElement("div");
+        wrap.className = "campo" + (campo.largo ? " campo-largo" : "") + (campo.tipo === "checkbox" ? " campo-checkbox" : "");
+        var idCampo = "campo-" + campo.chave.replace(/\./g, "-").replace(/_/g, "-");
+
+        if (campo.tipo === "checkbox") {
+          var input = document.createElement("input");
+          input.type = "checkbox";
+          input.id = idCampo;
+          if (alunoExistente) {
+            input.checked = !!getPath(alunoExistente, campo.chave);
+          }
+          var label = document.createElement("label");
+          label.setAttribute("for", idCampo);
+          label.textContent = campo.rotulo + (campo.obrigatorio ? " *" : "");
+          wrap.appendChild(input);
+          wrap.appendChild(label);
+          return wrap;
+        }
+
+        var label2 = document.createElement("label");
+        label2.setAttribute("for", idCampo);
+        label2.textContent = campo.rotulo + (campo.obrigatorio ? " *" : "");
+        wrap.appendChild(label2);
+
+        var valorAtual = valorPreenchido !== undefined
+          ? valorPreenchido
+          : (alunoExistente ? getPath(alunoExistente, campo.chave) : undefined);
+
+        if (campo.tipo === "select") {
+          var select = document.createElement("select");
+          select.id = idCampo;
+          var optVazia = document.createElement("option");
+          optVazia.value = "";
+          optVazia.textContent = "Selecione...";
+          select.appendChild(optVazia);
+          campo.opcoes.forEach(function (op) {
+            var opt = document.createElement("option");
+            opt.value = op;
+            opt.textContent = op;
+            select.appendChild(opt);
+          });
+          if (valorAtual) select.value = valorAtual;
+          wrap.appendChild(select);
+          return wrap;
+        }
+
+        var input2 = document.createElement("input");
+        input2.type = campo.tipo === "numero" ? "number" : campo.tipo === "data" ? "date" : campo.tipo === "email" ? "email" : campo.tipo === "tel" ? "tel" : "text";
+        if (campo.tipo === "numero") input2.step = "any";
+        input2.id = idCampo;
+        if (valorAtual !== undefined && valorAtual !== null) input2.value = valorAtual;
+        wrap.appendChild(input2);
+        return wrap;
+      }
+
+      function criarLinhaDias(rotulo, prefixoId, valoresAtuais) {
+        var box = document.createElement("div");
+        box.style.marginBottom = "14px";
+        var label = document.createElement("p");
+        label.style.cssText = "font-size:0.8rem;font-weight:700;color:var(--texto-secundario);margin:0 0 8px;";
+        label.textContent = rotulo;
+        box.appendChild(label);
+        var linha = document.createElement("div");
+        linha.className = "dias-semana";
+        DIAS_SEMANA.forEach(function (d) {
+          var lbl = document.createElement("label");
+          var chk = document.createElement("input");
+          chk.type = "checkbox";
+          chk.value = d.chave;
+          chk.setAttribute("data-dias-grupo", prefixoId);
+          if (valoresAtuais && valoresAtuais.indexOf(d.chave) !== -1) chk.checked = true;
+          lbl.appendChild(chk);
+          lbl.appendChild(document.createTextNode(d.rotulo));
+          linha.appendChild(lbl);
+        });
+        box.appendChild(linha);
+        return box;
+      }
+
+      function criarBlocoDias(tipo, alunoExistente) {
+        var container = document.createElement("div");
+        if (tipo === "comAcademia") {
+          container.appendChild(criarLinhaDias("Dias em que o aluno treina na academia", "dias-comAcademia", alunoExistente ? alunoExistente.diasTreino.comAcademia : []));
+        } else {
+          container.appendChild(criarLinhaDias("Dias presenciais com o personal", "dias-presencial", alunoExistente ? alunoExistente.diasTreino.presencialComPersonal : []));
+          container.appendChild(criarLinhaDias("Dias só com o app (não presenciais)", "dias-soapp", alunoExistente ? alunoExistente.diasTreino.soApp : []));
+        }
+        return container;
+      }
+
+      function lerDiasMarcados(prefixoId) {
+        var marcados = [];
+        document.querySelectorAll('input[data-dias-grupo="' + prefixoId + '"]:checked').forEach(function (el) {
+          marcados.push(el.value);
+        });
+        return marcados;
+      }
+
+      function abrirFormularioAluno(idAlunoExistente) {
+        var alunoExistente = idAlunoExistente ? DadosDemo.buscarAluno(contaAtual, idAlunoExistente) : null;
+        var config = FORMULARIO_ALUNO[contaAtual];
+        var corpo = document.getElementById("modal-corpo");
+        corpo.innerHTML = "";
+
+        var titulo = document.createElement("h3");
+        titulo.textContent = alunoExistente ? "Editar aluno" : "Cadastrar novo aluno";
+        corpo.appendChild(titulo);
+
+        var subtitulo = document.createElement("p");
+        subtitulo.className = "modal-subtitulo";
+        subtitulo.textContent = contaAtual === "academia"
+          ? "Campos conforme o modelo de cadastro da Academia."
+          : "Campos conforme o modelo de cadastro do Personal.";
+        corpo.appendChild(subtitulo);
+
+        var form = document.createElement("form");
+        form.id = "form-cadastro-aluno";
+        form.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          salvarFormularioAluno(idAlunoExistente);
+        });
+
+        config.secoes.forEach(function (secao) {
+          var bloco = document.createElement("div");
+          bloco.className = "form-secao";
+          var h4 = document.createElement("h4");
+          h4.textContent = secao.titulo;
+          bloco.appendChild(h4);
+
+          if (secao.dias) {
+            bloco.appendChild(criarBlocoDias(secao.dias, alunoExistente));
+            form.appendChild(bloco);
+            return;
+          }
+
+          if (secao.medidas) {
+            var gradeMedidas = document.createElement("div");
+            gradeMedidas.className = "form-grade";
+            CAMPOS_MEDIDAS.forEach(function (m) {
+              var obrig = (secao.medidasObrigatorias || []).indexOf(m.chave) !== -1;
+              gradeMedidas.appendChild(criarCampoFormulario({
+                chave: "medida-" + m.chave,
+                rotulo: m.rotulo + (obrig ? "" : " (opcional)"),
+                tipo: "numero",
+                obrigatorio: obrig
+              }, null, obterValorMedicaoRecente(alunoExistente, m.chave)));
+            });
+            bloco.appendChild(gradeMedidas);
+          }
+
+          var grade = document.createElement("div");
+          grade.className = "form-grade";
+          (secao.campos || []).forEach(function (campo) {
+            grade.appendChild(criarCampoFormulario(campo, alunoExistente));
+          });
+          bloco.appendChild(grade);
+          form.appendChild(bloco);
+        });
+
+        var erro = document.createElement("p");
+        erro.className = "form-erro";
+        erro.id = "form-aluno-erro";
+        erro.style.display = "none";
+        form.appendChild(erro);
+
+        var acoes = document.createElement("div");
+        acoes.className = "form-acoes";
+        var btnCancelar = document.createElement("button");
+        btnCancelar.type = "button";
+        btnCancelar.className = "botao-secundario";
+        btnCancelar.textContent = "Cancelar";
+        btnCancelar.addEventListener("click", fecharModal);
+        var btnSalvar = document.createElement("button");
+        btnSalvar.type = "submit";
+        btnSalvar.className = "botao-primario";
+        btnSalvar.textContent = alunoExistente ? "Salvar alterações" : "Cadastrar aluno";
+        acoes.appendChild(btnCancelar);
+        acoes.appendChild(btnSalvar);
+        form.appendChild(acoes);
+
+        corpo.appendChild(form);
+        document.getElementById("modal-overlay").style.display = "flex";
+      }
+
+      function salvarFormularioAluno(idAlunoExistente) {
+        var erroEl = document.getElementById("form-aluno-erro");
         erroEl.style.display = "none";
+
+        var config = FORMULARIO_ALUNO[contaAtual];
+        var dados = {};
+        var medicao = {};
+        var temMedicao = false;
+        var faltando = [];
+
+        config.secoes.forEach(function (secao) {
+          if (secao.dias) {
+            dados.diasTreino = dados.diasTreino || {};
+            if (secao.dias === "comAcademia") {
+              dados.diasTreino.comAcademia = lerDiasMarcados("dias-comAcademia");
+            } else {
+              dados.diasTreino.presencialComPersonal = lerDiasMarcados("dias-presencial");
+              dados.diasTreino.soApp = lerDiasMarcados("dias-soapp");
+            }
+            return;
+          }
+          if (secao.medidas) {
+            CAMPOS_MEDIDAS.forEach(function (m) {
+              var el = document.getElementById("campo-medida-" + m.chave);
+              if (el && el.value !== "") {
+                medicao[m.chave] = el.value;
+                temMedicao = true;
+              }
+            });
+          }
+          (secao.campos || []).forEach(function (campo) {
+            var idCampo = "campo-" + campo.chave.replace(/\./g, "-").replace(/_/g, "-");
+            var el = document.getElementById(idCampo);
+            if (!el) return;
+            var valor = campo.tipo === "checkbox" ? el.checked : el.value.trim();
+            if (campo.obrigatorio && (valor === "" || valor === false)) {
+              faltando.push(campo.rotulo);
+            }
+            setPath(dados, campo.chave, valor);
+          });
+        });
+
+        if (faltando.length > 0) {
+          erroEl.textContent = "Preencha os campos obrigatórios: " + faltando.join(", ") + ".";
+          erroEl.style.display = "block";
+          return;
+        }
+
         try {
-          DadosDemo.adicionarAluno(contaAtual, campo.value);
-          campo.value = "";
+          var aluno;
+          if (idAlunoExistente) {
+            aluno = DadosDemo.atualizarAluno(contaAtual, idAlunoExistente, dados);
+          } else {
+            aluno = DadosDemo.cadastrarAluno(contaAtual, dados);
+          }
+          if (temMedicao) {
+            DadosDemo.adicionarMedicao(contaAtual, aluno.id, medicao);
+          }
+          fecharModal();
           paginaAlunos = 1;
           renderAlunos();
           renderSelectAlunosMontador();
         } catch (e) {
-          erroEl.textContent = e.message || "Não deu para adicionar esse aluno.";
+          erroEl.textContent = e.message || "Não deu para salvar esse aluno.";
           erroEl.style.display = "block";
         }
       }
@@ -570,7 +1016,7 @@
         var container = document.getElementById("lista-alunos");
         container.innerHTML = "";
         if (todos.length === 0) {
-          container.innerHTML = '<p class="estado-vazio">Nenhum aluno cadastrado ainda. Use o campo acima para adicionar o primeiro.</p>';
+          container.innerHTML = '<p class="estado-vazio">Nenhum aluno cadastrado ainda. Use o botão "+ Cadastrar aluno" acima.</p>';
         } else {
           pagina.forEach(function (aluno) {
             var linha = document.createElement("div");
@@ -579,18 +1025,29 @@
             var infoDiv = document.createElement("div");
             var nomeSpan = document.createElement("div");
             nomeSpan.className = "aluno-nome";
-            nomeSpan.textContent = aluno.nome;
+            nomeSpan.textContent = aluno.nome + " — " + aluno.id;
             var metaSpan = document.createElement("div");
             metaSpan.className = "aluno-meta";
-            var qtdExercicios = aluno.treino.length;
-            metaSpan.textContent = qtdExercicios === 0
-              ? "Sem treino montado ainda"
-              : qtdExercicios + " exercício(s) no treino";
+            var idade = DadosDemo.calcularIdade(aluno.dataNascimento);
+            var partesMeta = [];
+            if (idade !== null) partesMeta.push(idade + " anos");
+            if (aluno.telefone) partesMeta.push(aluno.telefone);
+            var qtdExercicios = aluno.treino.exercicios.length;
+            var rotuloModo = aluno.treino.modo === "base" ? " (base)" : aluno.treino.modo === "personalizado" ? " (personalizado)" : "";
+            partesMeta.push(qtdExercicios === 0 ? "sem treino montado" : qtdExercicios + " exercício(s) no treino" + rotuloModo);
+            metaSpan.textContent = partesMeta.join(" · ");
             infoDiv.appendChild(nomeSpan);
             infoDiv.appendChild(metaSpan);
 
             var acoesDiv = document.createElement("div");
             acoesDiv.className = "aluno-acoes";
+
+            var botaoEditar = document.createElement("button");
+            botaoEditar.type = "button";
+            botaoEditar.textContent = "Editar cadastro";
+            botaoEditar.addEventListener("click", function () {
+              abrirFormularioAluno(aluno.id);
+            });
 
             var botaoMontar = document.createElement("button");
             botaoMontar.type = "button";
@@ -609,6 +1066,7 @@
               removerAluno(aluno.id);
             });
 
+            acoesDiv.appendChild(botaoEditar);
             acoesDiv.appendChild(botaoMontar);
             acoesDiv.appendChild(botaoRemover);
             linha.appendChild(infoDiv);
@@ -675,6 +1133,15 @@
         }
         document.getElementById("montar-sem-aluno").style.display = "none";
         document.getElementById("montar-conteudo").style.display = "block";
+        if (!geradorInicializado) {
+          popularSeletoresGeradorTreino();
+          geradorInicializado = true;
+        }
+        atualizarInfoAluno();
+        preencherGeradorComConfigAtual();
+        popularSelectTreinosBase();
+        document.getElementById("gerador-resultado").style.display = "none";
+        document.getElementById("treino-base-erro").style.display = "none";
         renderMontadorCatalogo();
         renderMontadorTreino();
       }
@@ -684,12 +1151,15 @@
           return;
         }
         var termo = (document.getElementById("montar-busca").value || "").trim().toLowerCase();
+        var grupo = document.getElementById("montar-grupo").value;
         DadosDemo.listarExerciciosDisponiveis(contaAtual).then(function (disponiveis) {
           var lista = disponiveis.filter(function (ex) {
-            return !termo || ex.nome.toLowerCase().indexOf(termo) !== -1;
+            var bateBusca = !termo || ex.nome.toLowerCase().indexOf(termo) !== -1;
+            var bateGrupo = !grupo || ex.grupo === grupo;
+            return bateBusca && bateGrupo;
           });
           var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
-          var noTreino = aluno ? aluno.treino : [];
+          var noTreino = aluno ? aluno.treino.exercicios : [];
 
           var container = document.getElementById("montar-catalogo-lista");
           container.innerHTML = "";
@@ -720,11 +1190,29 @@
         var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
         var container = document.getElementById("montar-treino-lista");
         container.innerHTML = "";
-        if (!aluno || aluno.treino.length === 0) {
-          container.innerHTML = '<p class="estado-vazio">Nenhum exercício no treino ainda. Clique nos exercícios ao lado para adicionar.</p>';
+        if (!aluno) {
           return;
         }
-        aluno.treino.forEach(function (idExercicio) {
+        if (aluno.treino.modo === "base" || aluno.treino.modo === "personalizado") {
+          var aviso = document.createElement("p");
+          aviso.className = "campo-nota";
+          aviso.style.margin = "0 0 10px";
+          if (aluno.treino.modo === "base") {
+            var base = DadosDemo.listarTreinosBase(contaAtual).filter(function (b) { return b.id === aluno.treino.baseId; })[0];
+            aviso.textContent = "Treino-base aplicado" + (base ? ' ("' + base.nome + '")' : "") + " — qualquer alteração vira personalizado só para este aluno.";
+          } else {
+            aviso.textContent = "Treino personalizado deste aluno.";
+          }
+          container.appendChild(aviso);
+        }
+        if (aluno.treino.exercicios.length === 0) {
+          var vazio = document.createElement("p");
+          vazio.className = "estado-vazio";
+          vazio.textContent = "Nenhum exercício no treino ainda. Clique nos exercícios ao lado, ou use o gerador/treino-base acima.";
+          container.appendChild(vazio);
+          return;
+        }
+        aluno.treino.exercicios.forEach(function (idExercicio) {
           var ex = catalogoCompleto.filter(function (e) { return e.id === idExercicio; })[0];
           if (!ex) {
             return;
@@ -762,15 +1250,331 @@
         return chip;
       }
 
+      // --- Cartão de info do aluno (Montar treino) --- só leitura ---
+
+      function escaparHtml(s) {
+        var div = document.createElement("div");
+        div.textContent = s == null ? "" : s;
+        return div.innerHTML;
+      }
+
+      function formatarDias(lista) {
+        if (!lista || lista.length === 0) return "";
+        var mapa = {};
+        DIAS_SEMANA.forEach(function (d) { mapa[d.chave] = d.rotulo; });
+        return lista.map(function (c) { return mapa[c] || c; }).join(", ");
+      }
+
+      function infoItem(rotulo, valor, largo) {
+        return '<div class="info-aluno-item' + (largo ? " largo" : "") + '"><span class="rotulo">' + escaparHtml(rotulo) + '</span><span class="valor">' + escaparHtml(String(valor)) + '</span></div>';
+      }
+
+      function atualizarInfoAluno() {
+        var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+        var container = document.getElementById("montar-info-aluno");
+        if (!aluno) {
+          container.innerHTML = "";
+          return;
+        }
+        var idade = DadosDemo.calcularIdade(aluno.dataNascimento);
+        var pesos = DadosDemo.pesoInicialEAtual(aluno);
+        var resumoAnamnese = [];
+        if (aluno.anamnese.objetivo) resumoAnamnese.push(aluno.anamnese.objetivo);
+        if (aluno.anamnese.nivelExperiencia) resumoAnamnese.push(aluno.anamnese.nivelExperiencia);
+        if (aluno.anamnese.doencas) resumoAnamnese.push("doenças: " + aluno.anamnese.doencas);
+        if (aluno.anamnese.lesoes) resumoAnamnese.push("lesões: " + aluno.anamnese.lesoes);
+        if (aluno.anamnese.restricoesMedicas) resumoAnamnese.push("restrições: " + aluno.anamnese.restricoesMedicas);
+
+        var diasTexto;
+        if (contaAtual === "academia") {
+          diasTexto = formatarDias(aluno.diasTreino.comAcademia) || "não informado";
+        } else {
+          var presencial = formatarDias(aluno.diasTreino.presencialComPersonal) || "nenhum";
+          var soApp = formatarDias(aluno.diasTreino.soApp) || "nenhum";
+          diasTexto = "Presencial: " + presencial + " · Só app: " + soApp;
+        }
+
+        container.innerHTML =
+          '<p class="info-aluno-nome">' + escaparHtml(aluno.nome) + '</p>' +
+          '<p class="info-aluno-id">ID ' + escaparHtml(aluno.id) + '</p>' +
+          '<div class="info-aluno-grade">' +
+            infoItem("WhatsApp", aluno.telefone || "—") +
+            infoItem("Idade", idade !== null ? idade + " anos" : "—") +
+            infoItem("Peso inicial → atual", (pesos.inicial ? pesos.inicial + "kg" : "—") + " → " + (pesos.atual ? pesos.atual + "kg" : "—")) +
+            infoItem("Objetivo", aluno.anamnese.objetivo || "—") +
+            infoItem("Dias de treino", diasTexto, true) +
+            infoItem("Resumo da anamnese", resumoAnamnese.length ? resumoAnamnese.join(" · ") : "sem observações registradas", true) +
+            infoItem("Foto", aluno.avaliacaoFisica.temFoto ? "Registrada (formato a definir)" : "Não registrada") +
+          '</div>';
+      }
+
+      // --- Gerador de treino pré-definido (motor oficial do app) ---
+
+      function popularSeletoresGeradorTreino() {
+        var selTipo = document.getElementById("gerador-tipo");
+        selTipo.innerHTML = "";
+        DadosDemo.listarTiposTreino().forEach(function (t) {
+          var opt = document.createElement("option");
+          opt.value = t.chave;
+          opt.textContent = t.nome;
+          selTipo.appendChild(opt);
+        });
+
+        var selTempo = document.getElementById("gerador-tempo");
+        selTempo.innerHTML = "";
+        DadosDemo.TEMPOS_MINUTOS.forEach(function (t) {
+          var opt = document.createElement("option");
+          opt.value = t;
+          opt.textContent = t + " min";
+          selTempo.appendChild(opt);
+        });
+        selTempo.value = "60";
+
+        var selSeries = document.getElementById("gerador-series");
+        selSeries.innerHTML = "";
+        DadosDemo.SERIES_OPCOES.forEach(function (s) {
+          var opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          selSeries.appendChild(opt);
+        });
+        selSeries.value = String(DadosDemo.SERIES_PADRAO);
+
+        var selDescanso = document.getElementById("gerador-descanso");
+        selDescanso.innerHTML = "";
+        DadosDemo.DESCANSO_OPCOES.forEach(function (d) {
+          var opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d + "s";
+          selDescanso.appendChild(opt);
+        });
+        selDescanso.value = String(DadosDemo.DESCANSO_PADRAO);
+
+        atualizarDiasGerador();
+      }
+
+      function atualizarDiasGerador() {
+        var tipoSel = document.getElementById("gerador-tipo").value;
+        var selDia = document.getElementById("gerador-dia");
+        selDia.innerHTML = "";
+        DadosDemo.listarDiasDoTipo(tipoSel).forEach(function (d) {
+          var opt = document.createElement("option");
+          opt.value = d.codigo;
+          opt.textContent = d.nome;
+          selDia.appendChild(opt);
+        });
+      }
+
+      function preencherGeradorComConfigAtual() {
+        var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+        var cfg = (aluno && aluno.treino && aluno.treino.config) || {};
+        var selTipo = document.getElementById("gerador-tipo");
+        if (cfg.tipoDivisao) selTipo.value = cfg.tipoDivisao;
+        atualizarDiasGerador();
+        if (cfg.diaCodigo) document.getElementById("gerador-dia").value = cfg.diaCodigo;
+        document.getElementById("gerador-tempo").value = cfg.tempoMinutos || 60;
+        document.getElementById("gerador-series").value = cfg.series || DadosDemo.SERIES_PADRAO;
+        document.getElementById("gerador-descanso").value = cfg.descanso || DadosDemo.DESCANSO_PADRAO;
+      }
+
+      function aplicarGeradorTreino() {
+        if (!alunoSelecionadoId) return;
+        var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+        var opcoes = {
+          tipoDivisao: document.getElementById("gerador-tipo").value,
+          diaCodigo: document.getElementById("gerador-dia").value,
+          tempoMinutos: parseInt(document.getElementById("gerador-tempo").value, 10),
+          series: parseInt(document.getElementById("gerador-series").value, 10),
+          descanso: parseInt(document.getElementById("gerador-descanso").value, 10),
+          sexo: (aluno && aluno.sexo === "Feminino") ? "feminino" : "masculino"
+        };
+        var resultadoEl = document.getElementById("gerador-resultado");
+        resultadoEl.style.color = "";
+        DadosDemo.gerarTreinoPreDefinido(contaAtual, alunoSelecionadoId, opcoes).then(function (res) {
+          resultadoEl.style.display = "block";
+          var msg = "Treino pré-preenchido com " + res.aluno.treino.exercicios.length + " exercício(s).";
+          if (res.gruposNaoEncontrados.length > 0) {
+            msg += " Não achei exercício disponível para: " + res.gruposNaoEncontrados.join(", ") + " — ajuste manualmente ao lado.";
+          }
+          resultadoEl.textContent = msg;
+          renderMontadorCatalogo();
+          renderMontadorTreino();
+          renderAlunos();
+          atualizarInfoAluno();
+        }).catch(function (erro) {
+          resultadoEl.style.display = "block";
+          resultadoEl.style.color = "#ff6a6a";
+          resultadoEl.textContent = erro.message || "Não consegui gerar o treino.";
+        });
+      }
+
+      // --- Treinos-base (biblioteca do profissional, até 20) ---
+
+      function popularSelectTreinosBase() {
+        var select = document.getElementById("treino-base-select");
+        var valorAtual = select.value;
+        select.innerHTML = "";
+        var bases = DadosDemo.listarTreinosBase(contaAtual);
+        var optVazia = document.createElement("option");
+        optVazia.value = "";
+        optVazia.textContent = bases.length === 0 ? "Nenhum treino-base salvo ainda" : "Escolha um treino-base...";
+        select.appendChild(optVazia);
+        bases.forEach(function (b) {
+          var opt = document.createElement("option");
+          opt.value = b.id;
+          opt.textContent = b.nome + " (" + b.exercicios.length + " exercícios)";
+          select.appendChild(opt);
+        });
+        if (valorAtual) select.value = valorAtual;
+      }
+
+      function aplicarTreinoBase() {
+        if (!alunoSelecionadoId) return;
+        var idBase = document.getElementById("treino-base-select").value;
+        var erroEl = document.getElementById("treino-base-erro");
+        erroEl.style.display = "none";
+        if (!idBase) return;
+        try {
+          DadosDemo.aplicarTreinoBaseNoAluno(contaAtual, alunoSelecionadoId, idBase);
+          renderMontadorCatalogo();
+          renderMontadorTreino();
+          renderAlunos();
+        } catch (e) {
+          erroEl.textContent = e.message;
+          erroEl.style.display = "block";
+        }
+      }
+
+      function removerTreinoBaseSelecionado() {
+        var idBase = document.getElementById("treino-base-select").value;
+        if (!idBase) return;
+        DadosDemo.removerTreinoBase(contaAtual, idBase);
+        popularSelectTreinosBase();
+      }
+
+      function salvarTreinoAtualComoBase() {
+        if (!alunoSelecionadoId) return;
+        var nomeEl = document.getElementById("treino-base-nome");
+        var erroEl = document.getElementById("treino-base-erro");
+        erroEl.style.display = "none";
+        var aluno = DadosDemo.buscarAluno(contaAtual, alunoSelecionadoId);
+        if (!aluno || aluno.treino.exercicios.length === 0) {
+          erroEl.textContent = "Monte o treino do aluno antes de salvar como base.";
+          erroEl.style.display = "block";
+          return;
+        }
+        try {
+          DadosDemo.salvarTreinoBase(contaAtual, nomeEl.value, aluno.treino.exercicios);
+          nomeEl.value = "";
+          popularSelectTreinosBase();
+        } catch (e) {
+          erroEl.textContent = e.message;
+          erroEl.style.display = "block";
+        }
+      }
+
+      // --- Sugestão de exercício (revisão em 48h, implantação em até 7
+      //     dias se aprovado — pedido literal de Murilo, 2026-09-29) ---
+
+      function abrirSugestaoExercicio() {
+        var corpo = document.getElementById("modal-corpo");
+        corpo.innerHTML = "";
+
+        var titulo = document.createElement("h3");
+        titulo.textContent = "Sugerir um exercício";
+        corpo.appendChild(titulo);
+
+        var subtitulo = document.createElement("p");
+        subtitulo.className = "modal-subtitulo";
+        subtitulo.textContent = "Sua sugestão é analisada em até 48h; se aprovada, entra no catálogo em até 7 dias.";
+        corpo.appendChild(subtitulo);
+
+        var form = document.createElement("form");
+        form.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          salvarSugestaoExercicio();
+        });
+
+        var camposSugestao = [
+          { chave: "nomeExercicio", rotulo: "Nome do exercício", obrigatorio: true },
+          { chave: "grupoMuscular", rotulo: "Grupo muscular", obrigatorio: false },
+          { chave: "observacao", rotulo: "Observação (equipamento, execução, etc.)", obrigatorio: false, largo: true }
+        ];
+        var grade = document.createElement("div");
+        grade.className = "form-grade";
+        camposSugestao.forEach(function (c) {
+          var wrap = document.createElement("div");
+          wrap.className = "campo" + (c.largo ? " campo-largo" : "");
+          var label = document.createElement("label");
+          label.textContent = c.rotulo + (c.obrigatorio ? " *" : "");
+          label.setAttribute("for", "sugestao-" + c.chave);
+          var input = document.createElement("input");
+          input.type = "text";
+          input.id = "sugestao-" + c.chave;
+          wrap.appendChild(label);
+          wrap.appendChild(input);
+          grade.appendChild(wrap);
+        });
+        form.appendChild(grade);
+
+        var erro = document.createElement("p");
+        erro.className = "form-erro";
+        erro.id = "sugestao-erro";
+        erro.style.display = "none";
+        form.appendChild(erro);
+
+        var acoes = document.createElement("div");
+        acoes.className = "form-acoes";
+        var btnCancelar = document.createElement("button");
+        btnCancelar.type = "button";
+        btnCancelar.className = "botao-secundario";
+        btnCancelar.textContent = "Cancelar";
+        btnCancelar.addEventListener("click", fecharModal);
+        var btnEnviar = document.createElement("button");
+        btnEnviar.type = "submit";
+        btnEnviar.className = "botao-primario";
+        btnEnviar.textContent = "Enviar sugestão";
+        acoes.appendChild(btnCancelar);
+        acoes.appendChild(btnEnviar);
+        form.appendChild(acoes);
+
+        corpo.appendChild(form);
+        document.getElementById("modal-overlay").style.display = "flex";
+      }
+
+      function salvarSugestaoExercicio() {
+        var erroEl = document.getElementById("sugestao-erro");
+        erroEl.style.display = "none";
+        var dados = {
+          nomeExercicio: document.getElementById("sugestao-nomeExercicio").value,
+          grupoMuscular: document.getElementById("sugestao-grupoMuscular").value,
+          observacao: document.getElementById("sugestao-observacao").value
+        };
+        try {
+          DadosDemo.sugerirExercicio(contaAtual, dados);
+          fecharModal();
+        } catch (e) {
+          erroEl.textContent = e.message;
+          erroEl.style.display = "block";
+        }
+      }
+
       return {
         entrarComo: entrarComo,
         trocarModo: trocarModo,
         mostrarAbaPainel: mostrarAbaPainel,
         filtrarCatalogo: filtrarCatalogo,
-        adicionarAluno: adicionarAluno,
+        abrirFormularioAluno: abrirFormularioAluno,
+        fecharModal: fecharModal,
         renderAlunos: renderAlunos,
         selecionarAlunoParaTreino: selecionarAlunoParaTreino,
-        renderMontadorCatalogo: renderMontadorCatalogo
+        renderMontadorCatalogo: renderMontadorCatalogo,
+        atualizarDiasGerador: atualizarDiasGerador,
+        aplicarGeradorTreino: aplicarGeradorTreino,
+        aplicarTreinoBase: aplicarTreinoBase,
+        removerTreinoBaseSelecionado: removerTreinoBaseSelecionado,
+        salvarTreinoAtualComoBase: salvarTreinoAtualComoBase,
+        abrirSugestaoExercicio: abrirSugestaoExercicio
       };
     })();
   </script>

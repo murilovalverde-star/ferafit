@@ -1901,3 +1901,253 @@ footer.site-footer a:hover {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ======================================================================
+   2026-09-29 — Cadastro completo de aluno (22 campos Academia / 30
+   Personal, conforme Modelo_Cadastro_Academia_e_Personal.xlsx) e Montar
+   treino avançado (pré-preenchimento oficial, treinos-base, sugestão de
+   exercício). Pedido direto de Murilo, sem número de demanda formal.
+   ====================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 9, 8, 0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+  z-index: 300;
+}
+
+.modal-caixa {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 720px;
+  width: 100%;
+  position: relative;
+  margin: 0 auto;
+}
+
+.modal-fechar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--texto-secundario);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.modal-caixa h3 {
+  font-size: 1.1rem;
+  margin: 0 0 4px;
+}
+
+.modal-subtitulo {
+  color: var(--texto-secundario);
+  font-size: 0.82rem;
+  margin: 0 0 20px;
+}
+
+.form-secao {
+  margin-bottom: 22px;
+}
+
+.form-secao h4 {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ambar);
+  margin: 0 0 14px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 8px;
+}
+
+.form-grade {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.form-grade .campo.campo-largo {
+  grid-column: 1 / -1;
+}
+
+.campo select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--texto);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.campo.campo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campo.campo-checkbox input {
+  width: auto;
+}
+
+.campo.campo-checkbox label {
+  margin: 0;
+}
+
+.dias-semana {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dias-semana label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 7px 11px;
+  font-size: 0.78rem;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dias-semana input {
+  width: auto;
+  margin: 0;
+}
+
+.form-erro {
+  color: #ff6a6a;
+  font-size: 0.85rem;
+  margin: -8px 0 14px;
+}
+
+.form-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.botao-secundario {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--texto);
+  font-weight: 700;
+  font-size: 0.86rem;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Cartão de informações do aluno no Montar treino — só leitura (pedido
+   literal de Murilo: "Nada disso pode ser editado no campo treino"). */
+.info-aluno-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin: 20px 0;
+}
+
+.info-aluno-nome {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+
+.info-aluno-id {
+  color: var(--texto-secundario);
+  font-size: 0.76rem;
+  margin: 0 0 14px;
+}
+
+.info-aluno-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px 18px;
+}
+
+.info-aluno-item .rotulo {
+  display: block;
+  color: var(--texto-secundario);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+
+.info-aluno-item .valor {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.info-aluno-item.largo {
+  grid-column: 1 / -1;
+}
+
+.gerador-treino-caixa,
+.treino-base-caixa {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}
+
+.gerador-treino-caixa h3,
+.treino-base-caixa h3 {
+  font-size: 0.95rem;
+  margin: 0 0 6px;
+}
+
+.gerador-treino-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.gerador-treino-grade .campo {
+  margin-bottom: 0;
+}
+
+.link-sugestao {
+  display: inline-block;
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: var(--laranja);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+@media (max-width: 720px) {
+  .form-grade {
+    grid-template-columns: 1fr;
+  }
+  .modal-overlay {
+    padding: 16px 10px;
+  }
+  .modal-caixa {
+    padding: 20px;
+  }
+}
