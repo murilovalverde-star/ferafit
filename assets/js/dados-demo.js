@@ -20,20 +20,25 @@
 // pré-preenchimento por tipo de treino/tempo/série/descanso — baseado
 // em `RESUMO_TREINOS_PARA_SITE.md` (Lógica e Testes, 2026-09-29).
 //
-// IMPORTANTE sobre o pré-preenchimento: o documento de referência lista
-// os exercícios EXATOS que o motor do app escolhe, mas ~63% deles (24 de
-// 38 nomes únicos conferidos) não existem no catálogo de 190 exercícios
-// deste site (`catalogo-exercicios.json`) — são nomes em inglês de um
-// catálogo do app que não foi sincronizado com o do site. Não dá pra
-// prometer "exatamente os mesmos exercícios" com o catálogo que o site
-// tem hoje. Por isso o motor abaixo replica fielmente GRUPO e SUBGRUPO
-// (e a ordem de prioridade) de cada dia/tipo/sexo, mas escolhe o
-// exercício de dentro do catálogo do PRÓPRIO site — o resultado é do
-// mesmo padrão do app (mesmos grupos, mesma ordem, mesma ênfase por
-// sexo), mas pode divergir na escolha fina do exercício. Como o
-// professor sempre pode excluir/alterar/incluir depois (pedido de
-// Murilo), isso fica como ponto de partida, não como promessa de
-// paridade perfeita — ver STATUS.md para o registro completo do achado.
+// 2026-09-29 (D035 do Orquestrador): a Lógica e Testes resolveu na origem
+// o achado acima — entregou `MAPA_ID_MOTOR_PARA_CATALOGO_190.json` com os
+// 190 de 190 identificadores do motor pareados com o catálogo do site (0
+// sem par), e corrigiu a seção 6 de `RESUMO_TREINOS_PARA_SITE.md` com o
+// id exato do catálogo do site em cada exercício do exemplo (treino nº1,
+// fase ouro). O pré-preenchimento abaixo agora usa esse ID exato como
+// primeira opção em cada slot (`escolherExercicioExato`) — o mesmo
+// exercício que o motor do app entregaria — e só cai para a escolha por
+// grupo/subgrupo (mitigação antiga, ainda existe como reserva) quando o
+// exato não está disponível: aparelho excluído pela academia, ou quando o
+// treino passa de 9 exercícios e repete a ordem de prioridade numa 2ª
+// volta (aí não há um 2º id de referência, só o padrão do grupo/subgrupo).
+// Conferido exercício por exercício contra os 32 blocos (16 dias × 2
+// sexos) da seção 6 corrigida — paridade exata em todos, 0 substituições
+// — e com uma regressão de 1152 combinações de tempo/série/descanso sem
+// erro. `MAPA_ID_MOTOR_PARA_CATALOGO_190.json` foi copiado para
+// `assets/data/` (fonte: `Fera Fit logic and tests`, sha256
+// af2f9d27263f9285b16da4f5cf2320ddf3061df740bfb1eb07015d4629c8a4d7) —
+// ver STATUS.md para o registro completo.
 //
 // 2026-09-29 (rodada 2 de feedback, P24 do STATUS.md): validação de
 // CPF (dígito verificador), formatação de telefone/telefone de
@@ -302,8 +307,8 @@
         {
           codigo: "unico", nome: "Dia único",
           slots: {
-            masculino: [["Costas", "Remada"], ["Quadríceps", null], ["Peito", "Superior"], ["Posteriores de coxa", null], ["Bíceps", "Cabeça longa"], ["Abdômen", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Panturrilha", null], ["Ombros", "Posterior"]],
-            feminino: [["Quadríceps", null], ["Costas", "Remada"], ["Glúteos", "Glúteo máximo"], ["Posteriores de coxa", null], ["Peito", "Superior"], ["Abdômen", "Superior"], ["Panturrilha", null], ["Ombros", "Posterior"], ["Adutores", null]]
+            masculino: [["Costas", "Remada", "Remada_baixa_sentado"], ["Quadríceps", null, "Cadeira_extensora"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Abdômen", "Superior", "Abdominal_tradicional_no_solo"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Abdômen", "Superior", "Abdominal_tradicional_no_solo"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Adutores", null, "Cadeira_adutora"]],
           }
         }
       ]
@@ -314,15 +319,15 @@
         {
           codigo: "A", nome: "Dia A (Superior)",
           slots: {
-            masculino: [["Costas", "Remada"], ["Peito", "Superior"], ["Bíceps", "Cabeça longa"], ["Tríceps", "Pulley — empurrando para baixo"], ["Ombros", "Posterior"], ["Costas", "Puxada"], ["Peito", "Média"], ["Trapézio", null], ["Antebraço", null]],
-            feminino: [["Costas", "Remada"], ["Peito", "Superior"], ["Bíceps", "Cabeça longa"], ["Tríceps", "Pulley — empurrando para baixo"], ["Ombros", "Posterior"], ["Costas", "Puxada"], ["Peito", "Média"], ["Trapézio", null], ["Antebraço", null]]
+            masculino: [["Costas", "Remada", "Remada_baixa_sentado"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Costas", "Puxada", "Puxada_frontal_aberta"], ["Peito", "Média", "Voador_Peck_deck"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Costas", "Remada", "Remada_baixa_sentado"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Costas", "Puxada", "Puxada_frontal_aberta"], ["Peito", "Média", "Voador_Peck_deck"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
           }
         },
         {
           codigo: "B", nome: "Dia B (Inferior)",
           slots: {
-            masculino: [["Quadríceps", null], ["Abdômen", "Médio"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Oblíquos", null], ["Adutores", null], ["Glúteos", "Glúteo médio e mínimo"], ["Lombar", null], ["Quadríceps", null]],
-            feminino: [["Quadríceps", null], ["Abdômen", "Médio"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Oblíquos", null], ["Adutores", null], ["Glúteos", "Glúteo médio e mínimo"], ["Lombar", null], ["Quadríceps", null]]
+            masculino: [["Quadríceps", null, "Cadeira_extensora"], ["Abdômen", "Médio", "Prancha_plank"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Oblíquos", null, "Torcao_russa"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Quadríceps", null, "Leg_press_45"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Abdômen", "Médio", "Prancha_plank"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Oblíquos", null, "Torcao_russa"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Quadríceps", null, "Leg_press_45"]],
           }
         }
       ]
@@ -333,22 +338,22 @@
         {
           codigo: "A", nome: "Dia A (Push)",
           slots: {
-            masculino: [["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Ombros", "Posterior"], ["Peito", "Média"], ["Tríceps", "Testa — empurrando para frente"], ["Ombros", "Lateral"], ["Peito", "Inferior"], ["Tríceps", "Francês — empurrando para cima"], ["Ombros", "Superior"]],
-            feminino: [["Peito", "Superior"], ["Ombros", "Posterior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"], ["Ombros", "Lateral"], ["Tríceps", "Testa — empurrando para frente"], ["Peito", "Inferior"], ["Ombros", "Superior"], ["Tríceps", "Francês — empurrando para cima"]]
+            masculino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Peito", "Média", "Voador_Peck_deck"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"]],
+            feminino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Peito", "Média", "Voador_Peck_deck"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"]],
           }
         },
         {
           codigo: "B", nome: "Dia B (Pull)",
           slots: {
-            masculino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Lombar", null], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Trapézio", null], ["Antebraço", null]],
-            feminino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Lombar", null], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Trapézio", null], ["Antebraço", null]]
+            masculino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
           }
         },
         {
           codigo: "C", nome: "Dia C (Pernas + Core)",
           slots: {
-            masculino: [["Quadríceps", null], ["Posteriores de coxa", null], ["Abdômen", "Inferior"], ["Panturrilha", null], ["Adutores", null], ["Glúteos", "Glúteo máximo"], ["Oblíquos", null], ["Quadríceps", null], ["Posteriores de coxa", null]],
-            feminino: [["Quadríceps", null], ["Glúteos", "Glúteo máximo"], ["Abdômen", "Inferior"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Oblíquos", null], ["Quadríceps", null], ["Glúteos", "Glúteo médio e mínimo"]]
+            masculino: [["Quadríceps", null, "Cadeira_extensora"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Abdômen", "Inferior", "Reverse_crunch_no_solo"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Oblíquos", null, "Torcao_russa"], ["Quadríceps", null, "Leg_press_45"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Abdômen", "Inferior", "Reverse_crunch_no_solo"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Oblíquos", null, "Torcao_russa"], ["Quadríceps", null, "Leg_press_45"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"]],
           }
         }
       ]
@@ -359,36 +364,36 @@
         {
           codigo: "A", nome: "Dia A (Peito+Tríceps)",
           slots: {
-            masculino: [["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"], ["Tríceps", "Testa — empurrando para frente"], ["Peito", "Inferior"], ["Tríceps", "Francês — empurrando para cima"], ["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"]],
-            feminino: [["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"], ["Tríceps", "Testa — empurrando para frente"], ["Peito", "Inferior"], ["Tríceps", "Francês — empurrando para cima"], ["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"]]
+            masculino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Peito", "Média", "Voador_Peck_deck"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Peito", "Superior", "Supino_inclinado_na_maquina_Hammer"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_com_corda"], ["Peito", "Média", "Supino_reto_na_maquina"]],
+            feminino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Peito", "Média", "Voador_Peck_deck"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Peito", "Superior", "Supino_inclinado_na_maquina_Hammer"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_com_corda"], ["Peito", "Média", "Supino_reto_na_maquina"]],
           }
         },
         {
           codigo: "B", nome: "Dia B (Costas+Bíceps)",
           slots: {
-            masculino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Costas", "Remada"], ["Bíceps", "Braquial"], ["Antebraço", null]],
-            feminino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Costas", "Remada"], ["Bíceps", "Braquial"], ["Antebraço", null]]
+            masculino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Costas", "Remada", "Remada_maquina_Hammer"], ["Bíceps", "Braquial", "Rosca_martelo_na_polia_corda"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Costas", "Remada", "Remada_maquina_Hammer"], ["Bíceps", "Braquial", "Rosca_martelo_na_polia_corda"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
           }
         },
         {
           codigo: "C", nome: "Dia C (Pernas completas)",
           slots: {
-            masculino: [["Quadríceps", null], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Glúteos", "Glúteo máximo"], ["Quadríceps", null], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null]],
-            feminino: [["Quadríceps", null], ["Glúteos", "Glúteo máximo"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Quadríceps", null], ["Glúteos", "Glúteo médio e mínimo"], ["Posteriores de coxa", null], ["Panturrilha", null]]
+            masculino: [["Quadríceps", null, "Cadeira_extensora"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Quadríceps", null, "Leg_press_45"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"], ["Panturrilha", null, "Panturrilha_em_pe_no_Smith"], ["Adutores", null, "Agachamento_Sumo_na_Maquina"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Quadríceps", null, "Leg_press_45"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"], ["Panturrilha", null, "Panturrilha_em_pe_no_Smith"]],
           }
         },
         {
           codigo: "D", nome: "Dia D (Ombros+Trapézio+Core)",
           slots: {
-            masculino: [["Abdômen", "Superior"], ["Ombros", "Posterior"], ["Lombar", null], ["Ombros", "Lateral"], ["Oblíquos", null], ["Abdômen", "Médio"], ["Ombros", "Superior"], ["Lombar", null], ["Trapézio", null]],
-            feminino: [["Abdômen", "Superior"], ["Ombros", "Posterior"], ["Lombar", null], ["Ombros", "Lateral"], ["Oblíquos", null], ["Abdômen", "Médio"], ["Ombros", "Superior"], ["Lombar", null], ["Trapézio", null]]
+            masculino: [["Abdômen", "Superior", "Abdominal_tradicional_no_solo"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Oblíquos", null, "Torcao_russa"], ["Abdômen", "Médio", "Prancha_plank"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Lombar", null, "Super_homem_com_remada"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"]],
+            feminino: [["Abdômen", "Superior", "Abdominal_tradicional_no_solo"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Oblíquos", null, "Torcao_russa"], ["Abdômen", "Médio", "Prancha_plank"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Lombar", null, "Super_homem_com_remada"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"]],
           }
         },
         {
           codigo: "E", nome: "Dia E (Especialização por sexo)",
           slots: {
-            masculino: [["Costas", "Puxada"], ["Peito", "Média"], ["Bíceps", "Braquial"], ["Tríceps", "Testa — empurrando para frente"], ["Ombros", "Lateral"], ["Costas", "Remada"], ["Peito", "Inferior"], ["Trapézio", null], ["Antebraço", null]],
-            feminino: [["Quadríceps", null], ["Glúteos", "Glúteo médio e mínimo"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Quadríceps", null], ["Glúteos", "Glúteo máximo"], ["Posteriores de coxa", null], ["Panturrilha", null]]
+            masculino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Peito", "Média", "Voador_Peck_deck"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Quadríceps", null, "Leg_press_45"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"], ["Panturrilha", null, "Panturrilha_em_pe_no_Smith"]],
           }
         }
       ]
@@ -399,36 +404,36 @@
         {
           codigo: "A", nome: "Dia A (Push - Seg)",
           slots: {
-            masculino: [["Peito", "Superior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Ombros", "Posterior"], ["Peito", "Média"], ["Tríceps", "Testa — empurrando para frente"], ["Ombros", "Lateral"], ["Peito", "Inferior"], ["Tríceps", "Francês — empurrando para cima"], ["Ombros", "Superior"]],
-            feminino: [["Peito", "Superior"], ["Ombros", "Posterior"], ["Tríceps", "Pulley — empurrando para baixo"], ["Peito", "Média"], ["Ombros", "Lateral"], ["Tríceps", "Testa — empurrando para frente"], ["Peito", "Inferior"], ["Ombros", "Superior"], ["Tríceps", "Francês — empurrando para cima"]]
+            masculino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Peito", "Média", "Voador_Peck_deck"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"]],
+            feminino: [["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Ombros", "Posterior", "crucifixo_inverso_na_maquina"], ["Tríceps", "Pulley — empurrando para baixo", "Triceps_pulley_barra_V"], ["Peito", "Média", "Voador_Peck_deck"], ["Ombros", "Lateral", "Elevacao_lateral_com_halteres"], ["Tríceps", "Testa — empurrando para frente", "Triceps_testa_com_barra_na_polia_alta"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"]],
           }
         },
         {
           codigo: "B", nome: "Dia B (Pull - Ter)",
           slots: {
-            masculino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Costas", "Remada"], ["Trapézio", null], ["Antebraço", null]],
-            feminino: [["Costas", "Puxada"], ["Bíceps", "Braquial"], ["Costas", "Remada"], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Bíceps", "Cabeça longa"], ["Costas", "Remada"], ["Trapézio", null], ["Antebraço", null]]
+            masculino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Costas", "Remada", "Remada_maquina_Hammer"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Costas", "Puxada", "Puxada_frontal_aberta"], ["Bíceps", "Braquial", "Rosca_martelo_com_halteres"], ["Costas", "Remada", "Remada_baixa_sentado"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_com_barra_V"], ["Bíceps", "Cabeça longa", "Rosca_inclinada_com_halteres_duplos"], ["Costas", "Remada", "Remada_maquina_Hammer"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
           }
         },
         {
           codigo: "C", nome: "Dia C (Legs - Qua)",
           slots: {
-            masculino: [["Quadríceps", null], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Glúteos", "Glúteo máximo"], ["Quadríceps", null], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null]],
-            feminino: [["Quadríceps", null], ["Glúteos", "Glúteo máximo"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Adutores", null], ["Quadríceps", null], ["Glúteos", "Glúteo médio e mínimo"], ["Posteriores de coxa", null], ["Panturrilha", null]]
+            masculino: [["Quadríceps", null, "Cadeira_extensora"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Quadríceps", null, "Leg_press_45"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"], ["Panturrilha", null, "Panturrilha_em_pe_no_Smith"], ["Adutores", null, "Agachamento_Sumo_na_Maquina"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Glúteos", "Glúteo máximo", "Elevacao_pelvica_na_maquina"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Quadríceps", null, "Leg_press_45"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Posteriores de coxa", null, "Mesa_flexora_deitado"], ["Panturrilha", null, "Panturrilha_em_pe_no_Smith"]],
           }
         },
         {
           codigo: "S", nome: "Dia S (Superior - Sex)",
           slots: {
-            masculino: [["Costas", "Remada"], ["Peito", "Inferior"], ["Bíceps", "Cabeça curta"], ["Tríceps", "Francês — empurrando para cima"], ["Ombros", "Superior"], ["Costas", "Puxada"], ["Peito", "Superior"], ["Trapézio", null], ["Antebraço", null]],
-            feminino: [["Costas", "Remada"], ["Peito", "Inferior"], ["Ombros", "Superior"], ["Tríceps", "Francês — empurrando para cima"], ["Bíceps", "Cabeça curta"], ["Costas", "Puxada"], ["Peito", "Superior"], ["Trapézio", null], ["Antebraço", null]]
+            masculino: [["Costas", "Remada", "Remada_baixa_sentado"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Costas", "Puxada", "Puxada_frontal_aberta"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
+            feminino: [["Costas", "Remada", "Remada_baixa_sentado"], ["Peito", "Inferior", "Supino_declinado_na_maquina_Hammer"], ["Ombros", "Superior", "Desenvolvimento_na_maquina"], ["Tríceps", "Francês — empurrando para cima", "Triceps_frances_com_barra_reta"], ["Bíceps", "Cabeça curta", "Rosca_scott_na_maquina"], ["Costas", "Puxada", "Puxada_frontal_aberta"], ["Peito", "Superior", "Supino_inclinado_com_halteres"], ["Trapézio", null, "Encolhimento_de_trapezio_com_halteres"], ["Antebraço", null, "Flexao_do_punho_com_barra_W"]],
           }
         },
         {
           codigo: "I", nome: "Dia I (Inferior - Sáb)",
           slots: {
-            masculino: [["Quadríceps", null], ["Abdômen", "Médio"], ["Posteriores de coxa", null], ["Panturrilha", null], ["Oblíquos", null], ["Adutores", null], ["Glúteos", "Glúteo médio e mínimo"], ["Lombar", null], ["Quadríceps", null]],
-            feminino: [["Quadríceps", null], ["Abdômen", "Médio"], ["Glúteos", "Glúteo médio e mínimo"], ["Posteriores de coxa", null], ["Oblíquos", null], ["Panturrilha", null], ["Adutores", null], ["Lombar", null], ["Quadríceps", null]]
+            masculino: [["Quadríceps", null, "Cadeira_extensora"], ["Abdômen", "Médio", "Prancha_plank"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Oblíquos", null, "Torcao_russa"], ["Adutores", null, "Cadeira_adutora"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Quadríceps", null, "Leg_press_45"]],
+            feminino: [["Quadríceps", null, "Cadeira_extensora"], ["Abdômen", "Médio", "Prancha_plank"], ["Glúteos", "Glúteo médio e mínimo", "Cadeira_abdutora"], ["Posteriores de coxa", null, "Cadeira_flexora_sentado"], ["Oblíquos", null, "Torcao_russa"], ["Panturrilha", null, "Panturrilha_em_pe_na_maquina"], ["Adutores", null, "Cadeira_adutora"], ["Lombar", null, "Extensao_do_tronco_hiperextensao"], ["Quadríceps", null, "Leg_press_45"]],
           }
         }
       ]
@@ -449,8 +454,23 @@
     return Math.max(1, qtd);
   }
 
+  // D035 (2026-09-29): escolhe pelo ID EXATO que o motor do app entrega
+  // (vindo de RESUMO_TREINOS_PARA_SITE.md seção 6 / MAPA_ID_MOTOR_PARA_
+  // CATALOGO_190.json, ambos da Lógica e Testes) — só usa se o exercício
+  // ainda existir no catálogo disponível (a academia pode ter desmarcado
+  // o aparelho) e ainda não tiver sido usado neste treino.
+  function escolherExercicioExato(catalogoDisponivel, usados, idExato) {
+    if (!idExato) return null;
+    if (usados.indexOf(idExato) !== -1) return null;
+    var achado = catalogoDisponivel.filter(function (ex) {
+      return ex.id === idExato;
+    })[0];
+    return achado || null;
+  }
+
   // Escolhe, dentro do catálogo disponível, um exercício do grupo (e
-  // subgrupo, se houver e existir) ainda não usado neste treino.
+  // subgrupo, se houver e existir) ainda não usado neste treino. Usada
+  // como reserva quando o ID exato (acima) não está disponível.
   function escolherExercicio(catalogoDisponivel, usados, grupo, subgrupo) {
     var candidatos = catalogoDisponivel.filter(function (ex) {
       return ex.grupo === grupo && usados.indexOf(ex.id) === -1;
@@ -867,12 +887,26 @@
       var usados = [];
       var exerciciosEscolhidos = [];
       var gruposNaoEncontrados = [];
+      var quantidadeExata = 0;
+      var quantidadeSubstituida = 0;
       slotsAlvo.forEach(function (slot) {
-        var ex = escolherExercicio(catalogo, usados, slot[0], slot[1]);
-        if (!ex) {
-          // catálogo da academia pode ter excluído tudo daquele grupo —
-          // tenta de novo sem exigir o subgrupo específico.
-          ex = escolherExercicio(catalogo, usados, slot[0], null);
+        // slot = [grupo, subgrupo, idExato] — idExato vem direto do
+        // exemplo real do motor do app (D035). Tenta o exato primeiro;
+        // só cai para grupo/subgrupo se ele não estiver disponível
+        // (aparelho excluído pela academia, ou já usado — 2ª volta).
+        var ex = escolherExercicioExato(catalogo, usados, slot[2]);
+        if (ex) {
+          quantidadeExata++;
+        } else {
+          ex = escolherExercicio(catalogo, usados, slot[0], slot[1]);
+          if (!ex) {
+            // catálogo da academia pode ter excluído tudo daquele grupo —
+            // tenta de novo sem exigir o subgrupo específico.
+            ex = escolherExercicio(catalogo, usados, slot[0], null);
+          }
+          if (ex) {
+            quantidadeSubstituida++;
+          }
         }
         if (ex) {
           usados.push(ex.id);
@@ -894,7 +928,7 @@
       aluno.treino.atualizadoEm = Date.now();
       salvarEstado(estado);
 
-      return { aluno: aluno, quantidadeAlvo: qtd, gruposNaoEncontrados: gruposNaoEncontrados };
+      return { aluno: aluno, quantidadeAlvo: qtd, gruposNaoEncontrados: gruposNaoEncontrados, quantidadeExata: quantidadeExata, quantidadeSubstituida: quantidadeSubstituida };
     });
   };
 

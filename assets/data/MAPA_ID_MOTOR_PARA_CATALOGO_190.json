@@ -1,0 +1,1902 @@
+[
+  {
+    "srcMotor": "Cable Reverse Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Abdominal reverso na polia",
+    "idCatalogoSite": "Reverse_crunch_na_polia",
+    "nomeOficialSite": "Abdominal reverso na polia",
+    "arquivoDeCapa": "Reverse_crunch_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Decline Reverse Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Abdominal reverso declinado",
+    "idCatalogoSite": "Reverse_crunch_declinado",
+    "nomeOficialSite": "Abdominal reverso declinado",
+    "arquivoDeCapa": "Reverse_crunch_declinado_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Flat Bench Lying Leg Raise",
+    "grupo": "Abdômen",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Elevação de pernas no banco",
+    "idCatalogoSite": "Elevacao_de_pernas_no_banco",
+    "nomeOficialSite": "Elevação de pernas no banco",
+    "arquivoDeCapa": "Elevacao_de_pernas_no_banco_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Hanging Leg Raise",
+    "grupo": "Abdômen",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Elevação de pernas suspenso",
+    "idCatalogoSite": "Elevacao_de_pernas_suspenso",
+    "nomeOficialSite": "Elevação de pernas suspenso",
+    "arquivoDeCapa": "Elevacao_de_pernas_suspenso_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Reverse Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Abdominal reverso no solo",
+    "idCatalogoSite": "Reverse_crunch_no_solo",
+    "nomeOficialSite": "Abdominal reverso no solo",
+    "arquivoDeCapa": "Reverse_crunch_no_solo_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Abdominal_com_rodinha_ab_wheel_rollout",
+    "grupo": "Abdômen",
+    "subgrupo": "Médio",
+    "nomeNoMotor": "Abdominal com rodinha (ab wheel rollout)",
+    "idCatalogoSite": "Abdominal_com_rodinha_ab_wheel_rollout",
+    "nomeOficialSite": "Abdominal com rodinha (ab wheel rollout)",
+    "arquivoDeCapa": "Abdominal_com_rodinha_ab_wheel_rollout_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Prancha_com_elevacao_de_perna",
+    "grupo": "Abdômen",
+    "subgrupo": "Médio",
+    "nomeNoMotor": "Prancha com elevação de perna",
+    "idCatalogoSite": "Prancha_com_elevacao_de_perna",
+    "nomeOficialSite": "Prancha com elevação de perna",
+    "arquivoDeCapa": "Prancha_com_elevacao_de_perna_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Prancha_plank",
+    "grupo": "Abdômen",
+    "subgrupo": "Médio",
+    "nomeNoMotor": "Prancha (plank)",
+    "idCatalogoSite": "Prancha_plank",
+    "nomeOficialSite": "Prancha (plank)",
+    "arquivoDeCapa": "Prancha_plank_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Ab Crunch Machine",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal na máquina",
+    "idCatalogoSite": "Abdominal_na_maquina",
+    "nomeOficialSite": "Abdominal na máquina",
+    "arquivoDeCapa": "Abdominal_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Cable Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal na polia ajoelhado sentado nos calcanhares",
+    "idCatalogoSite": "Crunch_na_polia_ajoelhado",
+    "nomeOficialSite": "Abdominal na polia ajoelhado sentado nos calcanhares",
+    "arquivoDeCapa": "Crunch_na_polia_ajoelhado_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Decline Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal declinado com anilha",
+    "idCatalogoSite": "Crunch_declinado_com_anilha",
+    "nomeOficialSite": "Abdominal declinado com anilha",
+    "arquivoDeCapa": "Crunch_declinado_com_anilha_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Floor Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal tradicional no solo",
+    "idCatalogoSite": "Abdominal_tradicional_no_solo",
+    "nomeOficialSite": "Abdominal tradicional no solo",
+    "arquivoDeCapa": "Abdominal_tradicional_no_solo_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rope Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal na polia ajoelhado com quadril alto",
+    "idCatalogoSite": "Crunch_na_polia_com_corda",
+    "nomeOficialSite": "Abdominal na polia ajoelhado com quadril alto",
+    "arquivoDeCapa": "Crunch_na_polia_com_corda_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Standing Rope Crunch",
+    "grupo": "Abdômen",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Abdominal em pé na polia",
+    "idCatalogoSite": "Crunch_em_pe_na_polia",
+    "nomeOficialSite": "Abdominal em pé na polia",
+    "arquivoDeCapa": "Crunch_em_pe_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Aducao_do_quadril_na_polia",
+    "grupo": "Adutores",
+    "subgrupo": "Adutores",
+    "nomeNoMotor": "Adução do quadril na polia",
+    "idCatalogoSite": "Aducao_do_quadril_na_polia",
+    "nomeOficialSite": "Adução do quadril na polia",
+    "arquivoDeCapa": "Aducao_do_quadril_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Agachamento_Sumo_com_Barra",
+    "grupo": "Adutores",
+    "subgrupo": "Adutores",
+    "nomeNoMotor": "Agachamento Terra Sumô",
+    "idCatalogoSite": "Agachamento_terra_sumo",
+    "nomeOficialSite": "Agachamento Terra Sumô",
+    "arquivoDeCapa": "Agachamento_terra_sumo_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Agachamento_Sumo_na_Maquina",
+    "grupo": "Adutores",
+    "subgrupo": "Adutores",
+    "nomeNoMotor": "Agachamento sumo na máquina",
+    "idCatalogoSite": "Agachamento_Sumo_na_Maquina",
+    "nomeOficialSite": "Agachamento Sumô na Máquina",
+    "arquivoDeCapa": "Agachamento_Sumo_na_Maquina_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Hip Adductor Machine",
+    "grupo": "Adutores",
+    "subgrupo": "Adutores",
+    "nomeNoMotor": "Cadeira adutora",
+    "idCatalogoSite": "Cadeira_adutora",
+    "nomeOficialSite": "Cadeira adutora",
+    "arquivoDeCapa": "Cadeira_adutora_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Curvatura_reversa_do_punho_com_halteres",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Curvatura reversa do punho com halteres",
+    "idCatalogoSite": "Curvatura_reversa_do_punho_com_halteres",
+    "nomeOficialSite": "Curvatura reversa do punho com halteres",
+    "arquivoDeCapa": "Curvatura_reversa_do_punho_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Curvatura_reversa_do_punho_na_barra_reta",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Curvatura reversa do punho na barra reta",
+    "idCatalogoSite": "Curvatura_reversa_do_punho_na_barra_reta",
+    "nomeOficialSite": "Curvatura reversa do punho na barra reta",
+    "arquivoDeCapa": "Curvatura_reversa_do_punho_na_barra_reta_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Curvatura_reversa_do_punho_na_barra_w",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Curvatura reversa do punho na barra W",
+    "idCatalogoSite": "Curvatura_reversa_do_punho_na_barra_w",
+    "nomeOficialSite": "Curvatura reversa do punho na barra W",
+    "arquivoDeCapa": "Curvatura_reversa_do_punho_na_barra_w_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Flexao_do_punho",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Flexão do punho",
+    "idCatalogoSite": "Flexao_do_punho",
+    "nomeOficialSite": "Flexao do punho",
+    "arquivoDeCapa": "Flexao_do_punho_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Flexao_do_punho_com_barra",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Flexão do punho com barra W",
+    "idCatalogoSite": "Flexao_do_punho_com_barra_W",
+    "nomeOficialSite": "Flexao do punho com barra",
+    "arquivoDeCapa": "Flexao_do_punho_com_barra_W_masculino43.jpeg",
+    "metodoDoMatch": "por eliminação: único motor sem par e único site sem par no mesmo grupo/subgrupo"
+  },
+  {
+    "srcMotor": "Flexao_do_punho_com_barra_reta",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Flexão do punho com barra reta",
+    "idCatalogoSite": "Flexao_do_punho_com_barra_reta",
+    "nomeOficialSite": "Flexao do punho com barra reta",
+    "arquivoDeCapa": "Flexao_do_punho_com_barra_reta_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_inversa_com_barra",
+    "grupo": "Antebraço",
+    "subgrupo": "Antebraço",
+    "nomeNoMotor": "Rosca inversa com barra",
+    "idCatalogoSite": "Rosca_inversa_com_barra",
+    "nomeOficialSite": "Rosca inversa com barra",
+    "arquivoDeCapa": "Rosca_inversa_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Cable Hammer Curl",
+    "grupo": "Bíceps",
+    "subgrupo": "Braquial",
+    "nomeNoMotor": "Rosca martelo na polia (corda)",
+    "idCatalogoSite": "Rosca_martelo_na_polia_corda",
+    "nomeOficialSite": "Rosca martelo na polia (corda)",
+    "arquivoDeCapa": "Rosca_martelo_na_polia_corda_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Hammer Curl",
+    "grupo": "Bíceps",
+    "subgrupo": "Braquial",
+    "nomeNoMotor": "Rosca martelo com halteres",
+    "idCatalogoSite": "Rosca_martelo_com_halteres",
+    "nomeOficialSite": "Rosca martelo com halteres",
+    "arquivoDeCapa": "Rosca_martelo_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rosca_inversa_na_polia",
+    "grupo": "Bíceps",
+    "subgrupo": "Braquial",
+    "nomeNoMotor": "Rosca inversa na polia",
+    "idCatalogoSite": "Rosca_inversa_na_polia",
+    "nomeOficialSite": "Rosca inversa na polia",
+    "arquivoDeCapa": "Rosca_inversa_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Concentration Curl",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca concentrada",
+    "idCatalogoSite": "Rosca_concentrada",
+    "nomeOficialSite": "Rosca concentrada",
+    "arquivoDeCapa": "Rosca_concentrada_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Preacher Curl Machine",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca scott na máquina",
+    "idCatalogoSite": "Rosca_scott_na_maquina",
+    "nomeOficialSite": "Rosca scott na máquina",
+    "arquivoDeCapa": "Rosca_scott_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rosca_na_polia_alta_dupla",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca na polia alta (dupla)",
+    "idCatalogoSite": "Rosca_na_polia_alta_dupla",
+    "nomeOficialSite": "Rosca na polia alta (dupla)",
+    "arquivoDeCapa": "Rosca_na_polia_alta_dupla_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_na_polia_alta_individual",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca na polia alta (individual)",
+    "idCatalogoSite": "Rosca_na_polia_alta_individual",
+    "nomeOficialSite": "Rosca na polia alta (individual)",
+    "arquivoDeCapa": "Rosca_na_polia_alta_individual_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_scott_com_barra_W",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca scott com barra W",
+    "idCatalogoSite": "Rosca_scott_com_barra_W",
+    "nomeOficialSite": "Rosca scott com barra W",
+    "arquivoDeCapa": "Rosca_scott_com_barra_W_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_scott_na_maquina_Hammer",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca scott na máquina (Hammer)",
+    "idCatalogoSite": "Rosca_scott_na_maquina_Hammer",
+    "nomeOficialSite": "Rosca scott na máquina (Hammer)",
+    "arquivoDeCapa": "Rosca_scott_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_scott_na_polia",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca scott na polia",
+    "idCatalogoSite": "Rosca_scott_na_polia",
+    "nomeOficialSite": "Rosca scott na polia",
+    "arquivoDeCapa": "Rosca_scott_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_spider",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca spider",
+    "idCatalogoSite": "Rosca_spider",
+    "nomeOficialSite": "Rosca spider",
+    "arquivoDeCapa": "Rosca_spider_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Standing Alternating Dumbbell Curl",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça curta",
+    "nomeNoMotor": "Rosca alternada com halteres em pé",
+    "idCatalogoSite": "Rosca_alternada_com_halteres_em_pe",
+    "nomeOficialSite": "Rosca alternada com halteres em pé",
+    "arquivoDeCapa": "Rosca_alternada_com_halteres_em_pe_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rosca_direta_com_barra_fechada",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça longa",
+    "nomeNoMotor": "Rosca direta com barra (fechada)",
+    "idCatalogoSite": "Rosca_direta_com_barra",
+    "nomeOficialSite": "Rosca direta com barra (fechada)",
+    "arquivoDeCapa": "Rosca_direta_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rosca_inclinada_com_halteres_alternados",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça longa",
+    "nomeNoMotor": "Rosca inclinada com halteres alternados",
+    "idCatalogoSite": "Rosca_inclinada_com_halteres_alternados",
+    "nomeOficialSite": "Rosca inclinada com halteres alternados",
+    "arquivoDeCapa": "Rosca_inclinada_com_halteres_alternados_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_inclinada_com_halteres_duplos",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça longa",
+    "nomeNoMotor": "Rosca inclinada com halteres duplos",
+    "idCatalogoSite": "Rosca_inclinada_com_halteres_duplos",
+    "nomeOficialSite": "Rosca inclinada com halteres duplos",
+    "arquivoDeCapa": "Rosca_inclinada_com_halteres_duplos_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rosca_na_polia_pegada_fechada",
+    "grupo": "Bíceps",
+    "subgrupo": "Cabeça longa",
+    "nomeNoMotor": "Rosca na polia (pegada fechada)",
+    "idCatalogoSite": "Rosca_na_polia_pegada_fechada",
+    "nomeOficialSite": "Rosca na polia (pegada fechada)",
+    "arquivoDeCapa": "Rosca_na_polia_pegada_fechada_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Barra fixa assistida (graviton)",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Barra fixa assistida (graviton)",
+    "idCatalogoSite": "Barra_fixa_assistida_graviton",
+    "nomeOficialSite": "Barra fixa assistida (graviton)",
+    "arquivoDeCapa": "Barra_fixa_assistida_graviton_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Barra_fixa_Puxada_na_barra_fixa_livre_sem_assistencia",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Barra fixa / Puxada na barra fixa livre (sem assistência)",
+    "idCatalogoSite": "Barra_fixa__Puxada_na_barra_fixa_livre",
+    "nomeOficialSite": "Barra fixa / Puxada na barra fixa livre (sem assistência)",
+    "arquivoDeCapa": "Barra_fixa__Puxada_na_barra_fixa_livre_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Close-Grip Front Lat Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada fechada",
+    "idCatalogoSite": "Puxada_fechada",
+    "nomeOficialSite": "Puxada fechada",
+    "arquivoDeCapa": "Puxada_fechada_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Full Range-Of-Motion Lat Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada amplitude total",
+    "idCatalogoSite": "Puxada_amplitude_total",
+    "nomeOficialSite": "Puxada amplitude total",
+    "arquivoDeCapa": "Puxada_amplitude_total_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "One Arm Lat Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada unilateral",
+    "idCatalogoSite": "Puxada_unilateral",
+    "nomeOficialSite": "Puxada unilateral",
+    "arquivoDeCapa": "Puxada_unilateral_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rope Straight-Arm Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Pulldown braço reto (corda)",
+    "idCatalogoSite": "Pulldown_braco_reto_corda",
+    "nomeOficialSite": "Pulldown braço reto (corda)",
+    "arquivoDeCapa": "Pulldown_braco_reto_corda_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Straight-Arm Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Pulldown braço reto (barra)",
+    "idCatalogoSite": "Pulldown_braco_reto_barra",
+    "nomeOficialSite": "Pulldown braço reto (barra)",
+    "arquivoDeCapa": "Pulldown_braco_reto_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Underhand Cable Pulldowns",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada supinada",
+    "idCatalogoSite": "Puxada_supinada",
+    "nomeOficialSite": "Puxada supinada",
+    "arquivoDeCapa": "Puxada_supinada_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "V-Bar Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada com barra V",
+    "idCatalogoSite": "Puxada_com_barra_V",
+    "nomeOficialSite": "Puxada com barra V",
+    "arquivoDeCapa": "Puxada_com_barra_V_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Wide-Grip Lat Pulldown",
+    "grupo": "Costas",
+    "subgrupo": "Puxada",
+    "nomeNoMotor": "Puxada frontal aberta",
+    "idCatalogoSite": "Puxada_frontal_aberta",
+    "nomeOficialSite": "Puxada frontal aberta",
+    "arquivoDeCapa": "Puxada_frontal_aberta_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Bent Over Barbell Row",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada curvada com barra",
+    "idCatalogoSite": "Remada_curvada_com_barra",
+    "nomeOficialSite": "Remada curvada com barra",
+    "arquivoDeCapa": "Remada_curvada_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Kneeling High Pulley Row",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada alta ajoelhado na polia",
+    "idCatalogoSite": "Remada_alta_ajoelhado_na_polia_unilateral",
+    "nomeOficialSite": "Remada alta ajoelhado na polia",
+    "arquivoDeCapa": "Remada_alta_ajoelhado_na_polia_unilateral_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leverage Iso Row",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada máquina (Hammer)",
+    "idCatalogoSite": "Remada_maquina_Hammer",
+    "nomeOficialSite": "Remada máquina (Hammer)",
+    "arquivoDeCapa": "Remada_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Lying T-Bar Row",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada T no aparelho",
+    "idCatalogoSite": "Remada_T_no_aparelho",
+    "nomeOficialSite": "Remada T no aparelho",
+    "arquivoDeCapa": "Remada_T_no_aparelho_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Remada serrote unilateral",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada serrote unilateral",
+    "idCatalogoSite": "Remada_serrote_unilateral",
+    "nomeOficialSite": "Remada serrote unilateral",
+    "arquivoDeCapa": "Remada_serrote_unilateral_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Remada_Pendlay",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada Pendlay",
+    "idCatalogoSite": "Remada_Pendlay",
+    "nomeOficialSite": "Remada Pendlay",
+    "arquivoDeCapa": "Remada_Pendlay_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Remada_inclinada_na_Barra",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada inclinada na Barra",
+    "idCatalogoSite": "Remada_inclinada_na_barra",
+    "nomeOficialSite": "Remada inclinada na Barra",
+    "arquivoDeCapa": "Remada_inclinada_na_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Remada_inclinada_na_polia",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada inclinada na polia",
+    "idCatalogoSite": "Remada_inclinada_na_polia",
+    "nomeOficialSite": "Remada inclinada na polia",
+    "arquivoDeCapa": "Remada_inclinada_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Remada_inclinada_no_Cross",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada inclinada no Cross",
+    "idCatalogoSite": "Remada_inclinada_no_Cross",
+    "nomeOficialSite": "Remada inclinada no Cross",
+    "arquivoDeCapa": "Remada_inclinada_no_Cross_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Remada_sentado_com_rotacao_unilateral",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada sentada com rotação unilateral",
+    "idCatalogoSite": "Remada_sentado_com_rotacao_unilateral",
+    "nomeOficialSite": "Remada sentada com rotação unilateral",
+    "arquivoDeCapa": "Remada_sentado_com_rotacao_unilateral_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Seated Cable Rows",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada baixa sentado",
+    "idCatalogoSite": "Remada_baixa_sentado",
+    "nomeOficialSite": "Remada baixa sentado",
+    "arquivoDeCapa": "Remada_baixa_sentado_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Smith Machine Bent Over Row",
+    "grupo": "Costas",
+    "subgrupo": "Remada",
+    "nomeNoMotor": "Remada no Smith",
+    "idCatalogoSite": "Remada_no_Smith",
+    "nomeOficialSite": "Remada no Smith",
+    "arquivoDeCapa": "Remada_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Coice_de_burro_glute_kickback",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo máximo",
+    "nomeNoMotor": "Coice de burro (glute kickback)",
+    "idCatalogoSite": "Coice_de_burro_glute_kickback",
+    "nomeOficialSite": "Coice de burro (glute kickback)",
+    "arquivoDeCapa": "Coice_de_burro_glute_kickback_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Coice_na_polia",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo máximo",
+    "nomeNoMotor": "Coice na polia",
+    "idCatalogoSite": "Coice_na_polia",
+    "nomeOficialSite": "Coice na polia",
+    "arquivoDeCapa": "Coice_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Elevacao_pelvica_no_Smith",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo máximo",
+    "nomeNoMotor": "Elevação pélvica no Smith",
+    "idCatalogoSite": "Elevacao_pelvica_no_Smith",
+    "nomeOficialSite": "Elevação pélvica no Smith",
+    "arquivoDeCapa": "Elevacao_pelvica_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Hip Thrust Machine",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo máximo",
+    "nomeNoMotor": "Elevação pélvica na máquina",
+    "idCatalogoSite": "Elevacao_pelvica_na_maquina",
+    "nomeOficialSite": "Elevação pélvica na máquina",
+    "arquivoDeCapa": "Elevacao_pelvica_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Ponte_de_gluteos",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo máximo",
+    "nomeNoMotor": "Ponte de glúteos",
+    "idCatalogoSite": "Ponte_de_gluteos",
+    "nomeOficialSite": "Ponte de glúteos",
+    "arquivoDeCapa": "Ponte_de_gluteos_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Abducao_de_quadril",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo médio e mínimo",
+    "nomeNoMotor": "Abdução de quadril",
+    "idCatalogoSite": "Abducao_de_quadril",
+    "nomeOficialSite": "Abdução de quadril",
+    "arquivoDeCapa": "Abducao_de_quadril_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Abducao_de_quadril_em_pe",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo médio e mínimo",
+    "nomeNoMotor": "Abdução de quadril em pé",
+    "idCatalogoSite": "Abducao_de_quadril_em_pe",
+    "nomeOficialSite": "Abdução de quadril em pé",
+    "arquivoDeCapa": "Abducao_de_quadril_em_pe_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Agachamento_lateral",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo médio e mínimo",
+    "nomeNoMotor": "Agachamento lateral",
+    "idCatalogoSite": "Agachamento_lateral",
+    "nomeOficialSite": "Agachamento lateral",
+    "arquivoDeCapa": "Agachamento_lateral_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Hip Abductor Machine",
+    "grupo": "Glúteos",
+    "subgrupo": "Glúteo médio e mínimo",
+    "nomeNoMotor": "Cadeira abdutora",
+    "idCatalogoSite": "Cadeira_abdutora",
+    "nomeOficialSite": "Cadeira abdutora",
+    "arquivoDeCapa": "Cadeira_abdutora_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Extensao_do_tronco_hiperextensao",
+    "grupo": "Lombar",
+    "subgrupo": "Lombar",
+    "nomeNoMotor": "Extensão do tronco (hiperextensão)",
+    "idCatalogoSite": "Extensao_do_tronco_hiperextensao",
+    "nomeOficialSite": "Extensão do tronco (hiperextensão)",
+    "arquivoDeCapa": "Extensao_do_tronco_hiperextensao_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Extensao_lombar_hiperextensao_no_banco_romano",
+    "grupo": "Lombar",
+    "subgrupo": "Lombar",
+    "nomeNoMotor": "Extensão lombar / hiperextensão no banco romano",
+    "idCatalogoSite": "Extensao_lombar__hiperextensao_no_banco_romano",
+    "nomeOficialSite": "Extensão lombar / hiperextensão no banco romano",
+    "arquivoDeCapa": "Extensao_lombar__hiperextensao_no_banco_romano_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Levantamento_no_rack_rack_pull",
+    "grupo": "Lombar",
+    "subgrupo": "Lombar",
+    "nomeNoMotor": "Levantamento no rack (rack pull)",
+    "idCatalogoSite": "Levantamento_no_rack_rack_pull",
+    "nomeOficialSite": "Levantamento no rack (rack pull)",
+    "arquivoDeCapa": "Levantamento_no_rack_rack_pull_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Super_homem_com_remada",
+    "grupo": "Lombar",
+    "subgrupo": "Lombar",
+    "nomeNoMotor": "Super-homem",
+    "idCatalogoSite": "Super_homem_com_remada",
+    "nomeOficialSite": "Super-homem",
+    "arquivoDeCapa": "Super_homem_com_remada_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Cable Russian Twists",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Rotação de tronco na polia",
+    "idCatalogoSite": "Rotacao_de_tronco_na_polia",
+    "nomeOficialSite": "Rotação de tronco na polia",
+    "arquivoDeCapa": "Rotacao_de_tronco_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Dumbbell Side Bend",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Flexão lateral com halter",
+    "idCatalogoSite": "Flexao_lateral_com_halter",
+    "nomeOficialSite": "Flexão lateral com halter",
+    "arquivoDeCapa": "Flexao_lateral_com_halter_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Flexao_lateral_de_tronco_no_banco_romano_obliquos",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Flexão lateral de tronco no banco romano (oblíquos)",
+    "idCatalogoSite": "Flexao_lateral_de_tronco_no_banco_romano",
+    "nomeOficialSite": "Flexão lateral de tronco no banco romano (oblíquos)",
+    "arquivoDeCapa": "Flexao_lateral_de_tronco_no_banco_romano_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "One-Arm High-Pulley Cable Side Bends",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Flexão lateral na polia",
+    "idCatalogoSite": "Flexao_lateral_na_polia",
+    "nomeOficialSite": "Flexão lateral na polia",
+    "arquivoDeCapa": "Flexao_lateral_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Pallof_press_na_polia_anti_rotacao",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Pallof press na polia (anti-rotação)",
+    "idCatalogoSite": "Pallof_press_na_polia_anti_rotacao",
+    "nomeOficialSite": "Pallof press na polia (anti-rotação)",
+    "arquivoDeCapa": "Pallof_press_na_polia_anti_rotacao_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Prancha_lateral",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Prancha lateral",
+    "idCatalogoSite": "Prancha_lateral",
+    "nomeOficialSite": "Prancha lateral",
+    "arquivoDeCapa": "Prancha_lateral_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Russian Twist",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Giro russo com anilha",
+    "idCatalogoSite": "Giro_russo_com_anilha",
+    "nomeOficialSite": "Giro russo com anilha",
+    "arquivoDeCapa": "Giro_russo_com_anilha_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Torcao_russa",
+    "grupo": "Oblíquos",
+    "subgrupo": "Oblíquos",
+    "nomeNoMotor": "Torção russa",
+    "idCatalogoSite": "Torcao_russa",
+    "nomeOficialSite": "Torcao russa",
+    "arquivoDeCapa": "Torcao_russa_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Cable Seated Lateral Raise",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Elevação lateral na polia",
+    "idCatalogoSite": "Elevacao_lateral_na_polia",
+    "nomeOficialSite": "Elevação lateral na polia",
+    "arquivoDeCapa": "Elevacao_lateral_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Elevacao_lateral_na_maquina_polia",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Elevação lateral na máquina polia",
+    "idCatalogoSite": "Elevacao_lateral_na_maquina_polia",
+    "nomeOficialSite": "Elevação lateral na máquina polia",
+    "arquivoDeCapa": "Elevacao_lateral_na_maquina_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Elevacao_lateral_unilateral_apoiado_em_banco_inclinado",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Elevação lateral unilateral apoiado em banco inclinado",
+    "idCatalogoSite": "Elevacao_lateral_unilateral_apoiado",
+    "nomeOficialSite": "Elevacao lateral unilateral apoiado em banco inclinado",
+    "arquivoDeCapa": "Elevacao_lateral_unilateral_apoiado_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Elevação lateral na máquina",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Elevação lateral na máquina",
+    "idCatalogoSite": "Elevacao_lateral_na_maquina",
+    "nomeOficialSite": "Elevação lateral na máquina",
+    "arquivoDeCapa": "Elevacao_lateral_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Remada_para_cima_upright_row_Barra",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Remada para cima (upright row) Barra",
+    "idCatalogoSite": "Remada_para_cima_upright_row_barra",
+    "nomeOficialSite": "Remada para cima (upright row) Barra",
+    "arquivoDeCapa": "Remada_para_cima_upright_row_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Remada_para_cima_upright_row_Halteres",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Remada para cima (upright row) Halteres",
+    "idCatalogoSite": "Remada_para_cima_upright_row_Halteres",
+    "nomeOficialSite": "Remada para cima (upright row) Halteres",
+    "arquivoDeCapa": "Remada_para_cima_upright_row_Halteres_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Remada_para_cima_upright_row_Polia",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Remada para cima (upright row) Polia",
+    "idCatalogoSite": "Remada_para_cima_upright_row_Polia",
+    "nomeOficialSite": "Remada para cima (upright row) Polia",
+    "arquivoDeCapa": "Remada_para_cima_upright_row_Polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Side Lateral Raise",
+    "grupo": "Ombros",
+    "subgrupo": "Lateral",
+    "nomeNoMotor": "Elevação lateral com halteres",
+    "idCatalogoSite": "Elevacao_lateral_com_halteres",
+    "nomeOficialSite": "Elevação lateral com halteres",
+    "arquivoDeCapa": "Elevacao_lateral_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Rotacao_externa_de_ombro",
+    "grupo": "Ombros",
+    "subgrupo": "Manguito rotador",
+    "nomeNoMotor": "Rotação externa de ombro",
+    "idCatalogoSite": "Rotacao_externa_de_ombro",
+    "nomeOficialSite": "Rotacao externa de ombro",
+    "arquivoDeCapa": "Rotacao_externa_de_ombro_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rotacao_externa_de_ombro_na_Polia",
+    "grupo": "Ombros",
+    "subgrupo": "Manguito rotador",
+    "nomeNoMotor": "Rotação externa de ombro na polia",
+    "idCatalogoSite": "Rotacao_externa_de_ombro_na_Polia",
+    "nomeOficialSite": "Rotacao externa de ombro na Polia",
+    "arquivoDeCapa": "Rotacao_externa_de_ombro_na_Polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rotacao_interna_de_ombro",
+    "grupo": "Ombros",
+    "subgrupo": "Manguito rotador",
+    "nomeNoMotor": "Rotação interna de ombro",
+    "idCatalogoSite": "Rotacao_interna_de_ombro",
+    "nomeOficialSite": "Rotacao interna de ombro",
+    "arquivoDeCapa": "Rotacao_interna_de_ombro_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Rotacao_interna_de_ombro_na_Polia",
+    "grupo": "Ombros",
+    "subgrupo": "Manguito rotador",
+    "nomeNoMotor": "Rotação interna de ombro na polia",
+    "idCatalogoSite": "Rotacao_interna_de_ombro_na_Polia",
+    "nomeOficialSite": "Rotacao interna de ombro na Polia",
+    "arquivoDeCapa": "Rotacao_interna_de_ombro_na_Polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Cable Rope Rear-Delt Rows",
+    "grupo": "Ombros",
+    "subgrupo": "Posterior",
+    "nomeNoMotor": "Remada para deltoide posterior (corda)",
+    "idCatalogoSite": "Remada_para_deltoide_posterior_corda",
+    "nomeOficialSite": "Remada para deltoide posterior (corda)",
+    "arquivoDeCapa": "Remada_para_deltoide_posterior_corda_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Face Pull",
+    "grupo": "Ombros",
+    "subgrupo": "Posterior",
+    "nomeNoMotor": "Face pull na polia",
+    "idCatalogoSite": "Face_pull_na_polia",
+    "nomeOficialSite": "Face pull na polia",
+    "arquivoDeCapa": "Face_pull_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Reverse Flyes",
+    "grupo": "Ombros",
+    "subgrupo": "Posterior",
+    "nomeNoMotor": "Crucifixo inverso com halteres",
+    "idCatalogoSite": "crucifixo_inverso_com_halteres",
+    "nomeOficialSite": "Crucifixo inverso com halteres",
+    "arquivoDeCapa": "crucifixo_inverso_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Reverse Machine Flyes",
+    "grupo": "Ombros",
+    "subgrupo": "Posterior",
+    "nomeNoMotor": "Crucifixo inverso na máquina",
+    "idCatalogoSite": "crucifixo_inverso_na_maquina",
+    "nomeOficialSite": "Crucifixo inverso na máquina",
+    "arquivoDeCapa": "crucifixo_inverso_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Arnold Dumbbell Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento Arnold",
+    "idCatalogoSite": "Desenvolvimento_Arnold",
+    "nomeOficialSite": "Desenvolvimento Arnold",
+    "arquivoDeCapa": "Desenvolvimento_Arnold_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Cable Shoulder Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento na polia",
+    "idCatalogoSite": "Desenvolvimento_na_polia",
+    "nomeOficialSite": "Desenvolvimento na polia",
+    "arquivoDeCapa": "Desenvolvimento_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Desenvolvimento_militar_com_barra_overhead_press_livre",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento militar com barra",
+    "idCatalogoSite": "Desenvolvimento_militar_com_barra",
+    "nomeOficialSite": "Desenvolvimento militar com barra",
+    "arquivoDeCapa": "Desenvolvimento_militar_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Dumbbell Front Raise",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Elevação frontal com halteres",
+    "idCatalogoSite": "Elevacao_frontal_com_halteres",
+    "nomeOficialSite": "Elevação frontal com halteres",
+    "arquivoDeCapa": "Elevacao_frontal_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Front Cable Raise",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Elevação frontal na polia",
+    "idCatalogoSite": "Elevacao_frontal_na_polia",
+    "nomeOficialSite": "Elevação frontal na polia",
+    "arquivoDeCapa": "Elevacao_frontal_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leverage Shoulder Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento na máquina (Hammer)",
+    "idCatalogoSite": "Desenvolvimento_na_maquina_Hammer",
+    "nomeOficialSite": "Desenvolvimento na máquina (Hammer)",
+    "arquivoDeCapa": "Desenvolvimento_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Machine Shoulder (Military) Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento na máquina",
+    "idCatalogoSite": "Desenvolvimento_na_maquina",
+    "nomeOficialSite": "Desenvolvimento na máquina",
+    "arquivoDeCapa": "Desenvolvimento_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Smith Machine Overhead Shoulder Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento no Smith",
+    "idCatalogoSite": "Desenvolvimento_no_Smith",
+    "nomeOficialSite": "Desenvolvimento no Smith",
+    "arquivoDeCapa": "Desenvolvimento_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Standing Dumbbell Press",
+    "grupo": "Ombros",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Desenvolvimento com halteres",
+    "idCatalogoSite": "Desenvolvimento_com_halteres",
+    "nomeOficialSite": "Desenvolvimento com halteres",
+    "arquivoDeCapa": "Desenvolvimento_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Elevacao_de_panturrilha_em_pe",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Elevação de panturrilha em pé",
+    "idCatalogoSite": "Elevacao_de_panturrilha_em_pe",
+    "nomeOficialSite": "Elevacao de panturrilha em pe",
+    "arquivoDeCapa": "Elevacao_de_panturrilha_em_pe_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Panturrilha_em_pe_na_maquina",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha em pé na máquina",
+    "idCatalogoSite": "Panturrilha_em_pe_na_maquina",
+    "nomeOficialSite": "Panturrilha em pé na máquina",
+    "arquivoDeCapa": "Panturrilha_em_pe_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Panturrilha_em_pe_na_maquina_na_polia",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha em pé na máquina na polia",
+    "idCatalogoSite": "Panturrilha_em_pe_na_polia",
+    "nomeOficialSite": "Panturrilha em pé na máquina na polia",
+    "arquivoDeCapa": "Panturrilha_em_pe_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Panturrilha_em_pe_no_Smith",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha em pé no Smith",
+    "idCatalogoSite": "Panturrilha_em_pe_no_Smith",
+    "nomeOficialSite": "Panturrilha em pé no Smith",
+    "arquivoDeCapa": "Panturrilha_em_pe_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Panturrilha_no_leg_press_45",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha no leg press 45",
+    "idCatalogoSite": "Panturrilha_no_leg_press_45",
+    "nomeOficialSite": "Panturrilha no leg press 45",
+    "arquivoDeCapa": "Panturrilha_no_leg_press_45_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Panturrilha_no_leg_press_Horizontal",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha no leg press Horizontal",
+    "idCatalogoSite": "Panturrilha_no_leg_press_Horizontal",
+    "nomeOficialSite": "Panturrilha no leg press Horizontal",
+    "arquivoDeCapa": "Panturrilha_no_leg_press_Horizontal_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Panturrilha_sentado",
+    "grupo": "Panturrilha",
+    "subgrupo": "Panturrilha",
+    "nomeNoMotor": "Panturrilha sentado",
+    "idCatalogoSite": "Panturrilha_sentado",
+    "nomeOficialSite": "Panturrilha sentado",
+    "arquivoDeCapa": "Panturrilha_sentado_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Cable Crossover",
+    "grupo": "Peito",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Crossover na polia alta",
+    "idCatalogoSite": "Crossover_na_polia_alta",
+    "nomeOficialSite": "Crossover na polia alta",
+    "arquivoDeCapa": "Crossover_na_polia_alta_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Decline Barbell Bench Press",
+    "grupo": "Peito",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Supino declinado com barra",
+    "idCatalogoSite": "Supino_declinado_com_barra",
+    "nomeOficialSite": "Supino declinado com barra",
+    "arquivoDeCapa": "Supino_declinado_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Decline Smith Press",
+    "grupo": "Peito",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Supino declinado no Smith",
+    "idCatalogoSite": "Supino_declinado_no_Smith",
+    "nomeOficialSite": "Supino declinado no Smith",
+    "arquivoDeCapa": "Supino_declinado_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leverage Decline Chest Press",
+    "grupo": "Peito",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Supino declinado na máquina (Hammer)",
+    "idCatalogoSite": "Supino_declinado_na_maquina_Hammer",
+    "nomeOficialSite": "Supino declinado na máquina (Hammer)",
+    "arquivoDeCapa": "Supino_declinado_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "crucifixo_no_banco_declinado",
+    "grupo": "Peito",
+    "subgrupo": "Inferior",
+    "nomeNoMotor": "Crucifixo halteres no banco declinado",
+    "idCatalogoSite": "Crucifixo_halteres_no_banco_declinado_com_halteres",
+    "nomeOficialSite": "Crucifixo halteres no banco declinado",
+    "arquivoDeCapa": "Crucifixo_halteres_no_banco_declinado_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Butterfly",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Voador / Peck deck",
+    "idCatalogoSite": "Voador_Peck_deck",
+    "nomeOficialSite": "Voador / Peck deck",
+    "arquivoDeCapa": "Voador_Peck_deck_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Cable Chest Press",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto na polia",
+    "idCatalogoSite": "Supino_reto_na_polia",
+    "nomeOficialSite": "Supino reto na polia",
+    "arquivoDeCapa": "Supino_reto_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Dumbbell Bench Press",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto com halteres",
+    "idCatalogoSite": "Supino_reto_com_halteres",
+    "nomeOficialSite": "Supino reto com halteres",
+    "arquivoDeCapa": "Supino_reto_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Flat Bench Cable Flyes",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Crucifixo reto na polia",
+    "idCatalogoSite": "Crucifixo_reto_na_polia",
+    "nomeOficialSite": "Crucifixo reto na polia",
+    "arquivoDeCapa": "Crucifixo_reto_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Flat Bench Dumbbell Fly",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Crucifixo no banco reto com halteres",
+    "idCatalogoSite": "Crucifixo_no_banco_reto_com_halteres",
+    "nomeOficialSite": "Crucifixo no banco reto com halteres",
+    "arquivoDeCapa": "Crucifixo_no_banco_reto_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leverage Chest Press",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto na máquina (Hammer)",
+    "idCatalogoSite": "Supino_reto_na_maquina_Hammer",
+    "nomeOficialSite": "Supino reto na máquina (Hammer)",
+    "arquivoDeCapa": "Supino_reto_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Machine Bench Press",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto na máquina",
+    "idCatalogoSite": "Supino_reto_na_maquina",
+    "nomeOficialSite": "Supino reto na máquina",
+    "arquivoDeCapa": "Supino_reto_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Push Up",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Flexão de braço (push-up)",
+    "idCatalogoSite": "Flexao_de_braco_push_up",
+    "nomeOficialSite": "Flexão de braço (push-up)",
+    "arquivoDeCapa": "Flexao_de_braco_push_up_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Supino reto no Smith",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto no Smith",
+    "idCatalogoSite": "Supino_reto_no_Smith",
+    "nomeOficialSite": "Supino reto no Smith",
+    "arquivoDeCapa": "Supino_reto_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Supino_reto_com_barra_livre_sem_Smith_maquina",
+    "grupo": "Peito",
+    "subgrupo": "Média",
+    "nomeNoMotor": "Supino reto com barra (livre, sem Smith/máquina)",
+    "idCatalogoSite": "Supino_reto_com_barra",
+    "nomeOficialSite": "Supino reto com barra (livre, sem Smith/máquina)",
+    "arquivoDeCapa": "Supino_reto_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Barbell Incline Bench Press - Medium Grip",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Supino inclinado com barra",
+    "idCatalogoSite": "Supino_inclinado_com_barra",
+    "nomeOficialSite": "Supino inclinado com barra",
+    "arquivoDeCapa": "Supino_inclinado_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Incline Bench Dumbbell Fly",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Crucifixo no banco inclinado com halteres",
+    "idCatalogoSite": "Crucifixo_no_banco_inclinado_com_halteres",
+    "nomeOficialSite": "Crucifixo no banco inclinado com halteres",
+    "arquivoDeCapa": "Crucifixo_no_banco_inclinado_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Incline Cable Chest Press",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Supino inclinado na polia",
+    "idCatalogoSite": "Supino_inclinado_na_polia",
+    "nomeOficialSite": "Supino inclinado na polia",
+    "arquivoDeCapa": "Supino_inclinado_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Incline Cable Flye",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Crucifixo inclinado na polia",
+    "idCatalogoSite": "Crucifixo_inclinado_na_polia",
+    "nomeOficialSite": "Crucifixo inclinado na polia",
+    "arquivoDeCapa": "Crucifixo_inclinado_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Incline Dumbbell Press",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Supino inclinado com halteres",
+    "idCatalogoSite": "Supino_inclinado_com_halteres",
+    "nomeOficialSite": "Supino inclinado com halteres",
+    "arquivoDeCapa": "Supino_inclinado_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leverage Incline Chest Press",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Supino inclinado na máquina (Hammer)",
+    "idCatalogoSite": "Supino_inclinado_na_maquina_Hammer",
+    "nomeOficialSite": "Supino inclinado na máquina (Hammer)",
+    "arquivoDeCapa": "Supino_inclinado_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Low Cable Crossover",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Crossover na polia baixa",
+    "idCatalogoSite": "Crossover_na_polia_baixa",
+    "nomeOficialSite": "Crossover na polia baixa",
+    "arquivoDeCapa": "Crossover_na_polia_baixa_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Smith Machine Incline Bench Press",
+    "grupo": "Peito",
+    "subgrupo": "Superior",
+    "nomeNoMotor": "Supino inclinado no Smith",
+    "idCatalogoSite": "Supino_inclinado_no_Smith",
+    "nomeOficialSite": "Supino inclinado no Smith",
+    "arquivoDeCapa": "Supino_inclinado_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Bom_dia_com_barra_good_morning",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Bom dia com barra (good morning)",
+    "idCatalogoSite": "Bom_dia_com_barra",
+    "nomeOficialSite": "Bom dia com barra (good morning)",
+    "arquivoDeCapa": "Bom_dia_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Cadeira_flexora_sentado",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Cadeira flexora (sentado)",
+    "idCatalogoSite": "Cadeira_flexora_sentado",
+    "nomeOficialSite": "Cadeira flexora (sentado)",
+    "arquivoDeCapa": "Cadeira_flexora_sentado_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Dumbbell Stiff Leg Deadlift",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Stiff com halteres",
+    "idCatalogoSite": "Stiff_com_halteres",
+    "nomeOficialSite": "Stiff com halteres",
+    "arquivoDeCapa": "Stiff_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Flexora_em_pe",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Flexora em pé",
+    "idCatalogoSite": "Flexora_em_pe",
+    "nomeOficialSite": "Flexora em pé",
+    "arquivoDeCapa": "Flexora_em_pe_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Flexora_em_pe_na_polia",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Flexora em pé na polia",
+    "idCatalogoSite": "Flexora_em_pe_na_polia",
+    "nomeOficialSite": "Flexora em pé na polia",
+    "arquivoDeCapa": "Flexora_em_pe_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Levantamento_terra_com_barra",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Levantamento terra com barra",
+    "idCatalogoSite": "Levantamento_terra_com_barra",
+    "nomeOficialSite": "Levantamento terra com barra",
+    "arquivoDeCapa": "Levantamento_terra_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Leverage Deadlift",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Levantamento terra na máquina (Hammer)",
+    "idCatalogoSite": "Levantamento_terra_na_maquina_Hammer",
+    "nomeOficialSite": "Levantamento terra na máquina (Hammer)",
+    "arquivoDeCapa": "Levantamento_terra_na_maquina_Hammer_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Mesa_flexora_deitado",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Mesa flexora (deitado)",
+    "idCatalogoSite": "Mesa_flexora_deitado",
+    "nomeOficialSite": "Mesa flexora (deitado)",
+    "arquivoDeCapa": "Mesa_flexora_deitado_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Stiff_com_barra",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Stiff com barra",
+    "idCatalogoSite": "Stiff_com_barra",
+    "nomeOficialSite": "Stiff com barra",
+    "arquivoDeCapa": "Stiff_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Stiff_na_polia",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Stiff na polia",
+    "idCatalogoSite": "Stiff_na_polia",
+    "nomeOficialSite": "Stiff na polia",
+    "arquivoDeCapa": "Stiff_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Stiff_no_Smith",
+    "grupo": "Posteriores de coxa",
+    "subgrupo": "Posteriores de coxa",
+    "nomeNoMotor": "Stiff no Smith",
+    "idCatalogoSite": "Stiff_no_Smith",
+    "nomeOficialSite": "Stiff no Smith",
+    "arquivoDeCapa": "Stiff_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Afundo_no_Smith",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Afundo no Smith",
+    "idCatalogoSite": "Afundo_no_Smith",
+    "nomeOficialSite": "Afundo no Smith",
+    "arquivoDeCapa": "Afundo_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Agachamento_bulgaro_no_Smith_afundo_com_pe_elevado_no_banco",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento búlgaro no Smith (afundo com pé elevado no banco)",
+    "idCatalogoSite": "Agachamento_bulgaro_no_Smith",
+    "nomeOficialSite": "Agachamento búlgaro no Smith (afundo com pé elevado no banco)",
+    "arquivoDeCapa": "Agachamento_bulgaro_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Agachamento_frontal_com_barra_front_squat",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento frontal com barra (front squat)",
+    "idCatalogoSite": "Agachamento_frontal_com_barra",
+    "nomeOficialSite": "Agachamento frontal com barra (front squat)",
+    "arquivoDeCapa": "Agachamento_frontal_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Agachamento_na_maquina",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento na máquina",
+    "idCatalogoSite": "Agachamento_invertido_na_maquina",
+    "nomeOficialSite": "Agachamento na máquina",
+    "arquivoDeCapa": "Agachamento_invertido_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Barbell Squat",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento livre com barra",
+    "idCatalogoSite": "Agachamento_livre_com_barra",
+    "nomeOficialSite": "Agachamento livre com barra",
+    "arquivoDeCapa": "Agachamento_livre_com_barra_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Bulgarian Split Squat",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento búlgaro",
+    "idCatalogoSite": "Agachamento_bulgaro",
+    "nomeOficialSite": "Agachamento bulgaro",
+    "arquivoDeCapa": "Agachamento_bulgaro_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Dumbbell Lunges",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Afundo com halteres",
+    "idCatalogoSite": "Afundo_com_halteres",
+    "nomeOficialSite": "Afundo com halteres",
+    "arquivoDeCapa": "Afundo_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Hack Squat",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Hack machine",
+    "idCatalogoSite": "Hack_machine",
+    "nomeOficialSite": "Hack machine",
+    "arquivoDeCapa": "Hack_machine_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Hack_pernas_proximas",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Hack pernas próximas",
+    "idCatalogoSite": "Hack_pernas_proximas",
+    "nomeOficialSite": "Hack pernas próximas",
+    "arquivoDeCapa": "Hack_pernas_proximas_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Leg Extensions",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Cadeira extensora",
+    "idCatalogoSite": "Cadeira_extensora",
+    "nomeOficialSite": "Cadeira extensora",
+    "arquivoDeCapa": "Cadeira_extensora_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leg Press",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Leg press 45",
+    "idCatalogoSite": "Leg_press_45",
+    "nomeOficialSite": "Leg press 45",
+    "arquivoDeCapa": "Leg_press_45_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Leg_press_90",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Leg press 90",
+    "idCatalogoSite": "Leg_press_90",
+    "nomeOficialSite": "Leg press 90",
+    "arquivoDeCapa": "Leg_press_90_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Leg_press_Horizontal",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Leg press Horizontal",
+    "idCatalogoSite": "Leg_press_Horizontal",
+    "nomeOficialSite": "Leg press Horizontal",
+    "arquivoDeCapa": "Leg_press_Horizontal_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Leg_press_pernas_proximas",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Leg press pernas próximas",
+    "idCatalogoSite": "Leg_press_pernas_proximas",
+    "nomeOficialSite": "Leg press pernas próximas",
+    "arquivoDeCapa": "Leg_press_pernas_proximas_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Smith Machine Squat",
+    "grupo": "Quadríceps",
+    "subgrupo": "Quadríceps",
+    "nomeNoMotor": "Agachamento no Smith",
+    "idCatalogoSite": "Agachamento_no_Smith",
+    "nomeOficialSite": "Agachamento no Smith",
+    "arquivoDeCapa": "Agachamento_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Elevacao_em_Y_Y_raise",
+    "grupo": "Trapézio",
+    "subgrupo": "Trapézio",
+    "nomeNoMotor": "Elevação em Y (Y-raise)",
+    "idCatalogoSite": "Elevacao_em_Y_Y_raise",
+    "nomeOficialSite": "Elevacao em Y (Y-raise)",
+    "arquivoDeCapa": "Elevacao_em_Y_Y_raise_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Encolhimento_de_trapezio_com_halteres",
+    "grupo": "Trapézio",
+    "subgrupo": "Trapézio",
+    "nomeNoMotor": "Encolhimento de trapézio com halteres",
+    "idCatalogoSite": "Encolhimento_de_trapezio_com_halteres",
+    "nomeOficialSite": "Encolhimento de trapézio com halteres",
+    "arquivoDeCapa": "Encolhimento_de_trapezio_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Encolhimento_por_tras_do_corpo_behind_the_back_shrug",
+    "grupo": "Trapézio",
+    "subgrupo": "Trapézio",
+    "nomeNoMotor": "Encolhimento por trás do corpo",
+    "idCatalogoSite": "Encolhimento_por_tras_do_corpo",
+    "nomeOficialSite": "Encolhimento por trás do corpo",
+    "arquivoDeCapa": "Encolhimento_por_tras_do_corpo_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Puxada_aberta_com_enfase_em_depressao_escapular",
+    "grupo": "Trapézio",
+    "subgrupo": "Trapézio",
+    "nomeNoMotor": "Puxada aberta com ênfase em depressão escapular",
+    "idCatalogoSite": "Puxada_aberta_com_enfase_em_depressao_escapular",
+    "nomeOficialSite": "Puxada aberta com ênfase em depressão escapular",
+    "arquivoDeCapa": "Puxada_aberta_com_enfase_em_depressao_escapular_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_frances",
+    "grupo": "Tríceps",
+    "subgrupo": "Francês — empurrando para cima",
+    "nomeNoMotor": "Tríceps francês com halter",
+    "idCatalogoSite": "Triceps_frances",
+    "nomeOficialSite": "Tríceps francês com halter",
+    "arquivoDeCapa": "Triceps_frances_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_frances_com_barra_reta",
+    "grupo": "Tríceps",
+    "subgrupo": "Francês — empurrando para cima",
+    "nomeNoMotor": "Tríceps francês com barra reta na polia",
+    "idCatalogoSite": "Triceps_frances_com_barra_reta",
+    "nomeOficialSite": "Tríceps francês com barra reta na polia",
+    "arquivoDeCapa": "Triceps_frances_com_barra_reta_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_frances_com_corda",
+    "grupo": "Tríceps",
+    "subgrupo": "Francês — empurrando para cima",
+    "nomeNoMotor": "Tríceps francês com corda na polia",
+    "idCatalogoSite": "Triceps_frances_com_corda",
+    "nomeOficialSite": "Tríceps francês com corda na polia",
+    "arquivoDeCapa": "Triceps_frances_com_corda_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_na_polia_inclinado",
+    "grupo": "Tríceps",
+    "subgrupo": "Francês — empurrando para cima",
+    "nomeNoMotor": "Tríceps francês inclinado com corda na polia",
+    "idCatalogoSite": "Triceps_na_polia_inclinado",
+    "nomeOficialSite": "Tríceps francês inclinado com corda na polia",
+    "arquivoDeCapa": "Triceps_na_polia_inclinado_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Extensao_de_triceps_pegada_pronada_cabo_baixo",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps pulley barra reta com tronco inclinado",
+    "idCatalogoSite": "Extensao_de_triceps_pegada_pronada_cabo_baixo",
+    "nomeOficialSite": "Tríceps pulley barra reta com tronco inclinado",
+    "arquivoDeCapa": "Extensao_de_triceps_pegada_pronada_cabo_baixo_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Mergulho_em_paralelas_livre_sem_assistencia",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Mergulho em paralelas livre (sem assistência)",
+    "idCatalogoSite": "Mergulho_em_paralelas_livre",
+    "nomeOficialSite": "Mergulho em paralelas livre (sem assistência)",
+    "arquivoDeCapa": "Mergulho_em_paralelas_livre_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Mergulho_na_maquina_dip",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Mergulho na máquina (dip)",
+    "idCatalogoSite": "Mergulho_na_maquina_dip",
+    "nomeOficialSite": "Mergulho na máquina (dip)",
+    "arquivoDeCapa": "Mergulho_na_maquina_dip_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_ajoelhado_na_polia",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps ajoelhado na polia",
+    "idCatalogoSite": "Triceps_ajoelhado_na_polia",
+    "nomeOficialSite": "Tríceps ajoelhado na polia",
+    "arquivoDeCapa": "Triceps_ajoelhado_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_coice_na_polia_unilateral",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps coice na polia (unilateral)",
+    "idCatalogoSite": "Triceps_coice_na_polia_unilateral",
+    "nomeOficialSite": "Tríceps coice na polia (unilateral)",
+    "arquivoDeCapa": "Triceps_coice_na_polia_unilateral_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_na_maquina",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps na máquina",
+    "idCatalogoSite": "Triceps_na_maquina",
+    "nomeOficialSite": "Tríceps na máquina",
+    "arquivoDeCapa": "Triceps_na_maquina_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_na_maquina_com_alavanca",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps na máquina com alavanca",
+    "idCatalogoSite": "Triceps_na_maquina_com_alavanca",
+    "nomeOficialSite": "Tríceps na máquina com alavanca",
+    "arquivoDeCapa": "Triceps_na_maquina_com_alavanca_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_pulley_barra_V",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps pulley barra V",
+    "idCatalogoSite": "Triceps_pulley_barra_V",
+    "nomeOficialSite": "Tríceps pulley barra V",
+    "arquivoDeCapa": "Triceps_pulley_barra_V_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_pulley_barra_reta",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps pulley barra reta",
+    "idCatalogoSite": "Triceps_pulley_barra_reta",
+    "nomeOficialSite": "Tríceps pulley barra reta",
+    "arquivoDeCapa": "Triceps_pulley_barra_reta_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_pulley_com_corda",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps pulley com corda",
+    "idCatalogoSite": "Triceps_pulley_com_corda",
+    "nomeOficialSite": "Tríceps pulley com corda",
+    "arquivoDeCapa": "Triceps_pulley_com_corda_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_pulley_pegada_inversa",
+    "grupo": "Tríceps",
+    "subgrupo": "Pulley — empurrando para baixo",
+    "nomeNoMotor": "Tríceps pulley pegada inversa",
+    "idCatalogoSite": "Triceps_pulley_pegada_inversa",
+    "nomeOficialSite": "Tríceps pulley pegada inversa",
+    "arquivoDeCapa": "Triceps_pulley_pegada_inversa_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "High Cable Lying Skullcrusher",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Tríceps testa com barra na polia",
+    "idCatalogoSite": "Triceps_testa_com_barra_na_polia_alta",
+    "nomeOficialSite": "Tríceps testa com barra na polia",
+    "arquivoDeCapa": "Triceps_testa_com_barra_na_polia_alta_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Lying Dumbbell Skullcrusher",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Tríceps testa com halteres",
+    "idCatalogoSite": "Triceps_testa_com_halteres",
+    "nomeOficialSite": "Tríceps testa com halteres",
+    "arquivoDeCapa": "Triceps_testa_com_halteres_masculino43.jpeg",
+    "metodoDoMatch": "grupo+subgrupo+nome (normalizado) batem, id/src diferentes"
+  },
+  {
+    "srcMotor": "Supino_fechado_no_Smith",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Supino fechado no Smith",
+    "idCatalogoSite": "Supino_fechado_no_Smith",
+    "nomeOficialSite": "Supino fechado no Smith",
+    "arquivoDeCapa": "Supino_fechado_no_Smith_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_deitado_na_polia",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Tríceps testa no banco reto com barra reta na polia",
+    "idCatalogoSite": "Triceps_deitado_na_polia",
+    "nomeOficialSite": "Tríceps testa no banco reto com barra reta na polia",
+    "arquivoDeCapa": "Triceps_deitado_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_overhead_na_polia",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Tríceps testa com corda na polia",
+    "idCatalogoSite": "Triceps_overhead_na_polia",
+    "nomeOficialSite": "Tríceps testa com corda na polia",
+    "arquivoDeCapa": "Triceps_overhead_na_polia_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  },
+  {
+    "srcMotor": "Triceps_testa_com_barra_W",
+    "grupo": "Tríceps",
+    "subgrupo": "Testa — empurrando para frente",
+    "nomeNoMotor": "Tríceps testa com barra W",
+    "idCatalogoSite": "Triceps_testa_com_barra_W",
+    "nomeOficialSite": "Tríceps testa com barra W",
+    "arquivoDeCapa": "Triceps_testa_com_barra_W_masculino43.jpeg",
+    "metodoDoMatch": "direto (src == id do catálogo do site)"
+  }
+]
