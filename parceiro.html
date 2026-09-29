@@ -77,47 +77,87 @@
 
           <div id="aba-cadastro">
 
-            <!-- CADASTRO ACADEMIA -->
+            <!-- CADASTRO ACADEMIA — D036 (2026-09-29): habilitado, com aprovação (mesmo
+                 padrão do personal, decisão P68/D083 na SPEC_parceiro_auth_e_fotos_001.md),
+                 senha escolhida no próprio cadastro e foto de perfil + galeria de até 6 fotos
+                 (SPEC_parceiro_auth_e_fotos_001.md, seção 3). Só a tela: não fala com o Supabase
+                 — grava via ParceirosStore (assets/js/parceiros-store.js), camada trocável. -->
             <div id="cadastro-academia">
+
+              <div class="aviso-desenho" style="margin:0 0 20px;">
+                ⚠ Este cadastro passa por aprovação. Depois de enviar, alguém do Fera Fit confere os
+                dados da academia e, se aprovado, o painel libera o acesso — o login já funciona com
+                a senha que você escolher abaixo, mas mostra "cadastro em análise" até a aprovação.
+              </div>
+
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Dados da academia</div>
                 <div class="campo">
                   <label for="ac-nome">Nome da academia</label>
-                  <input id="ac-nome" type="text" placeholder="Ex: Fera Fit Studio" disabled>
+                  <input id="ac-nome" type="text" placeholder="Ex: Fera Fit Studio">
                 </div>
                 <div class="campo">
                   <label for="ac-cnpj">CNPJ</label>
-                  <input id="ac-cnpj" type="text" placeholder="00.000.000/0000-00" disabled>
+                  <input id="ac-cnpj" type="text" placeholder="00.000.000/0000-00">
                 </div>
                 <div class="campo">
                   <label for="ac-endereco">Endereço</label>
-                  <input id="ac-endereco" type="text" placeholder="Rua, número, bairro" disabled>
+                  <input id="ac-endereco" type="text" placeholder="Rua, número, bairro">
                 </div>
                 <div class="campo">
                   <label for="ac-cidade">Cidade / UF</label>
-                  <input id="ac-cidade" type="text" placeholder="São Paulo / SP" disabled>
+                  <input id="ac-cidade" type="text" placeholder="São Paulo / SP">
                 </div>
                 <div class="campo">
                   <label for="ac-responsavel">Nome do responsável</label>
-                  <input id="ac-responsavel" type="text" placeholder="Nome completo" disabled>
+                  <input id="ac-responsavel" type="text" placeholder="Nome completo">
                 </div>
                 <div class="campo">
                   <label for="ac-telefone">Telefone / WhatsApp</label>
-                  <input id="ac-telefone" type="text" placeholder="(00) 00000-0000" disabled>
+                  <input id="ac-telefone" type="text" placeholder="(00) 00000-0000">
                 </div>
               </div>
+
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Foto e galeria</div>
+                <div class="campo">
+                  <label for="ac-foto">Foto de perfil</label>
+                  <input id="ac-foto" type="file" accept="image/*">
+                  <p class="campo-nota" style="margin-top:6px;">Aparece publicamente no perfil da academia, depois de aprovado.</p>
+                </div>
+                <div class="campo">
+                  <label for="ac-galeria">Galeria (até 6 fotos)</label>
+                  <input id="ac-galeria" type="file" accept="image/*" multiple>
+                  <p id="ac-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
+                  <p class="campo-nota" style="margin-top:6px;">Para divulgar o espaço da academia, do jeito que a academia faria nas redes sociais.</p>
+                </div>
+              </div>
+
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Acesso</div>
                 <div class="campo">
                   <label for="ac-email">E-mail</label>
-                  <input id="ac-email" type="email" placeholder="contato@suaacademia.com" disabled>
+                  <input id="ac-email" type="email" placeholder="contato@suaacademia.com">
                 </div>
                 <div class="campo">
                   <label for="ac-senha">Senha</label>
-                  <input id="ac-senha" type="password" placeholder="••••••••" disabled>
+                  <input id="ac-senha" type="password" placeholder="Escolha uma senha">
                 </div>
               </div>
-              <button class="botao-primario largura-total" type="button" disabled>Criar conta de academia</button>
+
+              <p id="ac-cadastro-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
+              <p class="campo-nota">Ao enviar, os dados da academia e a galeria ficam visíveis na busca pública do Fera Fit depois da aprovação.</p>
+
+              <button class="botao-primario largura-total" type="button" onclick="enviarCadastroAcademia()">Criar conta de academia</button>
+            </div>
+
+            <!-- ESTADO PÓS-ENVIO — academia (D036, 2026-09-29) -->
+            <div id="cadastro-academia-recebido" style="display:none;text-align:center;">
+              <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 12px;">Recebemos o cadastro da academia.</h1>
+              <p style="color:var(--texto-secundario);margin:0 0 8px;">
+                Um responsável do Fera Fit vai conferir os dados. A senha que você escolheu já funciona
+                para entrar, mas o painel mostra "cadastro em análise" até a aprovação.
+              </p>
             </div>
 
             <!-- CADASTRO PERSONAL — campos e fluxo definidos por Murilo, D013 e D014 (2026-09-18).
@@ -142,9 +182,15 @@
                   <input id="pe-nome" type="text" placeholder="Seu nome completo">
                 </div>
                 <div class="campo">
-                  <label for="pe-foto">Foto</label>
+                  <label for="pe-foto">Foto de perfil</label>
                   <input id="pe-foto" type="file" accept="image/*">
                   <p class="campo-nota" style="margin-top:6px;">Sua foto vai aparecer publicamente na busca de personais do Fera Fit.</p>
+                </div>
+                <div class="campo">
+                  <label for="pe-galeria">Galeria (até 6 fotos)</label>
+                  <input id="pe-galeria" type="file" accept="image/*" multiple>
+                  <p id="pe-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
+                  <p class="campo-nota" style="margin-top:6px;">Para divulgar seu trabalho, do jeito que você já faz nas redes sociais.</p>
                 </div>
                 <div class="campo">
                   <label for="pe-cref">CREF (registro profissional)</label>
@@ -177,7 +223,7 @@
               </div>
 
               <div class="cadastro-grupo">
-                <div class="titulo-grupo">E-mail — é para onde vai a sua senha provisória</div>
+                <div class="titulo-grupo">E-mail e senha — a senha já é sua, escolhida agora (D036, 2026-09-29)</div>
                 <div class="campo">
                   <label for="pe-email">E-mail</label>
                   <input id="pe-email" type="email" placeholder="seuemail@exemplo.com">
@@ -187,10 +233,19 @@
                   <input id="pe-email-confirmar" type="email" placeholder="Repita o e-mail">
                 </div>
                 <p id="pe-email-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Os e-mails digitados não coincidem.</p>
-                <p class="campo-nota">Confira com atenção: é para este endereço que vai a senha provisória. E-mail errado significa não conseguir entrar depois.</p>
+                <div class="campo">
+                  <label for="pe-senha">Senha</label>
+                  <input id="pe-senha" type="password" placeholder="Escolha uma senha">
+                </div>
+                <div class="campo">
+                  <label for="pe-senha-confirmar">Repita a senha</label>
+                  <input id="pe-senha-confirmar" type="password" placeholder="Repita a senha">
+                </div>
+                <p id="pe-senha-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">As senhas digitadas não coincidem.</p>
+                <p class="campo-nota">Confira o e-mail com atenção — é o seu login. A senha é escolhida por você agora, já pronta para o primeiro acesso: só falta a aprovação para o painel abrir de verdade.</p>
               </div>
 
-              <p class="campo-nota">Ao enviar, sua foto e seus dados profissionais ficam visíveis na busca pública de personais do Fera Fit. A resposta sobre a aprovação vem por e-mail e pode demorar alguns dias — não é instantâneo.</p>
+              <p class="campo-nota">Ao enviar, sua foto, galeria e dados profissionais ficam visíveis na busca pública de personais do Fera Fit depois de aprovado. A aprovação é feita por alguém do Fera Fit e pode levar alguns dias — não é instantânea.</p>
 
               <button class="botao-primario largura-total" type="button" onclick="enviarCadastroPersonal()">Enviar cadastro</button>
             </div>
@@ -372,6 +427,7 @@
   </div>
 
   <script src="assets/js/dados-demo.js"></script>
+  <script src="assets/js/parceiros-store.js"></script>
   <script>
     // Login cosmético — só compara texto digitado, roda 100% no navegador.
     // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
@@ -397,6 +453,47 @@
       document.getElementById('cadastro-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
       document.getElementById('cadastro-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'none';
+      document.getElementById('cadastro-academia-recebido').style.display = 'none';
+    }
+
+    // D036 (2026-09-29): cadastro de academia passa a gravar de verdade (via
+    // ParceirosStore, camada trocável — assets/js/parceiros-store.js), com
+    // aprovação e senha, igual ao personal (SPEC_parceiro_auth_e_fotos_001.md,
+    // seção 2.1). Continua sem falar com o Supabase.
+    function enviarCadastroAcademia() {
+      var nome = document.getElementById('ac-nome').value.trim();
+      var email = document.getElementById('ac-email').value.trim();
+      var senha = document.getElementById('ac-senha').value;
+      var erro = document.getElementById('ac-cadastro-erro');
+      var galeriaArquivos = document.getElementById('ac-galeria').files;
+
+      if (galeriaArquivos && galeriaArquivos.length > 6) {
+        document.getElementById('ac-galeria-erro').style.display = 'block';
+        return;
+      }
+      document.getElementById('ac-galeria-erro').style.display = 'none';
+
+      if (!nome || !email || !senha) {
+        erro.textContent = 'Preencha ao menos nome da academia, e-mail e senha.';
+        erro.style.display = 'block';
+        return;
+      }
+      erro.style.display = 'none';
+
+      var arquivoFoto = document.getElementById('ac-foto').files;
+      ParceirosStore.cadastrarAcademia({
+        nome: nome,
+        cnpj: document.getElementById('ac-cnpj').value,
+        endereco: document.getElementById('ac-endereco').value,
+        cidade: document.getElementById('ac-cidade').value,
+        responsavel: document.getElementById('ac-responsavel').value,
+        telefone: document.getElementById('ac-telefone').value,
+        email: email,
+        fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
+        galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
+      });
+      document.getElementById('cadastro-academia').style.display = 'none';
+      document.getElementById('cadastro-academia-recebido').style.display = 'block';
     }
 
     // D013 (2026-09-18): "não construa o envio para o banco ainda" — continua valendo, isto NÃO
@@ -408,13 +505,36 @@
     function enviarCadastroPersonal() {
       var email = document.getElementById('pe-email').value;
       var emailConfirmar = document.getElementById('pe-email-confirmar').value;
-      var erro = document.getElementById('pe-email-erro');
+      var erroEmail = document.getElementById('pe-email-erro');
       if (email !== emailConfirmar) {
-        erro.style.display = 'block';
+        erroEmail.style.display = 'block';
         return;
       }
-      erro.style.display = 'none';
+      erroEmail.style.display = 'none';
+
+      // D036 (2026-09-29): senha escolhida no próprio cadastro (P69/D083) —
+      // dupla digitação, mesmo reforço já usado no e-mail.
+      var senha = document.getElementById('pe-senha').value;
+      var senhaConfirmar = document.getElementById('pe-senha-confirmar').value;
+      var erroSenha = document.getElementById('pe-senha-erro');
+      if (senha !== senhaConfirmar || !senha) {
+        erroSenha.style.display = 'block';
+        return;
+      }
+      erroSenha.style.display = 'none';
+
+      var galeriaArquivos = document.getElementById('pe-galeria').files;
+      if (galeriaArquivos && galeriaArquivos.length > 6) {
+        document.getElementById('pe-galeria-erro').style.display = 'block';
+        return;
+      }
+      document.getElementById('pe-galeria-erro').style.display = 'none';
+
       var arquivoFoto = document.getElementById('pe-foto').files;
+
+      // Chamada antiga — continua alimentando o Módulo 2.5 (Portfólio de
+      // parceiros, D032/D033) de admin.html, sem nenhuma mudança de
+      // comportamento para quem já usava aquela tela.
       DadosDemo.cadastrarPersonalPendente({
         nome: document.getElementById('pe-nome').value,
         cref: document.getElementById('pe-cref').value,
@@ -427,6 +547,24 @@
         email: email,
         temFoto: !!(arquivoFoto && arquivoFoto.length)
       });
+
+      // Chamada nova (D036) — alimenta o Módulo 2.6 (Gestão de parceiros),
+      // que cobre academia + personal, aprovação, perfil e cobrança.
+      ParceirosStore.cadastrarPersonal({
+        nome: document.getElementById('pe-nome').value,
+        cref: document.getElementById('pe-cref').value,
+        formacao: document.getElementById('pe-formacao').value,
+        especializacao: document.getElementById('pe-especializacao').value,
+        cidade: document.getElementById('pe-cidade').value,
+        bairro: document.getElementById('pe-bairro').value,
+        experiencias: document.getElementById('pe-experiencias').value,
+        telefone: document.getElementById('pe-telefone').value,
+        email: email,
+        senha: senha,
+        fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
+        galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
+      });
+
       document.getElementById('cadastro-personal').style.display = 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'block';
     }

@@ -9,6 +9,7 @@
   <link rel="icon" href="assets/img/favicon.png">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/dados-demo.js"></script>
+  <script src="assets/js/parceiros-store.js"></script>
 </head>
 <body>
   <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
@@ -202,7 +203,40 @@
       </div>
     </section>
 
-    <!-- MÓDULO 3 — CONTATO -->
+    <!-- MODULO 2.6 -- GESTAO DE PARCEIROS (D036, 2026-09-29) -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo pronta">Tela pronta -- dado so local (mesmo navegador)</span>
+        <h2>Gestao de parceiros (academia e personal)</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 8px;">
+          Aprovacao, perfil (nunca medida nem treino de aluno), cobranca manual e faixa comercial
+          dos dois tipos de parceiro, seguindo <code>SPEC_admin_parceiros_001.md</code> da Backend.
+          Por enquanto e so demonstracao -- roda inteiro no <code>localStorage</code> deste
+          navegador, sem tocar em nenhuma tabela real do Supabase (D036).
+        </p>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 18px;">
+          Pagamento e sempre lancado a mao (PIX/transferencia) -- nada e automatico, nem suspensao
+          por atraso: so o botao "Suspender" muda o status. A quitacao usa a cobranca mais antiga
+          primeiro (FIFO). Admins: Murilo e Gabriela.
+        </p>
+
+        <div class="admin-mock" style="margin-bottom:18px;">
+          <div class="linha-mock" style="border-bottom:none;padding-bottom:6px;">
+            <span class="rotulo" style="font-weight:700;color:var(--texto);">Faixas comerciais</span>
+            <span></span>
+          </div>
+          <div id="parceiros-faixas"></div>
+        </div>
+
+        <h3 style="font-size:0.95rem;font-weight:800;margin:0 0 10px;">Aguardando aprovacao</h3>
+        <div id="parceiros-pendentes"></div>
+
+        <h3 style="font-size:0.95rem;font-weight:800;margin:22px 0 10px;">Parceiros ativos</h3>
+        <div id="parceiros-ativos"></div>
+      </div>
+    </section>
+
+    <!-- MODULO 3 -- CONTATO -->
     <section class="admin-modulo">
       <div class="container">
         <span class="status-modulo pronta">Tela pronta, sem dependência</span>
@@ -265,6 +299,9 @@
         document.getElementById('admin-login-tela').style.display = 'none';
         document.getElementById('admin-conteudo').style.display = 'block';
         renderPortfolio();
+        renderFaixas();
+        renderPendentesParceiros();
+        renderAtivosParceiros();
       } else {
         erro.style.display = 'block';
       }
@@ -336,6 +373,207 @@
     function definirStatusPortfolio(id, status) {
       DadosDemo.definirStatusPersonalPortfolio(id, status);
       renderPortfolio();
+    }
+  </script>
+  <script>
+    // ===========================================================
+    // D036 (2026-09-29) -- Gestao de parceiros (academia + personal).
+    // So le/escreve via ParceirosStore (assets/js/parceiros-store.js)
+    // -- interface trocavel, ver cabecalho daquele arquivo. Nada aqui
+    // fala com o Supabase.
+    // ===========================================================
+    function formatarMoeda(valor) {
+      if (valor === null || valor === undefined || valor === '') { return 'nao definido'; }
+      return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
+    }
+
+    function renderFaixas() {
+      var container = document.getElementById('parceiros-faixas');
+      if (!container) { return; }
+      var faixas = ParceirosStore.listarFaixas();
+      var html = '';
+      faixas.forEach(function (f) {
+        html += '<div class="linha-mock" style="align-items:flex-end;flex-wrap:wrap;gap:10px;">'
+          + '<span class="rotulo">' + escaparHtml(f.rotulo) + '</span>'
+          + '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+          + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Mensal (R$)'
+          + '<input type="number" step="0.01" min="0" id="faixa-preco-' + f.id + '" value="' + (f.precoMensal === null ? '' : f.precoMensal) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
+          + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Excedente/aluno (R$)'
+          + '<input type="number" step="0.01" min="0" id="faixa-excedente-' + f.id + '" value="' + (f.precoExcedentePorAluno === null ? '' : f.precoExcedentePorAluno) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
+          + '<button type="button" onclick="salvarFaixa(\'' + f.id + '\')" style="border:1px solid var(--card-border);background:transparent;color:var(--texto);font-size:0.76rem;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;">Salvar</button>'
+          + '</span></div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function salvarFaixa(faixaId) {
+      var preco = document.getElementById('faixa-preco-' + faixaId).value;
+      var excedente = document.getElementById('faixa-excedente-' + faixaId).value;
+      ParceirosStore.definirPrecoFaixa(faixaId, preco === '' ? null : preco, excedente === '' ? null : excedente);
+      renderFaixas();
+      renderAtivosParceiros();
+    }
+
+    function rotuloTipo(tipo) { return tipo === 'academia' ? 'Academia' : 'Personal'; }
+
+    function linhaFotos(p) {
+      var partes = [];
+      partes.push(p.fotoPerfil ? 'foto de perfil enviada' : 'sem foto de perfil');
+      partes.push((p.galeria ? p.galeria.length : 0) + ' de 6 fotos na galeria');
+      return partes.join(' -- ');
+    }
+
+    function renderPendentesParceiros() {
+      var container = document.getElementById('parceiros-pendentes');
+      if (!container) { return; }
+      var lista = ParceirosStore.listarPendentes();
+      if (!lista.length) {
+        container.innerHTML = '<p class="estado-vazio">Nenhum cadastro aguardando aprovacao neste navegador. Envie um teste pela aba "Quero me cadastrar" em parceiro.html (academia ou personal).</p>';
+        return;
+      }
+      var html = '';
+      lista.forEach(function (p) {
+        var meta = [rotuloTipo(p.tipo)];
+        if (p.cref) { meta.push('CREF ' + escaparHtml(p.cref)); }
+        if (p.cnpj) { meta.push('CNPJ ' + escaparHtml(p.cnpj)); }
+        if (p.cidade) { meta.push(escaparHtml(p.cidade)); }
+        if (p.email) { meta.push(escaparHtml(p.email)); }
+        html += '<div class="linha-portfolio">'
+          + '<div class="portfolio-principal">'
+          + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
+          + '<span class="portfolio-status pendente">Aguardando aprovacao</span>'
+          + '</div>'
+          + '<div class="portfolio-meta">' + meta.join(' -- ') + '</div>'
+          + '<div class="portfolio-meta">' + linhaFotos(p) + '</div>'
+          + '<div class="portfolio-acoes">'
+          + '<button type="button" onclick="aprovarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Aprovar</button>'
+          + '<button type="button" class="recusar" onclick="recusarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Recusar</button>'
+          + '</div>'
+          + '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function aprovarParceiroUI(tipo, id) {
+      ParceirosStore.aprovarParceiro(tipo, id);
+      renderPendentesParceiros();
+      renderAtivosParceiros();
+    }
+
+    function recusarParceiroUI(tipo, id) {
+      var motivo = window.prompt('Motivo da recusa (aparece so no historico interno):', '');
+      if (motivo === null) { return; }
+      ParceirosStore.recusarParceiro(tipo, id, motivo);
+      renderPendentesParceiros();
+    }
+
+    function opcoesFaixas(faixaIdAtual) {
+      var faixas = ParceirosStore.listarFaixas();
+      var html = '<option value="">Sem faixa definida</option>';
+      faixas.forEach(function (f) {
+        html += '<option value="' + f.id + '"' + (f.id === faixaIdAtual ? ' selected' : '') + '>' + escaparHtml(f.rotulo) + '</option>';
+      });
+      return html;
+    }
+
+    function renderAtivosParceiros() {
+      var container = document.getElementById('parceiros-ativos');
+      if (!container) { return; }
+      var lista = ParceirosStore.listarAtivos();
+      if (!lista.length) {
+        container.innerHTML = '<p class="estado-vazio">Nenhum parceiro ativo ainda. Aprove um cadastro pendente acima.</p>';
+        return;
+      }
+      var html = '';
+      lista.forEach(function (p) {
+        var status = ParceirosStore.statusCobranca(p.tipo, p.id);
+        var perfil = ParceirosStore.perfilParceiro(p.tipo, p.id);
+        var classeStatus = status.rotulo === 'em dia' ? 'aprovado' : (status.rotulo.indexOf('vencido') === 0 ? 'recusado' : 'pendente');
+        html += '<div class="linha-portfolio">'
+          + '<div class="portfolio-principal">'
+          + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
+          + '<span class="portfolio-status aprovado">' + rotuloTipo(p.tipo) + ' ativo(a)</span>'
+          + '<span class="portfolio-status ' + classeStatus + '">' + escaparHtml(status.rotulo) + '</span>'
+          + '</div>'
+          + '<div class="portfolio-meta">Alunos ativos (contagem real vem do banco): ' + perfil.alunosAtivos + '</div>'
+          + '<div class="portfolio-meta">Ultimo vencimento: ' + (status.ultimoVencimento || 'nenhum') + '</div>'
+          + '<div class="portfolio-meta">Faixa: <select onchange="definirFaixaUI(\'' + p.tipo + '\',\'' + p.id + '\',this.value)">' + opcoesFaixas(p.faixaId) + '</select></div>'
+          + '<div class="portfolio-acoes">'
+          + '<button type="button" onclick="registrarCobrancaUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar cobranca</button>'
+          + '<button type="button" onclick="registrarPagamentoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar pagamento</button>'
+          + '<button type="button" onclick="verHistoricoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Ver historico</button>'
+          + '<button type="button" class="recusar" onclick="suspenderParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Suspender</button>'
+          + '</div>'
+          + '<div id="historico-' + p.id + '" style="display:none;margin-top:10px;"></div>'
+          + '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function definirFaixaUI(tipo, id, faixaId) {
+      if (!faixaId) { return; }
+      ParceirosStore.definirFaixaParceiro(tipo, id, faixaId);
+      renderAtivosParceiros();
+    }
+
+    function suspenderParceiroUI(tipo, id) {
+      var motivo = window.prompt('Motivo da suspensao:', '');
+      if (motivo === null) { return; }
+      ParceirosStore.suspenderParceiro(tipo, id, motivo);
+      renderPendentesParceiros();
+      renderAtivosParceiros();
+    }
+
+    function registrarCobrancaUI(tipo, id) {
+      var valor = window.prompt('Valor da cobranca (R$):', '');
+      if (valor === null || valor === '') { return; }
+      var vencimento = window.prompt('Data de vencimento (AAAA-MM-DD):', '');
+      if (vencimento === null || vencimento === '') { return; }
+      ParceirosStore.registrarCobranca(tipo, id, Number(valor), vencimento, '');
+      renderAtivosParceiros();
+    }
+
+    function registrarPagamentoUI(tipo, id) {
+      var valor = window.prompt('Valor pago (R$):', '');
+      if (valor === null || valor === '') { return; }
+      var forma = window.prompt('Forma de pagamento (pix / transferencia / outro):', 'pix');
+      if (forma === null) { return; }
+      try {
+        ParceirosStore.registrarPagamento(tipo, id, Number(valor), forma.trim().toLowerCase(), '');
+      } catch (e) {
+        window.alert(e.message);
+        return;
+      }
+      renderAtivosParceiros();
+    }
+
+    function verHistoricoUI(tipo, id) {
+      var div = document.getElementById('historico-' + id);
+      if (!div) { return; }
+      if (div.style.display !== 'none') { div.style.display = 'none'; return; }
+      var cobrancas = ParceirosStore.historicoCobranca(tipo, id);
+      var acoes = ParceirosStore.historicoAcoesAdmin(tipo, id);
+      var html = '<div class="admin-mock">';
+      html += '<div class="linha-mock" style="border-bottom:none;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Historico de cobranca (nunca editado -- correcao e linha nova)</span><span></span></div>';
+      if (!cobrancas.length) {
+        html += '<p class="estado-vazio" style="padding:6px 0;">Nenhum lancamento ainda.</p>';
+      } else {
+        cobrancas.forEach(function (c) {
+          var rotuloEvento = c.tipoEvento === 'cobranca' ? 'Cobranca' : (c.tipoEvento === 'pagamento' ? 'Pagamento (' + escaparHtml(c.formaPagamento || '') + ')' : 'Ajuste');
+          html += '<div class="linha-mock"><span class="rotulo">' + rotuloEvento + (c.vencimento ? ' -- vence ' + c.vencimento : '') + (c.observacao ? ' -- ' + escaparHtml(c.observacao) : '') + '</span><span>' + formatarMoeda(c.valor) + '</span></div>';
+        });
+      }
+      html += '<div class="linha-mock" style="border-bottom:none;margin-top:8px;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Auditoria (aprovar/recusar/suspender/reativar)</span><span></span></div>';
+      if (!acoes.length) {
+        html += '<p class="estado-vazio" style="padding:6px 0;">Nenhuma acao registrada ainda.</p>';
+      } else {
+        acoes.forEach(function (a) {
+          html += '<div class="linha-mock"><span class="rotulo">' + a.acao + (a.motivo ? ' -- ' + escaparHtml(a.motivo) : '') + '</span><span>' + new Date(a.criadoEm).toLocaleString('pt-BR') + '</span></div>';
+        });
+      }
+      html += '</div>';
+      div.innerHTML = html;
+      div.style.display = 'block';
     }
   </script>
 </body>
