@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
+  <script src="assets/js/feedback-store.js"></script>
 </head>
 <body>
   <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
@@ -236,6 +237,71 @@
       </div>
     </section>
 
+    <!-- MODULO 2.7 -- FEEDBACK DO BETA (D038, 2026-09-29) -->
+    <section class="admin-modulo">
+      <div class="container">
+        <span class="status-modulo depende">Tela pronta -- dado real depende da Backend (D092)</span>
+        <h2>Feedback do Beta</h2>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 8px;">
+          Segue a proposta da Suporte ao Beta (D012 dela). O feedback do app ja chega a tabela
+          <code>beta_feedback</code> (migration 006 da Backend) -- canal, reacao, categoria, tela,
+          versao do app e pontos, <strong>sem texto livre</strong>, por decisao dela. A leitura real
+          usa a politica "admin le tudo" da propria 006, e so funciona quando o login de admin for
+          de verdade -- depende da Backend marcar Murilo e Gabriela como admin (D092 dela). Ate la,
+          os itens abaixo sao <span class="tag-exemplo">exemplo</span>, fixos, so para desenhar a tela.
+        </p>
+        <p style="color:var(--texto-secundario);max-width:640px;margin:0 0 18px;">
+          A coluna "IA sugerida" e a minha leitura da separacao que a Suporte propos, adaptada aos 7
+          valores reais de <code>categoria</code> (a proposta dela foi escrita com 4 categorias de
+          exemplo, antes de o Orquestrador confirmar os valores certos) -- ver STATUS.md, P27, para
+          o Orquestrador/Suporte confirmarem.
+        </p>
+
+        <div id="feedback-urgente"></div>
+
+        <div class="admin-mock" style="margin-bottom:18px;">
+          <div class="linha-mock" style="border-bottom:none;padding-bottom:6px;">
+            <span class="rotulo" style="font-weight:700;color:var(--texto);">Por categoria</span>
+            <span></span>
+          </div>
+          <div id="feedback-resumo-categoria"></div>
+        </div>
+
+        <div class="admin-mock" style="margin-bottom:18px;">
+          <div class="linha-mock" style="border-bottom:none;padding-bottom:6px;">
+            <span class="rotulo" style="font-weight:700;color:var(--texto);">Por tela (canal botao flutuante)</span>
+            <span></span>
+          </div>
+          <div id="feedback-resumo-tela"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
+          <div class="campo" style="margin-bottom:0;">
+            <label for="feedback-filtro-versao">Versao do app</label>
+            <select id="feedback-filtro-versao" onchange="aplicarFiltrosFeedback()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="campo" style="margin-bottom:0;">
+            <label for="feedback-filtro-tela">Tela</label>
+            <select id="feedback-filtro-tela" onchange="aplicarFiltrosFeedback()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="campo" style="margin-bottom:0;">
+            <label for="feedback-filtro-categoria">Categoria</label>
+            <select id="feedback-filtro-categoria" onchange="aplicarFiltrosFeedback()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <button type="button" onclick="limparFiltrosFeedback()" style="border:1px solid var(--card-border);background:transparent;color:var(--texto-secundario);font-size:0.76rem;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer;font-family:inherit;">Limpar filtros</button>
+        </div>
+
+        <h3 style="font-size:0.95rem;font-weight:800;margin:0 0 10px;">Mais recentes</h3>
+        <div id="feedback-lista"></div>
+      </div>
+    </section>
+
     <!-- MODULO 3 -- CONTATO -->
     <section class="admin-modulo">
       <div class="container">
@@ -302,6 +368,7 @@
         renderFaixas();
         renderPendentesParceiros();
         renderAtivosParceiros();
+        inicializarFeedbackBeta();
       } else {
         erro.style.display = 'block';
       }
@@ -574,6 +641,128 @@
       html += '</div>';
       div.innerHTML = html;
       div.style.display = 'block';
+    }
+  </script>
+  <script>
+    // ===========================================================
+    // D038 (2026-09-29) -- Feedback do Beta. So le via FeedbackStore
+    // (assets/js/feedback-store.js) -- interface trocavel, mesmo
+    // padrao da D036/D037. Hoje FeedbackStore = FeedbackStoreDemo
+    // (dados de exemplo fixos); a implementacao Supabase ja existe
+    // no arquivo mas fica desligada ate o login real de admin
+    // existir (D092 da Backend).
+    // ===========================================================
+    function formatarDataHora(timestampMs) {
+      return new Date(timestampMs).toLocaleString('pt-BR');
+    }
+
+    function filtrosFeedbackAtuais() {
+      return {
+        versaoApp: document.getElementById('feedback-filtro-versao').value || null,
+        tela: document.getElementById('feedback-filtro-tela').value || null,
+        categoria: document.getElementById('feedback-filtro-categoria').value || null
+      };
+    }
+
+    function popularSelect(idSelect, valores, rotulos) {
+      var select = document.getElementById(idSelect);
+      var valorAtual = select.value;
+      var html = '<option value="">Todas</option>';
+      valores.forEach(function (v) {
+        html += '<option value="' + escaparHtml(v) + '">' + escaparHtml((rotulos && rotulos[v]) || v) + '</option>';
+      });
+      select.innerHTML = html;
+      if (valores.indexOf(valorAtual) !== -1) { select.value = valorAtual; }
+    }
+
+    function inicializarFeedbackBeta() {
+      FeedbackStore.listarTodosSemFiltro().then(function (todos) {
+        var versoes = FeedbackUtil.versoesDisponiveis(todos);
+        var telas = FeedbackUtil.resumoPorTela(todos).map(function (r) { return r.tela; });
+        popularSelect('feedback-filtro-versao', versoes);
+        popularSelect('feedback-filtro-tela', telas);
+        popularSelect('feedback-filtro-categoria', FeedbackUtil.CATEGORIAS, FeedbackUtil.ROTULOS_CATEGORIA);
+        renderFeedbackUrgente(todos);
+        renderFeedbackBeta();
+      });
+    }
+
+    function aplicarFiltrosFeedback() {
+      renderFeedbackBeta();
+    }
+
+    function limparFiltrosFeedback() {
+      document.getElementById('feedback-filtro-versao').value = '';
+      document.getElementById('feedback-filtro-tela').value = '';
+      document.getElementById('feedback-filtro-categoria').value = '';
+      renderFeedbackBeta();
+    }
+
+    function renderFeedbackUrgente(todos) {
+      var container = document.getElementById('feedback-urgente');
+      var urgentes = FeedbackUtil.itensUrgentes(todos);
+      if (!urgentes.length) {
+        container.innerHTML = '';
+        return;
+      }
+      var html = '<div style="background:rgba(255,106,106,0.08);border:1px solid rgba(255,106,106,0.4);border-radius:12px;padding:14px 16px;margin-bottom:18px;">'
+        + '<div style="font-weight:800;color:#ff6a6a;font-size:0.85rem;margin-bottom:8px;">⚠ Urgente -- fora do ritmo diario de leitura</div>';
+      urgentes.forEach(function (u) {
+        html += '<div style="font-size:0.8rem;color:var(--texto);margin-bottom:4px;">' + escaparHtml(u.motivo) + '</div>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function renderFeedbackBeta() {
+      var filtros = filtrosFeedbackAtuais();
+      FeedbackStore.listarFeedback(filtros).then(function (itens) {
+        // Resumo por categoria
+        var containerCategoria = document.getElementById('feedback-resumo-categoria');
+        var resumoCategoria = FeedbackUtil.resumoPorCategoria(itens);
+        var htmlCategoria = '';
+        resumoCategoria.forEach(function (r) {
+          htmlCategoria += '<div class="linha-mock"><span class="rotulo">' + escaparHtml(r.rotulo) + '</span>'
+            + '<span>' + r.contagem + ' -- sugestao: ' + escaparHtml(r.iaSugerida) + '</span></div>';
+        });
+        containerCategoria.innerHTML = htmlCategoria;
+
+        // Resumo por tela
+        var containerTela = document.getElementById('feedback-resumo-tela');
+        var resumoTela = FeedbackUtil.resumoPorTela(itens);
+        if (!resumoTela.length) {
+          containerTela.innerHTML = '<p class="estado-vazio">Nenhum item do canal botao flutuante com os filtros atuais.</p>';
+        } else {
+          var htmlTela = '';
+          resumoTela.forEach(function (r) {
+            htmlTela += '<div class="linha-mock"><span class="rotulo">' + escaparHtml(r.tela) + '</span><span>' + r.contagem + '</span></div>';
+          });
+          containerTela.innerHTML = htmlTela;
+        }
+
+        // Lista mais recentes
+        var containerLista = document.getElementById('feedback-lista');
+        if (!itens.length) {
+          containerLista.innerHTML = '<p class="estado-vazio">Nenhum item de feedback com os filtros atuais.</p>';
+          return;
+        }
+        var htmlLista = '';
+        itens.forEach(function (i) {
+          var meta = [FeedbackUtil.ROTULOS_CANAL[i.canal] || i.canal];
+          if (i.reacao) { meta.push(FeedbackUtil.ROTULOS_REACAO[i.reacao] || i.reacao); }
+          if (i.categoria) { meta.push((FeedbackUtil.ROTULOS_CATEGORIA[i.categoria] || i.categoria) + ' (sugestao: ' + FeedbackUtil.IA_SUGERIDA[i.categoria] + ')'); }
+          if (i.telaAtual) { meta.push('tela: ' + escaparHtml(i.telaAtual)); }
+          if (i.versaoApp) { meta.push(escaparHtml(i.versaoApp)); }
+          htmlLista += '<div class="linha-portfolio">'
+            + '<div class="portfolio-principal">'
+            + '<span class="portfolio-nome">' + formatarDataHora(i.criadoEm) + '</span>'
+            + '<span class="portfolio-status pendente">' + (i.pontos || 0) + ' pts</span>'
+            + '</div>'
+            + '<div class="portfolio-meta">' + meta.join(' -- ') + '</div>'
+            + '</div>';
+        });
+        containerLista.innerHTML = htmlLista;
+      });
     }
   </script>
 </body>
