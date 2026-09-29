@@ -526,7 +526,10 @@
           { titulo: "Avaliação física (opcional)", medidas: true, campos: [
             { chave: "avaliacaoFisica.temFoto", rotulo: "Já existe uma foto inicial registrada (formato de envio a definir)", tipo: "checkbox", obrigatorio: false }
           ]},
-          { titulo: "Dias de treino na academia", dias: "comAcademia" }
+          { titulo: "Dias de treino na academia", dias: "comAcademia" },
+          { titulo: "Observação (privada)", apenasDoRegistrante: true, campos: [
+            { chave: "observacao", rotulo: "Observação — visível só para quem cadastrou este aluno", tipo: "textarea", obrigatorio: false, largo: true }
+          ]}
         ]
       },
       personal: {
@@ -559,7 +562,10 @@
             { chave: "redesSociais", rotulo: "Redes sociais", tipo: "texto", obrigatorio: false },
             { chave: "preferenciaHorario", rotulo: "Preferência de horário", tipo: "texto", obrigatorio: false }
           ]},
-          { titulo: "Dias de treino", dias: "presencial-e-app" }
+          { titulo: "Dias de treino", dias: "presencial-e-app" },
+          { titulo: "Observação (privada)", apenasDoRegistrante: true, campos: [
+            { chave: "observacao", rotulo: "Observação — visível só para quem cadastrou este aluno", tipo: "textarea", obrigatorio: false, largo: true }
+          ]}
         ]
       }
     };
@@ -785,12 +791,110 @@
           return wrap;
         }
 
+        if (campo.tipo === "textarea") {
+          var textarea = document.createElement("textarea");
+          textarea.id = idCampo;
+          if (valorAtual !== undefined && valorAtual !== null) textarea.value = valorAtual;
+          wrap.appendChild(textarea);
+          return wrap;
+        }
+
         var input2 = document.createElement("input");
         input2.type = campo.tipo === "numero" ? "number" : campo.tipo === "data" ? "date" : campo.tipo === "email" ? "email" : campo.tipo === "tel" ? "tel" : "text";
         if (campo.tipo === "numero") input2.step = "any";
         input2.id = idCampo;
         if (valorAtual !== undefined && valorAtual !== null) input2.value = valorAtual;
+
+        var ajuda = null;
+
+        if (campo.chave === "cpf") {
+          input2.placeholder = "000.000.000-00";
+          input2.value = DadosDemo.formatarCPF(input2.value);
+          ajuda = document.createElement("small");
+          ajuda.className = "campo-ajuda";
+          input2.addEventListener("input", function () {
+            input2.value = DadosDemo.formatarCPF(input2.value);
+          });
+          input2.addEventListener("blur", function () {
+            var digitos = input2.value.replace(/\D/g, "");
+            if (digitos.length === 0) {
+              ajuda.textContent = "";
+              ajuda.className = "campo-ajuda";
+              return;
+            }
+            if (DadosDemo.validarCPF(input2.value)) {
+              ajuda.textContent = "CPF válido.";
+              ajuda.className = "campo-ajuda campo-ajuda-ok";
+            } else {
+              ajuda.textContent = "Esse CPF não parece válido — confira os números.";
+              ajuda.className = "campo-ajuda campo-ajuda-erro";
+            }
+          });
+        } else if (campo.tipo === "tel") {
+          input2.placeholder = "+55 (11) 98888-7777";
+          input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+          ajuda = document.createElement("small");
+          ajuda.className = "campo-ajuda";
+          input2.addEventListener("input", function () {
+            input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+          });
+          input2.addEventListener("blur", function () {
+            var digitos = input2.value.replace(/\D/g, "");
+            if (digitos.length === 0) {
+              ajuda.textContent = "";
+              ajuda.className = "campo-ajuda";
+              return;
+            }
+            if (DadosDemo.telefoneEstaCompleto(input2.value)) {
+              ajuda.textContent = "";
+              ajuda.className = "campo-ajuda";
+            } else {
+              ajuda.textContent = "Complete o número: +55, DDD com 2 dígitos e telefone com 9 dígitos.";
+              ajuda.className = "campo-ajuda campo-ajuda-erro";
+            }
+          });
+        } else if (campo.chave === "endereco.cep") {
+          input2.placeholder = "00000-000";
+          ajuda = document.createElement("small");
+          ajuda.className = "campo-ajuda";
+          input2.addEventListener("input", function () {
+            var d = input2.value.replace(/\D/g, "").slice(0, 8);
+            input2.value = d.length > 5 ? d.slice(0, 5) + "-" + d.slice(5) : d;
+          });
+          input2.addEventListener("blur", function () {
+            var digitos = input2.value.replace(/\D/g, "");
+            if (digitos.length !== 8) {
+              if (digitos.length > 0) {
+                ajuda.textContent = "CEP incompleto (precisa de 8 números).";
+                ajuda.className = "campo-ajuda campo-ajuda-erro";
+              } else {
+                ajuda.textContent = "";
+                ajuda.className = "campo-ajuda";
+              }
+              return;
+            }
+            ajuda.textContent = "Buscando endereço...";
+            ajuda.className = "campo-ajuda";
+            DadosDemo.consultarCEP(input2.value).then(function (endereco) {
+              if (!endereco) {
+                ajuda.textContent = "Não encontrei esse CEP — preencha o endereço à mão.";
+                ajuda.className = "campo-ajuda campo-ajuda-erro";
+                return;
+              }
+              var campoRua = document.getElementById("campo-endereco-rua");
+              var campoBairro = document.getElementById("campo-endereco-bairro");
+              var campoCidade = document.getElementById("campo-endereco-cidade");
+              if (campoRua && endereco.rua) campoRua.value = endereco.rua;
+              if (campoBairro && endereco.bairro) campoBairro.value = endereco.bairro;
+              if (campoCidade && endereco.cidade) campoCidade.value = endereco.cidade;
+              ajuda.textContent = "Endereço preenchido automaticamente — confira o número.";
+              ajuda.className = "campo-ajuda campo-ajuda-ok";
+            });
+          });
+        }
+
         wrap.appendChild(input2);
+        if (ajuda) wrap.appendChild(ajuda);
         return wrap;
       }
 
@@ -862,6 +966,10 @@
         });
 
         config.secoes.forEach(function (secao) {
+          if (secao.apenasDoRegistrante && alunoExistente && alunoExistente.tipoContaOrigem !== contaAtual) {
+            return; // Observação é exclusiva de quem cadastrou o aluno.
+          }
+
           var bloco = document.createElement("div");
           bloco.className = "form-secao";
           var h4 = document.createElement("h4");
@@ -933,7 +1041,12 @@
         var temMedicao = false;
         var faltando = [];
 
+        var alunoExistenteAtual = idAlunoExistente ? DadosDemo.buscarAluno(contaAtual, idAlunoExistente) : null;
+
         config.secoes.forEach(function (secao) {
+          if (secao.apenasDoRegistrante && alunoExistenteAtual && alunoExistenteAtual.tipoContaOrigem !== contaAtual) {
+            return; // Observação é exclusiva de quem cadastrou o aluno — não lê nem sobrescreve.
+          }
           if (secao.dias) {
             dados.diasTreino = dados.diasTreino || {};
             if (secao.dias === "comAcademia") {

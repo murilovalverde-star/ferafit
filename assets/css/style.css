@@ -1267,6 +1267,29 @@ footer.site-footer a:hover {
 }
 
 /* ======================================================================
+   2026-09-29 (rodada 2 de feedback, P24 do STATUS.md) — mensagens de
+   ajuda/validação inline nos campos do formulário de aluno (CPF,
+   telefone, CEP), campo Observação (textarea já herda .campo textarea).
+   ====================================================================== */
+
+.campo-ajuda {
+  display: block;
+  font-size: 0.76rem;
+  margin-top: 6px;
+  color: var(--texto-secundario);
+  min-height: 1em;
+}
+
+.campo-ajuda.campo-ajuda-ok {
+  color: #48c774;
+}
+
+.campo-ajuda.campo-ajuda-erro {
+  color: #ff6a6a;
+}
+
+
+/* ======================================================================
    DEMANDA 006 — Painel do Administrador: abas Academia / Personal
    ====================================================================== */
 

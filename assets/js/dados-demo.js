@@ -34,6 +34,17 @@
 // professor sempre pode excluir/alterar/incluir depois (pedido de
 // Murilo), isso fica como ponto de partida, não como promessa de
 // paridade perfeita — ver STATUS.md para o registro completo do achado.
+//
+// 2026-09-29 (rodada 2 de feedback, P24 do STATUS.md): validação de
+// CPF (dígito verificador), formatação de telefone/telefone de
+// emergência (+55 (DD) 9XXXX-XXXX) e campo `observacao` (privado,
+// visível só a quem cadastrou o aluno — ver nota no esqueleto abaixo).
+// `consultarCEP` chama o ViaCEP (viacep.com.br) para autofill de
+// endereço — é um serviço público de terceiros (não é dos Correios,
+// que cobram por contrato comercial; verificado antes de implementar),
+// SEM relação com Supabase — a regra do parágrafo acima (nenhuma linha
+// fala com o Supabase para dado de aluno/academia/personal) continua
+// valendo à risca.
 // =============================================================
 
 (function (global) {
@@ -221,6 +232,14 @@
       endereco: { cep: "", rua: "", numero: "", bairro: "", cidade: "" },
       contatoEmergenciaNome: "",
       contatoEmergenciaTelefone: "",
+      // Observação livre — acesso exclusivo de quem cadastrou o aluno.
+      // Hoje a "conta" é só Academia OU Personal (login ainda cosmético,
+      // sem usuário individual — ver P24/A8 do STATUS.md), então a
+      // exclusividade é aplicada no nível de tipoContaOrigem: só o
+      // painel do mesmo tipo que cadastrou o aluno mostra/edita este
+      // campo. Quando entrar autenticação real, isso pode ficar restrito
+      // à pessoa exata que cadastrou, não só ao tipo de conta.
+      observacao: "",
       // Contrato / financeiro
       contrato: {
         plano: "",
@@ -585,7 +604,8 @@
   function aplicarCamposAluno(aluno, dados) {
     if (!dados) return;
     var camposDiretos = ["nome", "dataNascimento", "cpf", "rg", "sexo", "email", "telefone",
-      "contatoEmergenciaNome", "contatoEmergenciaTelefone", "profissao", "redesSociais", "preferenciaHorario"];
+      "contatoEmergenciaNome", "contatoEmergenciaTelefone", "profissao", "redesSociais", "preferenciaHorario",
+      "observacao"];
     camposDiretos.forEach(function (campo) {
       if (dados[campo] !== undefined) {
         aluno[campo] = (dados[campo] || "").toString().trim();
@@ -670,6 +690,90 @@
       idade--;
     }
     return idade;
+  };
+
+  // Algoritmo padrão de dígito verificador do CPF — client-side, sem
+  // depender de nenhuma API. Retorna true só se os 11 dígitos batem
+  // com as duas checagens (não aceita sequências tipo "111.111.111-11").
+  DadosDemo.validarCPF = function (cpf) {
+    var digitos = String(cpf || "").replace(/\D/g, "");
+    if (digitos.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(digitos)) return false;
+    function digitoVerificador(base, pesoInicial) {
+      var soma = 0;
+      for (var i = 0; i < base.length; i++) {
+        soma += parseInt(base.charAt(i), 10) * (pesoInicial - i);
+      }
+      var resto = (soma * 10) % 11;
+      return resto === 10 ? 0 : resto;
+    }
+    var d1 = digitoVerificador(digitos.substring(0, 9), 10);
+    if (d1 !== parseInt(digitos.charAt(9), 10)) return false;
+    var d2 = digitoVerificador(digitos.substring(0, 10), 11);
+    if (d2 !== parseInt(digitos.charAt(10), 10)) return false;
+    return true;
+  };
+
+  // Máscara progressiva "000.000.000-00", usada enquanto o usuário digita.
+  DadosDemo.formatarCPF = function (valor) {
+    var d = String(valor || "").replace(/\D/g, "").slice(0, 11);
+    var saida = d.slice(0, 3);
+    if (d.length > 3) saida += "." + d.slice(3, 6);
+    if (d.length > 6) saida += "." + d.slice(6, 9);
+    if (d.length > 9) saida += "-" + d.slice(9, 11);
+    return saida;
+  };
+
+  // Máscara progressiva "+55 (DD) 9XXXX-XXXX", usada enquanto o
+  // usuário digita telefone ou telefone de emergência.
+  DadosDemo.formatarTelefoneBR = function (valor) {
+    var d = String(valor || "").replace(/\D/g, "");
+    if (d.indexOf("55") === 0 && d.length > 11) d = d.slice(2);
+    d = d.slice(0, 11);
+    var ddd = d.slice(0, 2);
+    var numero = d.slice(2);
+    var saida = "+55";
+    if (ddd.length > 0) saida += " (" + ddd + (ddd.length === 2 ? ")" : "");
+    if (numero.length > 0) saida += " " + numero.slice(0, 5);
+    if (numero.length > 5) saida += "-" + numero.slice(5, 9);
+    return saida;
+  };
+
+  // true só quando DDD (2 dígitos) + número (9 dígitos) estão completos.
+  DadosDemo.telefoneEstaCompleto = function (valor) {
+    var d = String(valor || "").replace(/\D/g, "");
+    if (d.indexOf("55") === 0 && d.length > 11) d = d.slice(2);
+    return d.length === 11;
+  };
+
+  // Autofill de endereço a partir do CEP — usa o ViaCEP (viacep.com.br),
+  // serviço público de terceiros, gratuito, sem chave/cadastro (a API
+  // oficial dos Correios exige contrato comercial pago — verificado em
+  // 2026-09-29, não é uma opção viável aqui). Nunca lança erro: se o CEP
+  // não existir ou a rede falhar, resolve com null e o formulário
+  // continua 100% preenchível à mão — autofill é sempre um "a mais",
+  // nunca um bloqueio.
+  DadosDemo.consultarCEP = function (cep) {
+    var digitos = String(cep || "").replace(/\D/g, "");
+    if (digitos.length !== 8) {
+      return Promise.resolve(null);
+    }
+    return fetch("https://viacep.com.br/ws/" + digitos + "/json/")
+      .then(function (resp) {
+        if (!resp.ok) return null;
+        return resp.json();
+      })
+      .then(function (dados) {
+        if (!dados || dados.erro) return null;
+        return {
+          rua: dados.logradouro || "",
+          bairro: dados.bairro || "",
+          cidade: dados.localidade || ""
+        };
+      })
+      .catch(function () {
+        return null;
+      });
   };
 
   DadosDemo.removerAluno = function (tipoConta, idAluno) {
