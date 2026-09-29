@@ -1288,6 +1288,23 @@ footer.site-footer a:hover {
   color: #ff6a6a;
 }
 
+.campo-telefone-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campo-telefone-prefixo {
+  color: var(--texto-secundario);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.campo-telefone-linha input {
+  flex: 1;
+  min-width: 0;
+}
+
 
 /* ======================================================================
    DEMANDA 006 — Painel do Administrador: abas Academia / Personal

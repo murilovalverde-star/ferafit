@@ -724,16 +724,20 @@
     return saida;
   };
 
-  // Máscara progressiva "+55 (DD) 9XXXX-XXXX", usada enquanto o
-  // usuário digita telefone ou telefone de emergência.
+  // Máscara progressiva "(DD) 9XXXX-XXXX" (só a parte nacional — o
+  // "+55" é um prefixo fixo fora do campo, ver parceiro.html), usada
+  // enquanto o usuário digita telefone ou telefone de emergência.
+  // Também aceita colar o número já com "+55"/"55" na frente (nesse
+  // caso descarta o código de país colado, já que ele é mostrado à
+  // parte).
   DadosDemo.formatarTelefoneBR = function (valor) {
     var d = String(valor || "").replace(/\D/g, "");
     if (d.indexOf("55") === 0 && d.length > 11) d = d.slice(2);
     d = d.slice(0, 11);
     var ddd = d.slice(0, 2);
     var numero = d.slice(2);
-    var saida = "+55";
-    if (ddd.length > 0) saida += " (" + ddd + (ddd.length === 2 ? ")" : "");
+    var saida = "";
+    if (ddd.length > 0) saida += "(" + ddd + (ddd.length === 2 ? ")" : "");
     if (numero.length > 0) saida += " " + numero.slice(0, 5);
     if (numero.length > 5) saida += "-" + numero.slice(5, 9);
     return saida;

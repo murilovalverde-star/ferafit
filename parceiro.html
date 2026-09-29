@@ -806,6 +806,7 @@
         if (valorAtual !== undefined && valorAtual !== null) input2.value = valorAtual;
 
         var ajuda = null;
+        var prefixoTelefone = null;
 
         if (campo.chave === "cpf") {
           input2.placeholder = "000.000.000-00";
@@ -832,10 +833,11 @@
             }
           });
         } else if (campo.tipo === "tel") {
-          input2.placeholder = "+55 (11) 98888-7777";
-          if (input2.value) {
-            input2.value = DadosDemo.formatarTelefoneBR(input2.value);
-          }
+          input2.placeholder = "(11) 98888-7777";
+          input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+          prefixoTelefone = document.createElement("span");
+          prefixoTelefone.className = "campo-telefone-prefixo";
+          prefixoTelefone.textContent = "+55";
           ajuda = document.createElement("small");
           ajuda.className = "campo-ajuda";
           input2.addEventListener("input", function () {
@@ -898,7 +900,15 @@
           });
         }
 
-        wrap.appendChild(input2);
+        if (prefixoTelefone) {
+          var linhaTelefone = document.createElement("div");
+          linhaTelefone.className = "campo-telefone-linha";
+          linhaTelefone.appendChild(prefixoTelefone);
+          linhaTelefone.appendChild(input2);
+          wrap.appendChild(linhaTelefone);
+        } else {
+          wrap.appendChild(input2);
+        }
         if (ajuda) wrap.appendChild(ajuda);
         return wrap;
       }
@@ -1078,6 +1088,9 @@
             var valor = campo.tipo === "checkbox" ? el.checked : el.value.trim();
             if (campo.obrigatorio && (valor === "" || valor === false)) {
               faltando.push(campo.rotulo);
+            }
+            if (campo.tipo === "tel" && valor !== "") {
+              valor = "+55 " + valor;
             }
             setPath(dados, campo.chave, valor);
           });
