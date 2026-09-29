@@ -268,7 +268,7 @@
       },
       // Avaliação física
       avaliacaoFisica: {
-        medicoes: [], // { data, altura, peso, percentualGordura, abdomen, quadril, peito, braco, coxa }
+        medicoes: [], // { data, altura, peso, percentualGordura, abdomen, quadril, peito, braco, coxa, panturrilha }
         testesFisicos: "",
         temFoto: false
       },
@@ -676,7 +676,8 @@
       quadril: (medicao && medicao.quadril) || "",
       peito: (medicao && medicao.peito) || "",
       braco: (medicao && medicao.braco) || "",
-      coxa: (medicao && medicao.coxa) || ""
+      coxa: (medicao && medicao.coxa) || "",
+      panturrilha: (medicao && medicao.panturrilha) || ""
     };
     aluno.avaliacaoFisica.medicoes.push(registro);
     aluno.atualizadoEm = Date.now();
@@ -989,10 +990,11 @@
     return aluno;
   };
 
-  // --- Sugestão de exercício (revisão em 48h, implantação em até 7 dias
-  //     se aprovado — pedido literal de Murilo, 2026-09-29). Fica
-  //     registrado localmente como "em análise"; não existe hoje um
-  //     backend/fila real de revisão — ver STATUS.md. ---
+  // --- Sugestão de exercício (resposta em 24h a 72h — decisão de Murilo
+  //     de 2026-09-08, repassada formalmente pelo Orquestrador na D037,
+  //     2026-09-29; texto/prazo anterior era 48h de análise + 7 dias de
+  //     implantação). Fica registrado localmente como "em análise"; não
+  //     existe hoje um backend/fila real de revisão — ver STATUS.md. ---
 
   DadosDemo.sugerirExercicio = function (tipoConta, dados) {
     var nomeLimpo = ((dados && dados.nomeExercicio) || "").trim();
@@ -1007,8 +1009,7 @@
       grupoMuscular: ((dados && dados.grupoMuscular) || "").trim(),
       observacao: ((dados && dados.observacao) || "").trim(),
       dataEnvio: agora,
-      previsaoAnaliseAte: agora + 48 * 60 * 60 * 1000,
-      previsaoImplantacaoAte: agora + 7 * 24 * 60 * 60 * 1000,
+      previsaoRespostaAte: agora + 72 * 60 * 60 * 1000,
       status: "em análise"
     };
     estado[tipoConta].sugestoesExercicio.push(registro);

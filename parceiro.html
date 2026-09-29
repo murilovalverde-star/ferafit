@@ -640,7 +640,8 @@
       { chave: "quadril", rotulo: "Quadril (cm)" },
       { chave: "peito", rotulo: "Peito (cm)" },
       { chave: "braco", rotulo: "Braço (cm)" },
-      { chave: "coxa", rotulo: "Coxa (cm)" }
+      { chave: "coxa", rotulo: "Coxa (cm)" },
+      { chave: "panturrilha", rotulo: "Panturrilha (cm)" }
     ];
 
     var FORMULARIO_ALUNO = {
@@ -1742,8 +1743,9 @@
         }
       }
 
-      // --- Sugestão de exercício (revisão em 48h, implantação em até 7
-      //     dias se aprovado — pedido literal de Murilo, 2026-09-29) ---
+      // --- Sugestão de exercício (resposta em 24h a 72h — decisão de
+      //     Murilo de 2026-09-08, repassada pelo Orquestrador na D037;
+      //     texto anterior de 48h/7 dias, ajustado em 2026-09-29) ---
 
       function abrirSugestaoExercicio() {
         var corpo = document.getElementById("modal-corpo");
@@ -1755,7 +1757,7 @@
 
         var subtitulo = document.createElement("p");
         subtitulo.className = "modal-subtitulo";
-        subtitulo.textContent = "Sua sugestão é analisada em até 48h; se aprovada, entra no catálogo em até 7 dias.";
+        subtitulo.textContent = "Sua sugestão recebe uma resposta em 24h a 72h.";
         corpo.appendChild(subtitulo);
 
         var form = document.createElement("form");
