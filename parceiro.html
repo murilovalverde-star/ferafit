@@ -28,10 +28,46 @@
   </header>
 
   <main>
-    <section class="parceiro-hero">
-      <div class="container">
-        <span class="eyebrow">Área do Parceiro</span>
-        <h1>Entre para gerenciar seus alunos e suas aulas.</h1>
+    <section class="parceiro-hero" id="parceiro-hero-pitch">
+      <div class="container parceiro-hero-grid">
+
+        <!-- LOGIN — sempre visível, não fica escondido atrás de uma aba (redesenho 2026-09-29, feedback de Murilo) -->
+        <div class="login-canto" id="login-canto">
+          <div class="campo">
+            <label for="email-parceiro">E-mail (demonstração: admin)</label>
+            <input id="email-parceiro" type="text" placeholder="admin">
+          </div>
+          <div class="campo">
+            <label for="senha-parceiro">Senha (demonstração: admin)</label>
+            <input id="senha-parceiro" type="password" placeholder="admin">
+          </div>
+          <p id="parceiro-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">E-mail ou senha incorretos.</p>
+          <button class="botao-primario largura-total" type="button" onclick="entrarParceiro()">Entrar</button>
+          <div class="parceiro-links">
+            <a href="#">Esqueci minha senha</a>
+            <a href="contato.html">Falar com o Fera Fit</a>
+          </div>
+        </div>
+
+        <div class="parceiro-hero-conteudo">
+          <span class="eyebrow">Área do Parceiro</span>
+
+          <div class="parceiro-tabs" id="escolha-tipo-cadastro">
+            <button class="ativo" type="button" onclick="mostrarTipo('academia')" id="tipo-academia">Sou academia</button>
+            <button type="button" onclick="mostrarTipo('personal')" id="tipo-personal">Sou personal</button>
+          </div>
+
+          <!-- PITCH — texto de convencimento, muda conforme a escolha acima -->
+          <div id="pitch-academia">
+            <h1>Sua academia, com um personal digital para cada aluno.</h1>
+            <p class="parceiro-pitch-texto">Cada aluno que você matricula entra com o Fera Fit rodando no bolso: o app monta o treino, ajusta carga e repetição sozinho, aula após aula. Você continua sendo quem ensina e acompanha de perto — só não precisa montar e atualizar treinos todos os dias, mas fique tranquilo, temos a opção de personalização total caso deseje. Cadastre sua academia e comece a colocar seus alunos no Fera Fit.</p>
+          </div>
+          <div id="pitch-personal" style="display:none;">
+            <h1>Seus alunos treinando certo, mesmo quando você não está do lado.</h1>
+            <p class="parceiro-pitch-texto">Você monta a aula, mas quem cuida da evolução de carga de cada aluno, treino a treino, é o Fera Fit. Menos ficha de papel, menos "quanto eu levantei semana passada", mais resultado. Cadastre-se como personal parceiro e comece a usar o Fera Fit com seus alunos.</p>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -39,38 +75,7 @@
       <div class="container">
         <div class="parceiro-box" id="caixa-parceiro">
 
-          <div class="parceiro-tabs">
-            <button class="ativo" type="button" onclick="mostrarAba('entrar')">Entrar</button>
-            <button type="button" onclick="mostrarAba('cadastro')">Quero me cadastrar</button>
-          </div>
-
-          <!-- ABA ENTRAR — login cosmético, ver nota no script no fim do arquivo -->
-          <div id="aba-entrar">
-            <div class="campo">
-              <label for="email-parceiro">Usuário (demonstração: admin)</label>
-              <input id="email-parceiro" type="text" placeholder="admin">
-            </div>
-            <div class="campo">
-              <label for="senha-parceiro">Senha (demonstração: admin)</label>
-              <input id="senha-parceiro" type="password" placeholder="admin">
-            </div>
-            <p id="parceiro-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Usuário ou senha incorretos.</p>
-
-            <button class="botao-primario largura-total" type="button" onclick="entrarParceiro()">Entrar</button>
-
-            <div class="parceiro-links">
-              <a href="#">Esqueci minha senha</a>
-              <a href="contato.html">Falar com o Fera Fit</a>
-            </div>
-          </div>
-
-          <!-- ABA CADASTRO -->
-          <div id="aba-cadastro" style="display:none;">
-
-            <div class="parceiro-tabs" style="margin-bottom:20px;">
-              <button class="ativo" type="button" onclick="mostrarTipo('academia')" id="tipo-academia">Sou academia</button>
-              <button type="button" onclick="mostrarTipo('personal')" id="tipo-personal">Sou personal</button>
-            </div>
+          <div id="aba-cadastro">
 
             <!-- CADASTRO ACADEMIA -->
             <div id="cadastro-academia">
@@ -311,6 +316,7 @@
       var senha = document.getElementById('senha-parceiro').value;
       var erro = document.getElementById('parceiro-login-erro');
       if (usuario === 'admin' && senha === 'admin') {
+        document.getElementById('parceiro-hero-pitch').style.display = 'none';
         document.getElementById('caixa-parceiro').style.display = 'none';
         document.getElementById('area-logada').style.display = 'block';
       } else {
@@ -318,16 +324,11 @@
       }
     }
 
-    function mostrarAba(aba) {
-      var botoes = document.querySelectorAll('#caixa-parceiro > .parceiro-tabs')[0].querySelectorAll('button');
-      botoes.forEach(function(b) { b.classList.remove('ativo'); });
-      event.target.classList.add('ativo');
-      document.getElementById('aba-entrar').style.display = (aba === 'entrar') ? 'block' : 'none';
-      document.getElementById('aba-cadastro').style.display = (aba === 'cadastro') ? 'block' : 'none';
-    }
     function mostrarTipo(tipo) {
       document.getElementById('tipo-academia').classList.toggle('ativo', tipo === 'academia');
       document.getElementById('tipo-personal').classList.toggle('ativo', tipo === 'personal');
+      document.getElementById('pitch-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
+      document.getElementById('pitch-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
       document.getElementById('cadastro-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
       document.getElementById('cadastro-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'none';
