@@ -6,14 +6,28 @@
 // demonstração hoje, Supabase depois". Este arquivo separa uma
 // interface única (as funções que as telas chamam) com duas
 // implementações: `ParceirosStoreDemo` (tudo em localStorage, ativa
-// hoje) e `ParceirosStoreSupabase` (vazia, à espera da migration 019/
-// 020 da Backend — D082/D084/D087). Trocar de demo para Supabase é
+// hoje) e `ParceirosStoreSupabase`. Trocar de demo para Supabase é
 // trocar só a linha `global.ParceirosStore = ParceirosStoreDemo;` no
 // fim deste arquivo — nenhuma tela (admin.html, parceiro.html) muda.
 //
-// Nenhuma linha deste arquivo chama tabela nova do Supabase nem usa
-// chave além da `publishable` — é 100% local, igual ao resto da
-// camada de demonstração do site.
+// D037 do Orquestrador (2026-09-29): login, cadastro (academia e
+// personal, via Edge Function) e fotos de `ParceirosStoreSupabase`
+// já estão implementados de verdade e testados localmente (Node.js +
+// Playwright, cliente Supabase mockado) — seguindo o código real da
+// Backend (migration 019 e as duas Edge Functions, lidas só leitura).
+// AINDA ASSIM, a linha `global.ParceirosStore` no fim deste arquivo
+// continua em `ParceirosStoreDemo`: a migration 019 tem, no próprio
+// arquivo dela, "SÓ O ARQUIVO... Não aplique. Nada aqui foi rodado em
+// produção" — então o banco real ainda rejeitaria esses caminhos. A
+// troca só acontece depois que a Backend confirmar (D089 dela) que a
+// 019 foi aplicada. As 19 funções de gestão do admin (aprovar,
+// cobrança, faixas etc.) continuam como stub — dependem da 020/022,
+// que a Backend ainda não escreveu (D037, item 3).
+//
+// Nenhuma linha deste arquivo chama tabela nova do Supabase direto
+// (cadastro passa pela Edge Function, nunca por INSERT do navegador —
+// a própria 019 bloqueia esse caminho de propósito) nem usa chave
+// além da `publishable`.
 //
 // Nomes de campo e de regra seguem os dois specs da Backend (lidos só
 // para uso como guia, nenhuma tabela real é tocada):
@@ -491,24 +505,323 @@
   };
 
   // ===========================================================
-  // IMPLEMENTAÇÃO SUPABASE — vazia, à espera da migration 019/020 da
-  // Backend (D082/D084/D087). Mesma lista de funções da demo, cada
-  // uma reservada para virar uma chamada real (`supabase.rpc(...)`,
-  // sempre client anon/publishable, nunca service_role).
+  // IMPLEMENTAÇÃO SUPABASE — D037 do Orquestrador (2026-09-29).
+  //
+  // Cobre só o que a migration 019 (`fase2/sql/019_parceiro_auth_e_
+  // fotos.sql`, lida por inteiro, só leitura) e as Edge Functions
+  // `signup-personal`/`signup-academia` (lidas por inteiro, só
+  // leitura) já resolvem hoje: LOGIN, CADASTRO e FOTOS. As 19 funções
+  // de gestão do admin (aprovar, cobrança, faixas etc.) continuam
+  // como stub abaixo — dependem das migrations 020/022, que a
+  // Backend ainda não escreveu (D037, item 3).
+  //
+  // ⚠️ A migration 019 tem, no próprio arquivo, o aviso "SÓ O
+  // ARQUIVO... Não aplique. Nada aqui foi rodado em produção." —
+  // esta implementação foi escrita e testada localmente, mas o site
+  // publicado continua em `ParceirosStoreDemo` (ver a última linha
+  // deste arquivo) até a Backend confirmar (D089 dela) que a 019 foi
+  // de fato aplicada. Trocar a chave abaixo antes disso quebraria o
+  // site ao vivo, porque o banco real ainda rejeita esses caminhos.
+  //
+  // Só a chave `publishable`, nunca `service_role` — em nenhuma
+  // função deste arquivo.
+  //
+  // Campos enviados às Edge Functions são exatamente os que elas
+  // aceitam hoje (Edge Function ignora qualquer campo a mais, mas
+  // esta implementação já nem envia): `signup-personal` só recebe
+  // `nome_exibicao`/`cref`; `signup-academia` só recebe `nome`/
+  // `cidade`/`uf`. Os demais campos que o formulário do site já
+  // coleta (Formação, Especialização, CNPJ, Endereço, Responsável,
+  // Telefone) não têm coluna em `personais`/`academias` ainda — TODO
+  // sinalizado no próprio código da Backend, não desta IA.
   // ===========================================================
+
   var ParceirosStoreSupabase = {};
+
+  var SUPABASE_URL = "https://jgzbxouzqtwfjapnfooj.supabase.co";
+  var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_vKEyW3okSfWu_RtxR-vbuw_Vl711Dy_";
+
+  // Convenção de path da migration 019 (seção 5, comentário técnico):
+  // bucket de PERFIL não tem subpasta (id é o próprio nome do
+  // arquivo); bucket de GALERIA tem subpasta por id + arquivo com
+  // nome aleatório dentro dela.
+  var BUCKETS = {
+    academia: { perfil: "foto-perfil-academia", galeria: "galeria-academia" },
+    personal: { perfil: "foto-perfil-personal", galeria: "galeria-personal" }
+  };
+
+  function clienteSupabase() {
+    if (clienteSupabase._instancia) {
+      return clienteSupabase._instancia;
+    }
+    if (!global.supabase || typeof global.supabase.createClient !== "function") {
+      throw new Error("Biblioteca do Supabase (assets/js/supabase.js) não está carregada nesta página.");
+    }
+    clienteSupabase._instancia = global.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    });
+    return clienteSupabase._instancia;
+  }
+
+  // Permite injetar um cliente fake nos testes (Node.js, sem window.supabase real).
+  global.ParceirosStoreSupabaseTestes_definirCliente = function (clienteFake) {
+    clienteSupabase._instancia = clienteFake;
+  };
+
+  function extensaoArquivo(arquivo) {
+    var nome = (arquivo && arquivo.name) || "";
+    var partes = nome.split(".");
+    if (partes.length > 1) {
+      return partes[partes.length - 1].toLowerCase();
+    }
+    // Sem nome com extensão (ex.: blob) — cai para o tipo MIME.
+    var tipo = (arquivo && arquivo.type) || "";
+    if (tipo.indexOf("png") !== -1) return "png";
+    if (tipo.indexOf("webp") !== -1) return "webp";
+    return "jpg";
+  }
+
+  function uuidSimples() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0;
+      var v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  // Traduz os códigos de erro documentados nas duas Edge Functions
+  // (signup-personal/index.ts, signup-academia/index.ts) para uma
+  // mensagem em português — nunca mostra o código cru na tela.
+  var MENSAGENS_ERRO_EDGE_FUNCTION = {
+    nome_exibicao_obrigatorio: "Informe seu nome de exibição.",
+    nome_obrigatorio: "Informe o nome da academia.",
+    nao_autenticado: "Sessão inválida — faça login de novo e tente outra vez.",
+    metodo_nao_permitido: "Erro interno (método não permitido) — avise o suporte.",
+    falha_cadastro: "Não deu para concluir o cadastro agora. Tenta de novo em instantes."
+  };
+
+  function mensagemErroEdgeFunction(corpoResposta) {
+    var codigo = corpoResposta && corpoResposta.error;
+    return MENSAGENS_ERRO_EDGE_FUNCTION[codigo] || "Não deu para concluir o cadastro agora. Tenta de novo em instantes.";
+  }
+
+  // Chama uma Edge Function de cadastro (signup-personal ou
+  // signup-academia) com o token da sessão recém-criada pelo signUp.
+  // Nunca insere direto em personais/academias — a 019 bloqueia isso
+  // de propósito (REVOKE INSERT), e é a Edge Function (service_role,
+  // do lado do servidor) quem cria a linha e atribui o papel.
+  function chamarEdgeFunctionCadastro(nomeFuncao, accessToken, corpo) {
+    return global.fetch(SUPABASE_URL + "/functions/v1/" + nomeFuncao, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + accessToken
+      },
+      body: JSON.stringify(corpo)
+    }).then(function (resposta) {
+      return resposta.json().catch(function () { return {}; }).then(function (corpoResposta) {
+        if (!resposta.ok || !corpoResposta || corpoResposta.ok !== true) {
+          throw new Error(mensagemErroEdgeFunction(corpoResposta));
+        }
+        return corpoResposta;
+      });
+    });
+  }
+
+  // --- Login (Supabase Auth, e-mail e senha — 019 não mexe em
+  //     auth.users, só em personais/academias/storage) ---
+
+  ParceirosStoreSupabase.entrarComEmailSenha = function (email, senha) {
+    var cliente = clienteSupabase();
+    return cliente.auth.signInWithPassword({ email: (email || "").trim(), password: senha || "" })
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error("E-mail ou senha incorretos.");
+        }
+        return resultado.data;
+      });
+  };
+
+  ParceirosStoreSupabase.sairDaConta = function () {
+    var cliente = clienteSupabase();
+    return cliente.auth.signOut();
+  };
+
+  // --- Cadastro (signUp + Edge Function — nunca INSERT direto) ---
+
+  ParceirosStoreSupabase.cadastrarAcademia = function (dados) {
+    dados = dados || {};
+    var cliente = clienteSupabase();
+    var email = (dados.email || "").trim();
+    var senha = dados.senha || "";
+    if (!email || !senha) {
+      return Promise.reject(new Error("E-mail e senha são obrigatórios para o cadastro."));
+    }
+    return cliente.auth.signUp({ email: email, password: senha }).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error(resultado.error.message || "Não deu para criar a conta agora.");
+      }
+      var sessao = resultado.data && resultado.data.session;
+      if (!sessao || !sessao.access_token) {
+        // Projeto configurado para exigir confirmação de e-mail antes de
+        // liberar sessão — a Edge Function só pode ser chamada com um
+        // access_token válido, então paramos aqui com uma mensagem clara
+        // em vez de estourar um erro genérico de "token indefinido".
+        throw new Error("Conta criada. Confirme seu e-mail antes de continuar o cadastro.");
+      }
+      return chamarEdgeFunctionCadastro("signup-academia", sessao.access_token, {
+        nome: (dados.nome || "").trim(),
+        cidade: (dados.cidade || "").trim() || undefined,
+        uf: (dados.uf || "").trim() || undefined
+      }).then(function (corpoResposta) {
+        return {
+          id: corpoResposta.academia_id,
+          jaExistia: !!corpoResposta.ja_existia,
+          userId: sessao.user && sessao.user.id
+        };
+      });
+    });
+  };
+
+  ParceirosStoreSupabase.cadastrarPersonal = function (dados) {
+    dados = dados || {};
+    var cliente = clienteSupabase();
+    var email = (dados.email || "").trim();
+    var senha = dados.senha || "";
+    if (!email || !senha) {
+      return Promise.reject(new Error("E-mail e senha são obrigatórios para o cadastro."));
+    }
+    return cliente.auth.signUp({ email: email, password: senha }).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error(resultado.error.message || "Não deu para criar a conta agora.");
+      }
+      var sessao = resultado.data && resultado.data.session;
+      if (!sessao || !sessao.access_token) {
+        throw new Error("Conta criada. Confirme seu e-mail antes de continuar o cadastro.");
+      }
+      return chamarEdgeFunctionCadastro("signup-personal", sessao.access_token, {
+        nome_exibicao: (dados.nome || "").trim(),
+        cref: (dados.cref || "").trim() || undefined
+      }).then(function (corpoResposta) {
+        return {
+          id: corpoResposta.personal_id,
+          jaExistia: !!corpoResposta.ja_existia,
+          userId: sessao.user && sessao.user.id
+        };
+      });
+    });
+  };
+
+  // --- Fotos (buckets privados da 019 — leitura só depois de
+  //     aprovado; dono sempre escreve, mesmo antes da aprovação) ---
+
+  // Foto de perfil: path SEM subpasta, um arquivo só por id (upsert
+  // substitui a anterior).
+  ParceirosStoreSupabase.enviarFotoPerfil = function (tipo, id, arquivo) {
+    var bucket = BUCKETS[tipo] && BUCKETS[tipo].perfil;
+    if (!bucket) {
+      return Promise.reject(new Error("Tipo de parceiro inválido: " + tipo));
+    }
+    var cliente = clienteSupabase();
+    var caminho = id + "." + extensaoArquivo(arquivo);
+    return cliente.storage.from(bucket).upload(caminho, arquivo, { upsert: true }).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para enviar a foto de perfil agora.");
+      }
+      return { caminho: caminho, bucket: bucket };
+    });
+  };
+
+  // Galeria: path COM subpasta por id, nome de arquivo aleatório —
+  // cada envio soma uma foto nova, nunca substitui.
+  ParceirosStoreSupabase.enviarFotoGaleria = function (tipo, id, arquivo) {
+    var bucket = BUCKETS[tipo] && BUCKETS[tipo].galeria;
+    if (!bucket) {
+      return Promise.reject(new Error("Tipo de parceiro inválido: " + tipo));
+    }
+    var cliente = clienteSupabase();
+    var caminho = id + "/" + uuidSimples() + "." + extensaoArquivo(arquivo);
+    return cliente.storage.from(bucket).upload(caminho, arquivo, { upsert: false }).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para enviar essa foto da galeria agora.");
+      }
+      return { caminho: caminho, bucket: bucket };
+    });
+  };
+
+  ParceirosStoreSupabase.listarFotosGaleria = function (tipo, id) {
+    var bucket = BUCKETS[tipo] && BUCKETS[tipo].galeria;
+    if (!bucket) {
+      return Promise.reject(new Error("Tipo de parceiro inválido: " + tipo));
+    }
+    var cliente = clienteSupabase();
+    return cliente.storage.from(bucket).list(id).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para listar a galeria agora.");
+      }
+      return (resultado.data || []).map(function (item) {
+        return { nome: item.name, caminho: id + "/" + item.name };
+      });
+    });
+  };
+
+  ParceirosStoreSupabase.removerFotoGaleria = function (tipo, id, caminho) {
+    var bucket = BUCKETS[tipo] && BUCKETS[tipo].galeria;
+    if (!bucket) {
+      return Promise.reject(new Error("Tipo de parceiro inválido: " + tipo));
+    }
+    if (!caminho || caminho.indexOf(id + "/") !== 0) {
+      return Promise.reject(new Error("Caminho de foto inválido para remoção."));
+    }
+    var cliente = clienteSupabase();
+    return cliente.storage.from(bucket).remove([caminho]).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para apagar essa foto agora.");
+      }
+      return true;
+    });
+  };
+
+  // URL assinada e temporária (buckets são privados — nunca há URL
+  // pública fixa). A RLS da 019 decide, na hora de gerar a URL, se
+  // quem está pedindo pode ler aquele arquivo (dono, admin, ou
+  // qualquer autenticado só depois da aprovação).
+  ParceirosStoreSupabase.urlFotoAssinada = function (tipoBucket, tipo, id, caminho, expiraEmSegundos) {
+    var buckets = BUCKETS[tipo];
+    var bucket = buckets && buckets[tipoBucket];
+    if (!bucket) {
+      return Promise.reject(new Error("Tipo de parceiro ou de foto inválido."));
+    }
+    var cliente = clienteSupabase();
+    return cliente.storage.from(bucket).createSignedUrl(caminho, expiraEmSegundos || 3600).then(function (resultado) {
+      if (resultado.error) {
+        // Esperado quando o parceiro ainda não foi aprovado, ou quem
+        // pede não é dono/admin — a RLS barra antes de gerar a URL.
+        return null;
+      }
+      return resultado.data && resultado.data.signedUrl;
+    });
+  };
+
+  // --- Funções de gestão do admin — fora de escopo da D037 (item 3:
+  //     dependem das migrations 020/022, que a Backend ainda vai
+  //     escrever). Continuam como stub. ---
   [
-    "cadastrarAcademia", "cadastrarPersonal", "listarPendentes", "listarAtivos", "listarTodos",
+    "listarPendentes", "listarAtivos", "listarTodos",
     "perfilParceiro", "aprovarParceiro", "recusarParceiro", "suspenderParceiro", "reativarParceiro",
     "historicoAcoesAdmin", "registrarCobranca", "registrarPagamento", "registrarAjuste",
     "historicoCobranca", "statusCobranca", "listarFaixas", "definirPrecoFaixa", "definirFaixaParceiro"
   ].forEach(function (nomeFuncao) {
     ParceirosStoreSupabase[nomeFuncao] = function () {
-      throw new Error("ParceirosStore (Supabase): '" + nomeFuncao + "' ainda não implementada — aguarda o banco real (D087 da Backend, migration 019/020).");
+      throw new Error("ParceirosStore (Supabase): '" + nomeFuncao + "' ainda não implementada — aguarda o banco real (D087 da Backend, migration 020/022).");
     };
   });
 
-  // Troca aqui quando o banco chegar — nenhuma tela precisa mudar.
+  // ⚠️ NÃO TROCAR — o site publicado continua em demonstração até a
+  // Backend confirmar (D089 dela) que a migration 019 foi aplicada em
+  // produção. Ver aviso completo no cabeçalho da seção Supabase acima
+  // e no STATUS.md (P26/D037).
   global.ParceirosStore = ParceirosStoreDemo;
   global.ParceirosStoreDemo = ParceirosStoreDemo;
   global.ParceirosStoreSupabase = ParceirosStoreSupabase;
