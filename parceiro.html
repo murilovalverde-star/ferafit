@@ -814,6 +814,7 @@
           ajuda.className = "campo-ajuda";
           input2.addEventListener("input", function () {
             input2.value = DadosDemo.formatarCPF(input2.value);
+            input2.setSelectionRange(input2.value.length, input2.value.length);
           });
           input2.addEventListener("blur", function () {
             var digitos = input2.value.replace(/\D/g, "");
@@ -837,6 +838,7 @@
           ajuda.className = "campo-ajuda";
           input2.addEventListener("input", function () {
             input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+            input2.setSelectionRange(input2.value.length, input2.value.length);
           });
           input2.addEventListener("blur", function () {
             var digitos = input2.value.replace(/\D/g, "");
@@ -860,6 +862,7 @@
           input2.addEventListener("input", function () {
             var d = input2.value.replace(/\D/g, "").slice(0, 8);
             input2.value = d.length > 5 ? d.slice(0, 5) + "-" + d.slice(5) : d;
+            input2.setSelectionRange(input2.value.length, input2.value.length);
           });
           input2.addEventListener("blur", function () {
             var digitos = input2.value.replace(/\D/g, "");
