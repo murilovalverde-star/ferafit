@@ -833,7 +833,9 @@
           });
         } else if (campo.tipo === "tel") {
           input2.placeholder = "+55 (11) 98888-7777";
-          input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+          if (input2.value) {
+            input2.value = DadosDemo.formatarTelefoneBR(input2.value);
+          }
           ajuda = document.createElement("small");
           ajuda.className = "campo-ajuda";
           input2.addEventListener("input", function () {
