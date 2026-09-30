@@ -39,11 +39,23 @@
 
             <div class="campo">
               <label for="senha-nova">Nova senha</label>
-              <input id="senha-nova" type="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password" minlength="8">
+              <div style="position:relative;">
+                <input id="senha-nova" type="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password" minlength="8" style="padding-right:44px;">
+                <button type="button" class="botao-olho-senha" data-alvo="senha-nova" onclick="alternarVisibilidadeSenha(this)" aria-label="Mostrar senha" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;padding:8px;cursor:pointer;color:var(--texto-secundario);display:flex;align-items:center;">
+                  <svg class="icone-olho-aberto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <svg class="icone-olho-fechado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.5 19.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                </button>
+              </div>
             </div>
             <div class="campo">
               <label for="senha-repetir">Repita a nova senha</label>
-              <input id="senha-repetir" type="password" placeholder="Repita a senha" autocomplete="new-password" minlength="8">
+              <div style="position:relative;">
+                <input id="senha-repetir" type="password" placeholder="Repita a senha" autocomplete="new-password" minlength="8" style="padding-right:44px;">
+                <button type="button" class="botao-olho-senha" data-alvo="senha-repetir" onclick="alternarVisibilidadeSenha(this)" aria-label="Mostrar senha" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;padding:8px;cursor:pointer;color:var(--texto-secundario);display:flex;align-items:center;">
+                  <svg class="icone-olho-aberto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <svg class="icone-olho-fechado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.5 19.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                </button>
+              </div>
             </div>
 
             <p id="erro-formulario" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
@@ -98,6 +110,16 @@
     });
 
     var MIN_CARACTERES = 8;
+
+    // Botão de olho para mostrar/esconder a senha digitada (pedido de Murilo, 2026-09-29).
+    function alternarVisibilidadeSenha(botao) {
+      var input = document.getElementById(botao.getAttribute("data-alvo"));
+      var mostrando = input.type === "text";
+      input.type = mostrando ? "password" : "text";
+      botao.querySelector(".icone-olho-aberto").style.display = mostrando ? "block" : "none";
+      botao.querySelector(".icone-olho-fechado").style.display = mostrando ? "none" : "block";
+      botao.setAttribute("aria-label", mostrando ? "Mostrar senha" : "Esconder senha");
+    }
 
     function mostrarEstado(id) {
       ["estado-carregando", "estado-formulario", "estado-sucesso", "estado-invalido"].forEach(function (e) {
@@ -155,15 +177,25 @@
         var resultado = await supabaseClient.auth.updateUser({ password: nova });
         if (resultado.error) {
           var erro = resultado.error;
+          // Acompanhamento da D039 (2026-09-29): registra o código/mensagem real do erro
+          // no console (nunca o token) para dar pra diagnosticar sem depender de adivinhação
+          // quando o motivo não é nenhum dos já tratados abaixo.
+          console.error("criar-senha.html: updateUser retornou erro", { code: erro && erro.code, status: erro && erro.status, message: erro && erro.message });
           // Achado E15 (23/09/2026): quando o Supabase recusa a senha por ela já ter
           // aparecido em vazamentos conhecidos (checagem HaveIBeenPwned), mostra um aviso
           // específico em vez do erro genérico. Texto definido por Murilo.
           var senhaVazada = erro && erro.code === "weak_password" &&
             erro.weak_password && Array.isArray(erro.weak_password.reasons) &&
             erro.weak_password.reasons.indexOf("pwned") !== -1;
+          // Achado D039-A (2026-09-29): o Supabase recusa a nova senha quando ela é igual
+          // à senha atual da conta (código "same_password") — comum ao testar de novo com
+          // a mesma senha de antes. Mensagem específica em vez do erro genérico.
+          var senhaIgualAnterior = erro && erro.code === "same_password";
           erroEl.textContent = senhaVazada
             ? "Senha de fácil dedução, troque por uma senha mais segura."
-            : "Não deu pra salvar agora. Tenta de novo em instantes.";
+            : senhaIgualAnterior
+              ? "Essa já é sua senha atual. Escolha uma senha diferente da anterior."
+              : "Não deu pra salvar agora. Tenta de novo em instantes.";
           erroEl.style.display = "block";
           botao.disabled = false;
           botao.textContent = "Salvar nova senha";
@@ -178,6 +210,7 @@
         await supabaseClient.auth.signOut();
         mostrarEstado("estado-sucesso");
       } catch (e) {
+        console.error("criar-senha.html: updateUser lançou exceção", { code: e && e.code, status: e && e.status, message: e && e.message });
         erroEl.textContent = "Não deu pra salvar agora. Tenta de novo em instantes.";
         erroEl.style.display = "block";
         botao.disabled = false;
