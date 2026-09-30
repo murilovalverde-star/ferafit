@@ -203,10 +203,20 @@
 
       // Achado E15 (23/09/2026): quando o Supabase recusa a senha por ela já ter
       // aparecido em vazamentos conhecidos (checagem HaveIBeenPwned), mostra um aviso
-      // específico em vez do erro genérico. Texto definido por Murilo. Intocado pela D040.
-      var senhaVazada = erro && erro.code === "weak_password" &&
-        erro.weak_password && Array.isArray(erro.weak_password.reasons) &&
-        erro.weak_password.reasons.indexOf("pwned") !== -1;
+      // específico em vez do erro genérico. Texto definido por Murilo.
+      // Correção D041 (2026-09-30): a checagem procurava `erro.weak_password.reasons`,
+      // mas a classe real que a biblioteca lança (`AuthWeakPasswordError`) guarda a lista
+      // em `erro.reasons` (propriedade própria da classe, não um objeto aninhado) -- por
+      // isso o aviso nunca aparecia, mesmo com o motivo certo vindo do servidor. Lê
+      // `erro.reasons` e, por segurança/compatibilidade, também `erro.weak_password?.reasons`
+      // caso esse formato apareça em alguma versão futura da biblioteca.
+      var motivosSenhaFraca = (erro && Array.isArray(erro.reasons) && erro.reasons) ||
+        (erro && erro.weak_password && Array.isArray(erro.weak_password.reasons) && erro.weak_password.reasons) ||
+        [];
+      var ehSenhaFraca = erro && erro.code === "weak_password";
+      var senhaVazada = ehSenhaFraca && motivosSenhaFraca.indexOf("pwned") !== -1;
+      var senhaCurtaOuCaracteres = ehSenhaFraca && !senhaVazada &&
+        (motivosSenhaFraca.indexOf("length") !== -1 || motivosSenhaFraca.indexOf("characters") !== -1);
       // Hipótese (não confirmada) de uma rodada anterior: o Supabase também pode recusar
       // quando a nova senha é igual à atual (código "same_password"). Mensagem específica
       // só quando o código realmente vier assim — nos outros casos, mensagem genérica +
@@ -215,9 +225,11 @@
 
       var mensagem = senhaVazada
         ? "Senha de fácil dedução, troque por uma senha mais segura."
-        : senhaIgualAnterior
-          ? "Essa já é sua senha atual. Escolha uma senha diferente da anterior."
-          : "Não deu pra salvar agora. Tenta de novo em instantes.";
+        : senhaCurtaOuCaracteres
+          ? "A senha precisa de " + MIN_CARACTERES + " caracteres, com uma combinação mais forte."
+          : senhaIgualAnterior
+            ? "Essa já é sua senha atual. Escolha uma senha diferente da anterior."
+            : "Não deu pra salvar agora. Tenta de novo em instantes.";
 
       erroEl.innerHTML = "";
       erroEl.appendChild(document.createTextNode(mensagem));
