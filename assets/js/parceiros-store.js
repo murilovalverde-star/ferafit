@@ -814,19 +814,414 @@
     });
   };
 
-  // --- Funções de gestão do admin — fora de escopo da D037 (item 3:
-  //     dependem das migrations 020/022, que a Backend ainda vai
-  //     escrever). Continuam como stub. ---
-  [
-    "listarPendentes", "listarAtivos", "listarTodos",
-    "perfilParceiro", "aprovarParceiro", "recusarParceiro", "suspenderParceiro", "reativarParceiro",
-    "historicoAcoesAdmin", "registrarCobranca", "registrarPagamento", "registrarAjuste",
-    "historicoCobranca", "statusCobranca", "listarFaixas", "definirPrecoFaixa", "definirFaixaParceiro"
-  ].forEach(function (nomeFuncao) {
-    ParceirosStoreSupabase[nomeFuncao] = function () {
-      throw new Error("ParceirosStore (Supabase): '" + nomeFuncao + "' ainda não implementada — aguarda o banco real (D087 da Backend, migration 020/022).");
+  // --- Funções de gestão do admin (D043, 2026-09-30) ---
+  // A migration 020 da Backend está em produção (confirmado pela D043 do
+  // Orquestrador) -- implementação real, abaixo, lida linha a linha do
+  // arquivo `fase2/sql/020_painel_admin_parceiros.sql` (Backend, só
+  // leitura) e de `SPEC_admin_parceiros_001.md`. Até aqui (D037/D042)
+  // estas 16 funções eram só stub -- ver STATUS.md, P32, para o registro
+  // completo dessa correção de premissa antes de implementar.
+  //
+  // `parceiro_faixas_comerciais` tem GRANT direto de SELECT/INSERT/
+  // UPDATE/DELETE para `authenticated`, com RLS por `sou_admin()` (seção
+  // 12 da migration) -- listarFaixas/definirPrecoFaixa leem/escrevem essa
+  // tabela direto, sem RPC, mesmo padrão já usado em
+  // `FeedbackStoreSupabase.listarFeedback` (feedback-store.js).
+  //
+  // `personais`/`academias` ainda NÃO têm `cnpj`, `email`, `telefone`,
+  // `cidade` (personal) nem `apresentacao` -- só chegam na migration 024,
+  // ainda não aplicada (D043, item 2). Os campos que `admin.html` já
+  // checa com `if (p.cnpj)`/`if (p.email)` simplesmente vêm `undefined`
+  // aqui -- não quebra a tela, só mostra menos do que a versão de
+  // demonstração até a 024 entrar.
+  //
+  // `registrarAjuste` continua como stub: não existe função RPC para
+  // "ajuste" na migration 020 (só `admin_registrar_cobranca` e
+  // `admin_registrar_pagamento`), e nenhum botão de `admin.html` chama
+  // essa função hoje -- fora do escopo literal da D043.
+  // `admin_listar_sugestoes_exercicio`/`admin_responder_sugestao_exercicio`
+  // (as 2 últimas das 11 funções da migration) também ficam de fora --
+  // nenhuma tela usa sugestão de exercício ainda.
+
+  function parametrosPorTipo(tipo, id) {
+    if (tipo !== "academia" && tipo !== "personal") {
+      throw new Error("Tipo de parceiro inválido: " + tipo + " (use 'academia' ou 'personal').");
+    }
+    return tipo === "academia" ? { p_personal_id: null, p_academia_id: id } : { p_personal_id: id, p_academia_id: null };
+  }
+
+  function linhaAcademiaParaParceiro(linha) {
+    return {
+      id: linha.id,
+      tipo: "academia",
+      nome: linha.nome,
+      cidade: linha.cidade,
+      ativa: linha.ativa,
+      ativo: linha.ativa,
+      faixaId: linha.faixa_comercial_id,
+      criadoEm: linha.criada_em,
+      // Sem leitura de galeria/foto de perfil nesta listagem (evita N
+      // chamadas extras de Storage por linha) -- ver urlFotoAssinada se
+      // precisar mostrar foto de um parceiro específico.
+      fotoPerfil: null,
+      galeria: []
     };
-  });
+  }
+
+  function linhaPersonalParaParceiro(linha) {
+    return {
+      id: linha.id,
+      tipo: "personal",
+      nome: linha.nome_exibicao,
+      cref: linha.cref,
+      ativo: linha.ativo,
+      faixaId: linha.faixa_comercial_id,
+      criadoEm: linha.criado_em,
+      fotoPerfil: null,
+      galeria: []
+    };
+  }
+
+  function linhaCobrancaParaItem(linha, tipo, id) {
+    return {
+      id: linha.id,
+      tipo: tipo,
+      parceiroId: id,
+      tipoEvento: linha.tipo_evento,
+      valor: linha.valor,
+      vencimento: linha.vencimento,
+      formaPagamento: linha.forma_pagamento,
+      observacao: linha.observacao,
+      criadoEm: linha.criado_em
+    };
+  }
+
+  function linhaAcaoParaItem(linha, tipo, id) {
+    return {
+      id: linha.id,
+      tipo: tipo,
+      parceiroId: id,
+      acao: linha.acao,
+      motivo: linha.motivo,
+      criadoEm: linha.criado_em
+    };
+  }
+
+  ParceirosStoreSupabase.listarFaixas = function () {
+    var cliente = clienteSupabase();
+    return cliente.from("parceiro_faixas_comerciais")
+      .select("id, nome_comercial, limite_alunos, preco_mensal, preco_excedente_por_aluno, ordem")
+      .order("ordem", { ascending: true })
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error("Não deu para ler as faixas comerciais agora — confira se o login de admin está ativo.");
+        }
+        return (resultado.data || []).map(function (linha) {
+          return {
+            id: linha.id,
+            rotulo: linha.nome_comercial,
+            limiteAlunos: linha.limite_alunos,
+            precoMensal: linha.preco_mensal,
+            precoExcedentePorAluno: linha.preco_excedente_por_aluno
+          };
+        });
+      });
+  };
+
+  ParceirosStoreSupabase.definirPrecoFaixa = function (faixaId, precoMensal, precoExcedentePorAluno) {
+    var cliente = clienteSupabase();
+    var valores = {
+      preco_mensal: (precoMensal === null || precoMensal === "" || precoMensal === undefined) ? null : Number(precoMensal),
+      preco_excedente_por_aluno: (precoExcedentePorAluno === null || precoExcedentePorAluno === "" || precoExcedentePorAluno === undefined) ? null : Number(precoExcedentePorAluno)
+    };
+    return cliente.from("parceiro_faixas_comerciais").update(valores).eq("id", faixaId).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para salvar o preço dessa faixa agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.listarPendentes = function () {
+    var cliente = clienteSupabase();
+    return Promise.all([
+      cliente.from("academias").select("id, nome, cidade, ativa, faixa_comercial_id, criada_em").eq("ativa", false),
+      cliente.from("personais").select("id, nome_exibicao, cref, ativo, faixa_comercial_id, criado_em").eq("ativo", false)
+    ]).then(function (resultados) {
+      var resAcademias = resultados[0], resPersonais = resultados[1];
+      if (resAcademias.error || resPersonais.error) {
+        throw new Error("Não deu para listar os parceiros pendentes agora — confira se o login de admin está ativo.");
+      }
+      var lista = (resAcademias.data || []).map(linhaAcademiaParaParceiro)
+        .concat((resPersonais.data || []).map(linhaPersonalParaParceiro));
+      lista.sort(function (a, b) { return new Date(a.criadoEm) - new Date(b.criadoEm); });
+      return lista;
+    });
+  };
+
+  ParceirosStoreSupabase.listarAtivos = function () {
+    var cliente = clienteSupabase();
+    return Promise.all([
+      cliente.from("academias").select("id, nome, cidade, ativa, faixa_comercial_id, criada_em").eq("ativa", true),
+      cliente.from("personais").select("id, nome_exibicao, cref, ativo, faixa_comercial_id, criado_em").eq("ativo", true)
+    ]).then(function (resultados) {
+      var resAcademias = resultados[0], resPersonais = resultados[1];
+      if (resAcademias.error || resPersonais.error) {
+        throw new Error("Não deu para listar os parceiros ativos agora — confira se o login de admin está ativo.");
+      }
+      var lista = (resAcademias.data || []).map(linhaAcademiaParaParceiro)
+        .concat((resPersonais.data || []).map(linhaPersonalParaParceiro));
+      lista.sort(function (a, b) { return new Date(a.criadoEm) - new Date(b.criadoEm); });
+      return lista;
+    });
+  };
+
+  ParceirosStoreSupabase.listarTodos = function () {
+    var cliente = clienteSupabase();
+    return Promise.all([
+      cliente.from("academias").select("id, nome, cidade, ativa, faixa_comercial_id, criada_em"),
+      cliente.from("personais").select("id, nome_exibicao, cref, ativo, faixa_comercial_id, criado_em")
+    ]).then(function (resultados) {
+      var resAcademias = resultados[0], resPersonais = resultados[1];
+      if (resAcademias.error || resPersonais.error) {
+        throw new Error("Não deu para listar os parceiros agora — confira se o login de admin está ativo.");
+      }
+      var lista = (resAcademias.data || []).map(linhaAcademiaParaParceiro)
+        .concat((resPersonais.data || []).map(linhaPersonalParaParceiro));
+      lista.sort(function (a, b) { return new Date(b.criadoEm) - new Date(a.criadoEm); });
+      return lista;
+    });
+  };
+
+  ParceirosStoreSupabase.perfilParceiro = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return cliente.rpc("admin_perfil_parceiro", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para ver o perfil desse parceiro agora.");
+      }
+      var linha = (resultado.data || [])[0];
+      if (!linha) {
+        throw new Error("Parceiro não encontrado.");
+      }
+      return {
+        id: id,
+        tipo: tipo,
+        nome: linha.nome,
+        ativo: linha.ativo,
+        faixaId: linha.faixa_comercial_id,
+        faixaNome: linha.faixa_comercial_nome,
+        precoMensal: linha.preco_mensal,
+        precoExcedentePorAluno: linha.preco_excedente_por_aluno,
+        limiteAlunos: linha.limite_alunos,
+        alunosAtivos: linha.alunos_ativos,
+        criadoEm: linha.criado_em
+      };
+    });
+  };
+
+  ParceirosStoreSupabase.aprovarParceiro = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return cliente.rpc("admin_aprovar_parceiro", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para aprovar esse parceiro agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.recusarParceiro = function (tipo, id, motivo) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    params.p_motivo = (motivo || "").trim() || null;
+    return cliente.rpc("admin_recusar_parceiro", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para recusar esse parceiro agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.suspenderParceiro = function (tipo, id, motivo) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    params.p_motivo = (motivo || "").trim() || null;
+    return cliente.rpc("admin_suspender_parceiro", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para suspender esse parceiro agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.reativarParceiro = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return cliente.rpc("admin_reativar_parceiro", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para reativar esse parceiro agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.definirFaixaParceiro = function (tipo, id, faixaId) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    params.p_faixa_id = faixaId;
+    return cliente.rpc("admin_definir_faixa_comercial", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para definir a faixa comercial agora.");
+      }
+      return true;
+    });
+  };
+
+  ParceirosStoreSupabase.registrarCobranca = function (tipo, id, valor, vencimento, observacao) {
+    if (!(valor >= 0)) {
+      return Promise.reject(new Error("Valor da cobrança precisa ser um número >= 0."));
+    }
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    params.p_valor = valor;
+    params.p_vencimento = vencimento || null;
+    params.p_observacao = (observacao || "").trim() || null;
+    return cliente.rpc("admin_registrar_cobranca", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para registrar essa cobrança agora.");
+      }
+      return resultado.data;
+    });
+  };
+
+  ParceirosStoreSupabase.registrarPagamento = function (tipo, id, valor, formaPagamento, observacao) {
+    if (!(valor >= 0)) {
+      return Promise.reject(new Error("Valor do pagamento precisa ser um número >= 0."));
+    }
+    if (["pix", "transferencia", "outro"].indexOf(formaPagamento) === -1) {
+      return Promise.reject(new Error("Forma de pagamento precisa ser 'pix', 'transferencia' ou 'outro'."));
+    }
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    params.p_valor = valor;
+    params.p_forma_pagamento = formaPagamento;
+    params.p_observacao = (observacao || "").trim() || null;
+    return cliente.rpc("admin_registrar_pagamento", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para registrar esse pagamento agora.");
+      }
+      return resultado.data;
+    });
+  };
+
+  ParceirosStoreSupabase.historicoCobranca = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var coluna = tipo === "academia" ? "academia_id" : "personal_id";
+    return cliente.from("parceiro_cobrancas")
+      .select("id, tipo_evento, valor, vencimento, forma_pagamento, observacao, criado_em")
+      .eq(coluna, id)
+      .order("criado_em", { ascending: false })
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error("Não deu para ler o histórico de cobrança agora.");
+        }
+        return (resultado.data || []).map(function (linha) { return linhaCobrancaParaItem(linha, tipo, id); });
+      });
+  };
+
+  ParceirosStoreSupabase.historicoAcoesAdmin = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var coluna = tipo === "academia" ? "academia_id" : "personal_id";
+    return cliente.from("parceiro_acoes_admin")
+      .select("id, acao, motivo, criado_em")
+      .eq(coluna, id)
+      .order("criado_em", { ascending: false })
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error("Não deu para ler o histórico de ações agora.");
+        }
+        return (resultado.data || []).map(function (linha) { return linhaAcaoParaItem(linha, tipo, id); });
+      });
+  };
+
+  ParceirosStoreSupabase.statusCobranca = function (tipo, id) {
+    var cliente = clienteSupabase();
+    var params;
+    try {
+      params = parametrosPorTipo(tipo, id);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return cliente.rpc("parceiro_status_cobranca", params).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para ver o status de cobrança agora.");
+      }
+      var linha = (resultado.data || [])[0] || {};
+      var dias = linha.dias_em_atraso;
+      var rotulo;
+      if (dias === null || dias === undefined) {
+        rotulo = linha.ultimo_vencimento ? "em dia" : "sem cobrança registrada";
+      } else if (dias > 0) {
+        rotulo = "vencido há " + dias + " dia" + (dias === 1 ? "" : "s");
+      } else {
+        rotulo = "em dia";
+      }
+      return {
+        ultimoVencimento: linha.ultimo_vencimento || null,
+        ultimoPagamentoEm: linha.ultimo_pagamento_em || null,
+        diasEmAtraso: (dias === null || dias === undefined) ? 0 : Math.max(0, dias),
+        rotulo: rotulo
+      };
+    });
+  };
+
+  // Sem função RPC correspondente na migration 020 e sem nenhuma tela
+  // chamando isso hoje -- ver nota no topo deste bloco. Continua stub,
+  // de propósito, fora do escopo literal da D043.
+  ParceirosStoreSupabase.registrarAjuste = function () {
+    throw new Error("ParceirosStore (Supabase): 'registrarAjuste' ainda não implementada — não existe função admin_registrar_ajuste na migration 020, e nenhuma tela chama isso hoje (D043).");
+  };
 
   // ⚠️ NÃO TROCAR — o site publicado continua em demonstração até a
   // Backend confirmar (D089 dela) que a migration 019 foi aplicada em

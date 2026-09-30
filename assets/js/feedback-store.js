@@ -21,9 +21,10 @@
 // A leitura real usa a política RLS "feedback: admin lê tudo", que
 // já existe na 006 — não precisa de Edge Function nem de função
 // nova no banco, só um SELECT direto, protegido por RLS, com a
-// chave `publishable`. O que falta é o login de admin de verdade
-// (a Backend marcar Murilo/Gabriela como admin — D092 dela). Até
-// lá, `global.FeedbackStore` fica em `FeedbackStoreDemo`.
+// chave `publishable`. O login de admin de verdade existe desde a
+// D043 (2026-09-30, admin.html) -- Murilo e Gabriela já têm
+// `app_metadata.role = 'admin'` (Backend, D096) -- então
+// `global.FeedbackStore` está em `FeedbackStoreSupabase`.
 //
 // --- Sugestão de IA por categoria (adaptação registrada no
 //     STATUS.md, P27) ---
@@ -319,10 +320,10 @@
       });
   };
 
-  // ⚠️ NÃO TROCAR — depende do login real de admin (D092 da
-  // Backend). Ver aviso completo no cabeçalho deste arquivo e no
-  // STATUS.md (P27/D038).
-  global.FeedbackStore = FeedbackStoreDemo;
+  // Ligado na D043 (2026-09-30) -- o login real de admin existe agora
+  // (Supabase Auth em admin.html, checagem de sou_admin()). Ver
+  // STATUS.md (P27/D038 e P32/D043).
+  global.FeedbackStore = FeedbackStoreSupabase;
   global.FeedbackStoreDemo = FeedbackStoreDemo;
   global.FeedbackStoreSupabase = FeedbackStoreSupabase;
   global.FeedbackUtil = FeedbackUtil;

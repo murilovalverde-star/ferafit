@@ -4,16 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Administrador — Fera Fit</title>
-  <meta name="description" content="Desenho do painel administrativo do Fera Fit — sem indexação, uso interno.">
+  <meta name="description" content="Painel administrativo do Fera Fit — sem indexação, uso interno.">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="assets/img/favicon.png">
   <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Biblioteca hospedada localmente (não via CDN de terceiro) — D010, 17/09/2026, achado da Segurança.
+       Versão baixada: @supabase/supabase-js@2.116.0 (dist/umd/supabase.js). Para atualizar, baixar de novo
+       de https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.X.X e substituir este arquivo. -->
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
   <script src="assets/js/feedback-store.js"></script>
 </head>
 <body>
-  <div class="tarja-demo">Demonstração — tela de desenho, sem dados reais. Login de teste, sem autenticação de verdade.</div>
+  <div class="tarja-demo">Login real (Supabase Auth) — D043, 30/09/2026. "Gestão de parceiros" e "Feedback do Beta" usam dado real do banco; o restante do painel (ex.: Catálogo de exercícios) ainda é desenho de tela, sem dados reais.</div>
 
   <header class="site-header">
     <div class="container">
@@ -28,22 +32,21 @@
     </div>
   </header>
 
-  <!-- LOGIN COSMÉTICO — sem autenticação real, sem sessão, sem dado nenhum. Compara só no navegador. -->
+  <!-- LOGIN REAL (Supabase Auth, signInWithPassword + checagem de sou_admin()) -- D043, 2026-09-30. Ver STATUS.md, P32. -->
   <section class="bloco" id="admin-login-tela">
     <div class="container">
       <div class="parceiro-box" style="max-width:380px;">
         <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 18px;text-align:center;">Entrar no painel</h1>
         <div class="campo">
-          <label for="admin-usuario">Usuário</label>
-          <input id="admin-usuario" type="text" placeholder="admin">
+          <label for="admin-email">E-mail</label>
+          <input id="admin-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="username">
         </div>
         <div class="campo">
           <label for="admin-senha">Senha</label>
-          <input id="admin-senha" type="password" placeholder="admin">
+          <input id="admin-senha" type="password" placeholder="senha" autocomplete="current-password">
         </div>
-        <p id="admin-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Usuário ou senha incorretos.</p>
-        <button class="botao-primario largura-total" type="button" onclick="entrarAdmin()">Entrar</button>
-        <p style="color:var(--texto-secundario);font-size:0.76rem;margin:14px 0 0;text-align:center;">Login de demonstração — sem conexão com nenhum sistema real.</p>
+        <p id="admin-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
+        <button id="admin-login-botao" class="botao-primario largura-total" type="button" onclick="entrarAdmin()">Entrar</button>
       </div>
     </div>
   </section>
@@ -51,15 +54,20 @@
   <main id="admin-conteudo" style="display:none;">
     <section class="admin-header">
       <div class="container">
-        <h1>Painel do Administrador</h1>
-        <p class="subtitle">
-          Desenho de tela para Murilo e a equipe ajustarem o app e o site sem escrever código.
-          Esta página é uma maquete estática — os botões não fazem nada ainda, e qualquer dado
-          de exemplo está marcado com <span class="tag-exemplo">exemplo</span>.
-        </p>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+          <div>
+            <h1>Painel do Administrador</h1>
+            <p class="subtitle">
+              Login real (Supabase Auth, D043). "Gestão de parceiros" e "Feedback do Beta" usam dado
+              real do banco — o restante do painel ainda é desenho de tela, sem dados reais, marcado
+              com <span class="tag-exemplo">exemplo</span>.
+            </p>
+          </div>
+          <button type="button" onclick="sairAdmin()" style="border:1px solid var(--card-border);background:transparent;color:var(--texto);font-size:0.85rem;font-weight:700;padding:8px 18px;border-radius:999px;cursor:pointer;font-family:inherit;white-space:nowrap;">Sair</button>
+        </div>
         <div class="aviso-desenho">
-          ⚠ Esta é uma tela de desenho, não um painel funcional. Ver a seção "O que falta de
-          terceiros" no fim da página.
+          ⚠ Só "Gestão de parceiros" e "Feedback do Beta" usam dado real hoje. O resto do painel
+          ainda é desenho de tela — ver a seção "O que falta de terceiros" no fim da página.
         </div>
       </div>
     </section>
@@ -354,24 +362,87 @@
   </footer>
 
   <script>
-    // Login cosmético — só compara texto digitado, roda 100% no navegador.
-    // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
-    // Combinado em D009 (16/09/2026): sai do ar antes de existir login de verdade.
+    // ===========================================================
+    // D043 (2026-09-30) — Login real de admin (Supabase Auth). Troca o
+    // login de demonstração (admin/admin, D009) por signInWithPassword
+    // com a chave publishable, seguido de checagem de sou_admin() no
+    // banco -- quem não for admin nunca vê o painel, só a mensagem
+    // genérica "Esta conta não tem acesso ao painel.". O login antigo
+    // (admin/admin) fica preservado só no backup datado deste arquivo
+    // feito antes desta publicação (regra de nunca apagar) -- não
+    // existe mais no arquivo publicado.
+    //
+    // Sessão: um único cliente Supabase, criado aqui, com
+    // storage:sessionStorage (não o localStorage padrão) -- sobrevive a
+    // recarregar a página, mas não a fechar a aba/navegador, que é o
+    // pedido da D043 ("expira ao fechar o navegador"). Esse mesmo
+    // cliente é injetado em ParceirosStoreSupabase e FeedbackStoreSupabase
+    // pelo gancho que os dois arquivos já expunham para os testes
+    // automatizados -- assim as três partes (login, gestão de
+    // parceiros, feedback do beta) enxergam a mesma sessão, sem
+    // duplicar configuração de cliente em três lugares. Ponto para a
+    // Segurança revisar depois (D032 dela, como a própria D043 previu).
+    // ===========================================================
+    var SUPABASE_URL_ADMIN = "https://jgzbxouzqtwfjapnfooj.supabase.co";
+    var SUPABASE_PUBLISHABLE_KEY_ADMIN = "sb_publishable_vKEyW3okSfWu_RtxR-vbuw_Vl711Dy_";
+
+    var clienteAdmin = window.supabase.createClient(SUPABASE_URL_ADMIN, SUPABASE_PUBLISHABLE_KEY_ADMIN, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.sessionStorage }
+    });
+    // Mesmo cliente para as três partes -- ver nota acima.
+    ParceirosStoreSupabaseTestes_definirCliente(clienteAdmin);
+    FeedbackStoreSupabaseTestes_definirCliente(clienteAdmin);
+
     function entrarAdmin() {
-      var usuario = document.getElementById('admin-usuario').value;
+      var email = document.getElementById('admin-email').value;
       var senha = document.getElementById('admin-senha').value;
       var erro = document.getElementById('admin-login-erro');
-      if (usuario === 'admin' && senha === 'admin') {
-        document.getElementById('admin-login-tela').style.display = 'none';
-        document.getElementById('admin-conteudo').style.display = 'block';
-        renderPortfolio();
-        renderFaixas();
-        renderPendentesParceiros();
-        renderAtivosParceiros();
-        inicializarFeedbackBeta();
-      } else {
-        erro.style.display = 'block';
-      }
+      var botao = document.getElementById('admin-login-botao');
+      erro.style.display = 'none';
+      erro.textContent = '';
+      botao.disabled = true;
+      botao.textContent = 'Entrando...';
+
+      ParceirosStoreSupabase.entrarComEmailSenha(email, senha)
+        .then(function () {
+          return clienteAdmin.rpc('sou_admin');
+        })
+        .then(function (resultado) {
+          if (resultado.error) {
+            throw new Error('Não foi possível entrar agora. Tente de novo em instantes.');
+          }
+          if (resultado.data !== true) {
+            // Não é admin: nunca deixa a sessão autenticada pendurada.
+            return ParceirosStoreSupabase.sairDaConta().then(function () {
+              throw new Error('Esta conta não tem acesso ao painel.');
+            });
+          }
+          document.getElementById('admin-login-tela').style.display = 'none';
+          document.getElementById('admin-conteudo').style.display = 'block';
+          renderPortfolio();
+          renderFaixas();
+          renderPendentesParceiros();
+          renderAtivosParceiros();
+          inicializarFeedbackBeta();
+        })
+        .catch(function (e) {
+          erro.textContent = (e && e.message) || 'Não foi possível entrar agora.';
+          erro.style.display = 'block';
+        })
+        .then(function () {
+          botao.disabled = false;
+          botao.textContent = 'Entrar';
+        });
+    }
+
+    function sairAdmin() {
+      ParceirosStoreSupabase.sairDaConta().then(function () {
+        document.getElementById('admin-conteudo').style.display = 'none';
+        document.getElementById('admin-login-tela').style.display = 'block';
+        document.getElementById('admin-email').value = '';
+        document.getElementById('admin-senha').value = '';
+        document.getElementById('admin-login-erro').style.display = 'none';
+      });
     }
 
     function mostrarPainel(tipo) {
@@ -444,41 +515,55 @@
   </script>
   <script>
     // ===========================================================
-    // D036 (2026-09-29) -- Gestao de parceiros (academia + personal).
-    // So le/escreve via ParceirosStore (assets/js/parceiros-store.js)
-    // -- interface trocavel, ver cabecalho daquele arquivo. Nada aqui
-    // fala com o Supabase.
+    // D043 (2026-09-30) -- Gestao de parceiros ligada ao banco real
+    // (migration 020, em producao). Chama ParceirosStoreSupabase
+    // diretamente (nao o switch global ParceirosStore, que continua em
+    // ParceirosStoreDemo para nao ligar cadastro/login/fotos de
+    // parceiro -- ver STATUS.md, P32/D043, item 2). Cada funcao de
+    // render virou assincrona (a versao D036/demonstracao era
+    // sincrona, so localStorage); qualquer erro de leitura mostra
+    // mensagem no lugar do conteudo, em vez de travar a tela.
     // ===========================================================
     function formatarMoeda(valor) {
       if (valor === null || valor === undefined || valor === '') { return 'nao definido'; }
       return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
     }
 
+    function mostrarErroContainer(idContainer, erro) {
+      var container = document.getElementById(idContainer);
+      if (!container) { return; }
+      container.innerHTML = '<p class="estado-vazio">Não deu para carregar agora: ' + escaparHtml((erro && erro.message) || String(erro)) + '</p>';
+    }
+
     function renderFaixas() {
       var container = document.getElementById('parceiros-faixas');
       if (!container) { return; }
-      var faixas = ParceirosStore.listarFaixas();
-      var html = '';
-      faixas.forEach(function (f) {
-        html += '<div class="linha-mock" style="align-items:flex-end;flex-wrap:wrap;gap:10px;">'
-          + '<span class="rotulo">' + escaparHtml(f.rotulo) + '</span>'
-          + '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
-          + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Mensal (R$)'
-          + '<input type="number" step="0.01" min="0" id="faixa-preco-' + f.id + '" value="' + (f.precoMensal === null ? '' : f.precoMensal) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
-          + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Excedente/aluno (R$)'
-          + '<input type="number" step="0.01" min="0" id="faixa-excedente-' + f.id + '" value="' + (f.precoExcedentePorAluno === null ? '' : f.precoExcedentePorAluno) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
-          + '<button type="button" onclick="salvarFaixa(\'' + f.id + '\')" style="border:1px solid var(--card-border);background:transparent;color:var(--texto);font-size:0.76rem;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;">Salvar</button>'
-          + '</span></div>';
-      });
-      container.innerHTML = html;
+      container.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+      return ParceirosStoreSupabase.listarFaixas().then(function (faixas) {
+        var html = '';
+        faixas.forEach(function (f) {
+          html += '<div class="linha-mock" style="align-items:flex-end;flex-wrap:wrap;gap:10px;">'
+            + '<span class="rotulo">' + escaparHtml(f.rotulo) + '</span>'
+            + '<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+            + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Mensal (R$)'
+            + '<input type="number" step="0.01" min="0" id="faixa-preco-' + f.id + '" value="' + (f.precoMensal === null ? '' : f.precoMensal) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
+            + '<label style="font-size:0.72rem;color:var(--texto-secundario);">Excedente/aluno (R$)'
+            + '<input type="number" step="0.01" min="0" id="faixa-excedente-' + f.id + '" value="' + (f.precoExcedentePorAluno === null ? '' : f.precoExcedentePorAluno) + '" style="width:90px;margin-left:6px;" placeholder="nao definido"></label>'
+            + '<button type="button" onclick="salvarFaixa(\'' + f.id + '\')" style="border:1px solid var(--card-border);background:transparent;color:var(--texto);font-size:0.76rem;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;">Salvar</button>'
+            + '</span></div>';
+        });
+        container.innerHTML = html;
+      }).catch(function (e) { mostrarErroContainer('parceiros-faixas', e); });
     }
 
     function salvarFaixa(faixaId) {
       var preco = document.getElementById('faixa-preco-' + faixaId).value;
       var excedente = document.getElementById('faixa-excedente-' + faixaId).value;
-      ParceirosStore.definirPrecoFaixa(faixaId, preco === '' ? null : preco, excedente === '' ? null : excedente);
-      renderFaixas();
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.definirPrecoFaixa(faixaId, preco === '' ? null : preco, excedente === '' ? null : excedente)
+        .then(function () {
+          return Promise.all([renderFaixas(), renderAtivosParceiros()]);
+        })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function rotuloTipo(tipo) { return tipo === 'academia' ? 'Academia' : 'Personal'; }
@@ -493,49 +578,70 @@
     function renderPendentesParceiros() {
       var container = document.getElementById('parceiros-pendentes');
       if (!container) { return; }
-      var lista = ParceirosStore.listarPendentes();
-      if (!lista.length) {
-        container.innerHTML = '<p class="estado-vazio">Nenhum cadastro aguardando aprovacao neste navegador. Envie um teste pela aba "Quero me cadastrar" em parceiro.html (academia ou personal).</p>';
-        return;
-      }
-      var html = '';
-      lista.forEach(function (p) {
-        var meta = [rotuloTipo(p.tipo)];
-        if (p.cref) { meta.push('CREF ' + escaparHtml(p.cref)); }
-        if (p.cnpj) { meta.push('CNPJ ' + escaparHtml(p.cnpj)); }
-        if (p.cidade) { meta.push(escaparHtml(p.cidade)); }
-        if (p.email) { meta.push(escaparHtml(p.email)); }
-        html += '<div class="linha-portfolio">'
-          + '<div class="portfolio-principal">'
-          + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
-          + '<span class="portfolio-status pendente">Aguardando aprovacao</span>'
-          + '</div>'
-          + '<div class="portfolio-meta">' + meta.join(' -- ') + '</div>'
-          + '<div class="portfolio-meta">' + linhaFotos(p) + '</div>'
-          + '<div class="portfolio-acoes">'
-          + '<button type="button" onclick="aprovarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Aprovar</button>'
-          + '<button type="button" class="recusar" onclick="recusarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Recusar</button>'
-          + '</div>'
-          + '</div>';
-      });
-      container.innerHTML = html;
+      container.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+      return ParceirosStoreSupabase.listarPendentes().then(function (lista) {
+        if (!lista.length) {
+          container.innerHTML = '<p class="estado-vazio">Nenhum cadastro aguardando aprovacao.</p>';
+          return;
+        }
+        return Promise.all(lista.map(function (p) {
+          return ParceirosStoreSupabase.historicoAcoesAdmin(p.tipo, p.id);
+        })).then(function (historicos) {
+          var html = '';
+          lista.forEach(function (p, i) {
+            // Mais recente primeiro (ver historicoAcoesAdmin) -- se a
+            // ultima acao sobre esse parceiro foi "suspenso", ele ja
+            // passou por aprovacao antes: mostra Reativar, nao Aprovar/
+            // Recusar de novo (distincao que a D036/demonstracao nao
+            // fazia, e que a D043 pede ao nomear "reativar" como acao
+            // propria, distinta de "aprovar").
+            var ultimaAcao = historicos[i][0];
+            var foiSuspenso = ultimaAcao && ultimaAcao.acao === 'suspenso';
+            var meta = [rotuloTipo(p.tipo)];
+            if (p.cref) { meta.push('CREF ' + escaparHtml(p.cref)); }
+            if (p.cnpj) { meta.push('CNPJ ' + escaparHtml(p.cnpj)); }
+            if (p.cidade) { meta.push(escaparHtml(p.cidade)); }
+            if (p.email) { meta.push(escaparHtml(p.email)); }
+            var acoes = foiSuspenso
+              ? '<button type="button" onclick="reativarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Reativar</button>'
+              : '<button type="button" onclick="aprovarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Aprovar</button>'
+                + '<button type="button" class="recusar" onclick="recusarParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Recusar</button>';
+            html += '<div class="linha-portfolio">'
+              + '<div class="portfolio-principal">'
+              + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
+              + '<span class="portfolio-status pendente">' + (foiSuspenso ? 'Suspenso' : 'Aguardando aprovacao') + '</span>'
+              + '</div>'
+              + '<div class="portfolio-meta">' + meta.join(' -- ') + '</div>'
+              + '<div class="portfolio-meta">' + linhaFotos(p) + '</div>'
+              + '<div class="portfolio-acoes">' + acoes + '</div>'
+              + '</div>';
+          });
+          container.innerHTML = html;
+        });
+      }).catch(function (e) { mostrarErroContainer('parceiros-pendentes', e); });
     }
 
     function aprovarParceiroUI(tipo, id) {
-      ParceirosStore.aprovarParceiro(tipo, id);
-      renderPendentesParceiros();
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.aprovarParceiro(tipo, id)
+        .then(function () { return Promise.all([renderPendentesParceiros(), renderAtivosParceiros()]); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function recusarParceiroUI(tipo, id) {
       var motivo = window.prompt('Motivo da recusa (aparece so no historico interno):', '');
       if (motivo === null) { return; }
-      ParceirosStore.recusarParceiro(tipo, id, motivo);
-      renderPendentesParceiros();
+      ParceirosStoreSupabase.recusarParceiro(tipo, id, motivo)
+        .then(function () { return renderPendentesParceiros(); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
-    function opcoesFaixas(faixaIdAtual) {
-      var faixas = ParceirosStore.listarFaixas();
+    function reativarParceiroUI(tipo, id) {
+      ParceirosStoreSupabase.reativarParceiro(tipo, id)
+        .then(function () { return Promise.all([renderPendentesParceiros(), renderAtivosParceiros()]); })
+        .catch(function (e) { window.alert(e.message); });
+    }
+
+    function opcoesFaixas(faixas, faixaIdAtual) {
       var html = '<option value="">Sem faixa definida</option>';
       faixas.forEach(function (f) {
         html += '<option value="' + f.id + '"' + (f.id === faixaIdAtual ? ' selected' : '') + '>' + escaparHtml(f.rotulo) + '</option>';
@@ -546,49 +652,65 @@
     function renderAtivosParceiros() {
       var container = document.getElementById('parceiros-ativos');
       if (!container) { return; }
-      var lista = ParceirosStore.listarAtivos();
-      if (!lista.length) {
-        container.innerHTML = '<p class="estado-vazio">Nenhum parceiro ativo ainda. Aprove um cadastro pendente acima.</p>';
-        return;
-      }
-      var html = '';
-      lista.forEach(function (p) {
-        var status = ParceirosStore.statusCobranca(p.tipo, p.id);
-        var perfil = ParceirosStore.perfilParceiro(p.tipo, p.id);
-        var classeStatus = status.rotulo === 'em dia' ? 'aprovado' : (status.rotulo.indexOf('vencido') === 0 ? 'recusado' : 'pendente');
-        html += '<div class="linha-portfolio">'
-          + '<div class="portfolio-principal">'
-          + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
-          + '<span class="portfolio-status aprovado">' + rotuloTipo(p.tipo) + ' ativo(a)</span>'
-          + '<span class="portfolio-status ' + classeStatus + '">' + escaparHtml(status.rotulo) + '</span>'
-          + '</div>'
-          + '<div class="portfolio-meta">Alunos ativos (contagem real vem do banco): ' + perfil.alunosAtivos + '</div>'
-          + '<div class="portfolio-meta">Ultimo vencimento: ' + (status.ultimoVencimento || 'nenhum') + '</div>'
-          + '<div class="portfolio-meta">Faixa: <select onchange="definirFaixaUI(\'' + p.tipo + '\',\'' + p.id + '\',this.value)">' + opcoesFaixas(p.faixaId) + '</select></div>'
-          + '<div class="portfolio-acoes">'
-          + '<button type="button" onclick="registrarCobrancaUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar cobranca</button>'
-          + '<button type="button" onclick="registrarPagamentoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar pagamento</button>'
-          + '<button type="button" onclick="verHistoricoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Ver historico</button>'
-          + '<button type="button" class="recusar" onclick="suspenderParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Suspender</button>'
-          + '</div>'
-          + '<div id="historico-' + p.id + '" style="display:none;margin-top:10px;"></div>'
-          + '</div>';
-      });
-      container.innerHTML = html;
+      container.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+      var listaFinal, faixasFinal;
+      return ParceirosStoreSupabase.listarAtivos().then(function (lista) {
+        listaFinal = lista;
+        if (!lista.length) {
+          container.innerHTML = '<p class="estado-vazio">Nenhum parceiro ativo ainda.</p>';
+          return null;
+        }
+        return ParceirosStoreSupabase.listarFaixas().then(function (faixas) {
+          faixasFinal = faixas;
+          return Promise.all(lista.map(function (p) {
+            return Promise.all([
+              ParceirosStoreSupabase.statusCobranca(p.tipo, p.id),
+              ParceirosStoreSupabase.perfilParceiro(p.tipo, p.id)
+            ]);
+          }));
+        });
+      }).then(function (statusEPerfis) {
+        if (!statusEPerfis) { return; }
+        var html = '';
+        listaFinal.forEach(function (p, i) {
+          var status = statusEPerfis[i][0];
+          var perfil = statusEPerfis[i][1];
+          var classeStatus = status.rotulo === 'em dia' ? 'aprovado' : (status.rotulo.indexOf('vencido') === 0 ? 'recusado' : 'pendente');
+          html += '<div class="linha-portfolio">'
+            + '<div class="portfolio-principal">'
+            + '<span class="portfolio-nome">' + escaparHtml(p.nome || '(sem nome)') + '</span>'
+            + '<span class="portfolio-status aprovado">' + rotuloTipo(p.tipo) + ' ativo(a)</span>'
+            + '<span class="portfolio-status ' + classeStatus + '">' + escaparHtml(status.rotulo) + '</span>'
+            + '</div>'
+            + '<div class="portfolio-meta">Alunos ativos (contagem real vem do banco): ' + perfil.alunosAtivos + '</div>'
+            + '<div class="portfolio-meta">Ultimo vencimento: ' + (status.ultimoVencimento || 'nenhum') + '</div>'
+            + '<div class="portfolio-meta">Faixa: <select onchange="definirFaixaUI(\'' + p.tipo + '\',\'' + p.id + '\',this.value)">' + opcoesFaixas(faixasFinal, p.faixaId) + '</select></div>'
+            + '<div class="portfolio-acoes">'
+            + '<button type="button" onclick="registrarCobrancaUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar cobranca</button>'
+            + '<button type="button" onclick="registrarPagamentoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Registrar pagamento</button>'
+            + '<button type="button" onclick="verHistoricoUI(\'' + p.tipo + '\',\'' + p.id + '\')">Ver historico</button>'
+            + '<button type="button" class="recusar" onclick="suspenderParceiroUI(\'' + p.tipo + '\',\'' + p.id + '\')">Suspender</button>'
+            + '</div>'
+            + '<div id="historico-' + p.id + '" style="display:none;margin-top:10px;"></div>'
+            + '</div>';
+        });
+        container.innerHTML = html;
+      }).catch(function (e) { mostrarErroContainer('parceiros-ativos', e); });
     }
 
     function definirFaixaUI(tipo, id, faixaId) {
       if (!faixaId) { return; }
-      ParceirosStore.definirFaixaParceiro(tipo, id, faixaId);
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.definirFaixaParceiro(tipo, id, faixaId)
+        .then(function () { return renderAtivosParceiros(); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function suspenderParceiroUI(tipo, id) {
       var motivo = window.prompt('Motivo da suspensao:', '');
       if (motivo === null) { return; }
-      ParceirosStore.suspenderParceiro(tipo, id, motivo);
-      renderPendentesParceiros();
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.suspenderParceiro(tipo, id, motivo)
+        .then(function () { return Promise.all([renderPendentesParceiros(), renderAtivosParceiros()]); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function registrarCobrancaUI(tipo, id) {
@@ -596,8 +718,9 @@
       if (valor === null || valor === '') { return; }
       var vencimento = window.prompt('Data de vencimento (AAAA-MM-DD):', '');
       if (vencimento === null || vencimento === '') { return; }
-      ParceirosStore.registrarCobranca(tipo, id, Number(valor), vencimento, '');
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.registrarCobranca(tipo, id, Number(valor), vencimento, '')
+        .then(function () { return renderAtivosParceiros(); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function registrarPagamentoUI(tipo, id) {
@@ -605,52 +728,55 @@
       if (valor === null || valor === '') { return; }
       var forma = window.prompt('Forma de pagamento (pix / transferencia / outro):', 'pix');
       if (forma === null) { return; }
-      try {
-        ParceirosStore.registrarPagamento(tipo, id, Number(valor), forma.trim().toLowerCase(), '');
-      } catch (e) {
-        window.alert(e.message);
-        return;
-      }
-      renderAtivosParceiros();
+      ParceirosStoreSupabase.registrarPagamento(tipo, id, Number(valor), forma.trim().toLowerCase(), '')
+        .then(function () { return renderAtivosParceiros(); })
+        .catch(function (e) { window.alert(e.message); });
     }
 
     function verHistoricoUI(tipo, id) {
       var div = document.getElementById('historico-' + id);
       if (!div) { return; }
       if (div.style.display !== 'none') { div.style.display = 'none'; return; }
-      var cobrancas = ParceirosStore.historicoCobranca(tipo, id);
-      var acoes = ParceirosStore.historicoAcoesAdmin(tipo, id);
-      var html = '<div class="admin-mock">';
-      html += '<div class="linha-mock" style="border-bottom:none;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Historico de cobranca (nunca editado -- correcao e linha nova)</span><span></span></div>';
-      if (!cobrancas.length) {
-        html += '<p class="estado-vazio" style="padding:6px 0;">Nenhum lancamento ainda.</p>';
-      } else {
-        cobrancas.forEach(function (c) {
-          var rotuloEvento = c.tipoEvento === 'cobranca' ? 'Cobranca' : (c.tipoEvento === 'pagamento' ? 'Pagamento (' + escaparHtml(c.formaPagamento || '') + ')' : 'Ajuste');
-          html += '<div class="linha-mock"><span class="rotulo">' + rotuloEvento + (c.vencimento ? ' -- vence ' + c.vencimento : '') + (c.observacao ? ' -- ' + escaparHtml(c.observacao) : '') + '</span><span>' + formatarMoeda(c.valor) + '</span></div>';
-        });
-      }
-      html += '<div class="linha-mock" style="border-bottom:none;margin-top:8px;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Auditoria (aprovar/recusar/suspender/reativar)</span><span></span></div>';
-      if (!acoes.length) {
-        html += '<p class="estado-vazio" style="padding:6px 0;">Nenhuma acao registrada ainda.</p>';
-      } else {
-        acoes.forEach(function (a) {
-          html += '<div class="linha-mock"><span class="rotulo">' + a.acao + (a.motivo ? ' -- ' + escaparHtml(a.motivo) : '') + '</span><span>' + new Date(a.criadoEm).toLocaleString('pt-BR') + '</span></div>';
-        });
-      }
-      html += '</div>';
-      div.innerHTML = html;
+      div.innerHTML = '<p class="estado-vazio" style="padding:6px 0;">Carregando...</p>';
       div.style.display = 'block';
+      Promise.all([
+        ParceirosStoreSupabase.historicoCobranca(tipo, id),
+        ParceirosStoreSupabase.historicoAcoesAdmin(tipo, id)
+      ]).then(function (resultados) {
+        var cobrancas = resultados[0], acoes = resultados[1];
+        var html = '<div class="admin-mock">';
+        html += '<div class="linha-mock" style="border-bottom:none;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Historico de cobranca (nunca editado -- correcao e linha nova)</span><span></span></div>';
+        if (!cobrancas.length) {
+          html += '<p class="estado-vazio" style="padding:6px 0;">Nenhum lancamento ainda.</p>';
+        } else {
+          cobrancas.forEach(function (c) {
+            var rotuloEvento = c.tipoEvento === 'cobranca' ? 'Cobranca' : (c.tipoEvento === 'pagamento' ? 'Pagamento (' + escaparHtml(c.formaPagamento || '') + ')' : 'Ajuste');
+            html += '<div class="linha-mock"><span class="rotulo">' + rotuloEvento + (c.vencimento ? ' -- vence ' + c.vencimento : '') + (c.observacao ? ' -- ' + escaparHtml(c.observacao) : '') + '</span><span>' + formatarMoeda(c.valor) + '</span></div>';
+          });
+        }
+        html += '<div class="linha-mock" style="border-bottom:none;margin-top:8px;"><span class="rotulo" style="font-weight:700;color:var(--texto);">Auditoria (aprovar/recusar/suspender/reativar)</span><span></span></div>';
+        if (!acoes.length) {
+          html += '<p class="estado-vazio" style="padding:6px 0;">Nenhuma acao registrada ainda.</p>';
+        } else {
+          acoes.forEach(function (a) {
+            html += '<div class="linha-mock"><span class="rotulo">' + a.acao + (a.motivo ? ' -- ' + escaparHtml(a.motivo) : '') + '</span><span>' + new Date(a.criadoEm).toLocaleString('pt-BR') + '</span></div>';
+          });
+        }
+        html += '</div>';
+        div.innerHTML = html;
+      }).catch(function (e) {
+        div.innerHTML = '<p class="estado-vazio">Não deu para carregar o historico agora: ' + escaparHtml(e.message) + '</p>';
+      });
     }
   </script>
   <script>
     // ===========================================================
-    // D038 (2026-09-29) -- Feedback do Beta. So le via FeedbackStore
-    // (assets/js/feedback-store.js) -- interface trocavel, mesmo
-    // padrao da D036/D037. Hoje FeedbackStore = FeedbackStoreDemo
-    // (dados de exemplo fixos); a implementacao Supabase ja existe
-    // no arquivo mas fica desligada ate o login real de admin
-    // existir (D092 da Backend).
+    // D038 (2026-09-29), ligado a dado real na D043 (2026-09-30) --
+    // Feedback do Beta. So le via FeedbackStore (assets/js/
+    // feedback-store.js) -- interface trocavel, mesmo padrao da
+    // D036/D037. FeedbackStore = FeedbackStoreSupabase agora (o login
+    // real de admin existe, D043) -- SELECT direto em beta_feedback,
+    // protegido pela politica RLS "admin le tudo" da migration 006.
     // ===========================================================
     function formatarDataHora(timestampMs) {
       return new Date(timestampMs).toLocaleString('pt-BR');
