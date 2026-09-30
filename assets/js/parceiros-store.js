@@ -198,6 +198,11 @@
       cidade: (dados.cidade || "").trim(),
       responsavel: (dados.responsavel || "").trim(),
       telefone: (dados.telefone || "").trim(),
+      // D042 (2026-09-30) — apresentação pública, texto livre curto.
+      // Corresponde à coluna academias.apresentacao da migration 024
+      // (Backend, ainda não aplicada) — 500 caracteres é limite de tela
+      // (maxlength em parceiro.html); aqui só reforça o mesmo teto.
+      apresentacao: (dados.apresentacao || "").trim().slice(0, 500),
       email: (dados.email || "").trim(),
       fotoPerfil: dados.fotoPerfil ? normalizarArquivos([dados.fotoPerfil], 1)[0] : null,
       galeria: normalizarArquivos(dados.galeria, MAX_FOTOS_GALERIA),
@@ -228,6 +233,11 @@
       bairro: (dados.bairro || "").trim(),
       experiencias: (dados.experiencias || "").trim(),
       telefone: (dados.telefone || "").trim(),
+      // D042 (2026-09-30) — apresentação pública, texto livre curto.
+      // Corresponde à coluna personais.apresentacao da migration 024
+      // (Backend, ainda não aplicada) — 500 caracteres é limite de tela
+      // (maxlength em parceiro.html); aqui só reforça o mesmo teto.
+      apresentacao: (dados.apresentacao || "").trim().slice(0, 500),
       email: (dados.email || "").trim(),
       // Nunca guarda o texto da senha — ver nota no cabeçalho do arquivo.
       senhaDefinida: !!(dados.senha && dados.senha.length),

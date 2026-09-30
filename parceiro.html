@@ -116,6 +116,11 @@
                   <label for="ac-telefone">Telefone / WhatsApp</label>
                   <input id="ac-telefone" type="text" placeholder="(00) 00000-0000">
                 </div>
+                <div class="campo">
+                  <label for="ac-apresentacao">Apresentação</label>
+                  <textarea id="ac-apresentacao" rows="3" maxlength="500" placeholder="Conte um pouco sobre a academia para quem for ver o perfil" oninput="atualizarContadorApresentacao('ac-apresentacao', 'ac-apresentacao-contador')"></textarea>
+                  <p id="ac-apresentacao-contador" class="campo-nota" style="margin-top:6px;">0/500</p>
+                </div>
               </div>
 
               <div class="cadastro-grupo">
@@ -219,6 +224,11 @@
                 <div class="campo">
                   <label for="pe-telefone">Telefone / WhatsApp</label>
                   <input id="pe-telefone" type="text" placeholder="(00) 00000-0000">
+                </div>
+                <div class="campo">
+                  <label for="pe-apresentacao">Apresentação</label>
+                  <textarea id="pe-apresentacao" rows="3" maxlength="500" placeholder="Conte um pouco sobre você para quem for ver o seu perfil" oninput="atualizarContadorApresentacao('pe-apresentacao', 'pe-apresentacao-contador')"></textarea>
+                  <p id="pe-apresentacao-contador" class="campo-nota" style="margin-top:6px;">0/500</p>
                 </div>
               </div>
 
@@ -457,6 +467,15 @@
     }
 
     // D036 (2026-09-29): cadastro de academia passa a gravar de verdade (via
+    // D042 (2026-09-30, item 2) — campo Apresentação, texto livre curto com
+    // contador até 500 caracteres, para os dois cadastros (academia e
+    // personal). Corresponde à coluna `apresentacao` da migration 024 do
+    // Backend (ainda não aplicada) — aqui só em demonstração, como o resto.
+    function atualizarContadorApresentacao(idCampo, idContador) {
+      var valor = document.getElementById(idCampo).value || '';
+      document.getElementById(idContador).textContent = valor.length + '/500';
+    }
+
     // ParceirosStore, camada trocável — assets/js/parceiros-store.js), com
     // aprovação e senha, igual ao personal (SPEC_parceiro_auth_e_fotos_001.md,
     // seção 2.1). Continua sem falar com o Supabase.
@@ -488,6 +507,7 @@
         cidade: document.getElementById('ac-cidade').value,
         responsavel: document.getElementById('ac-responsavel').value,
         telefone: document.getElementById('ac-telefone').value,
+        apresentacao: document.getElementById('ac-apresentacao').value,
         email: email,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
         galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
@@ -559,6 +579,7 @@
         bairro: document.getElementById('pe-bairro').value,
         experiencias: document.getElementById('pe-experiencias').value,
         telefone: document.getElementById('pe-telefone').value,
+        apresentacao: document.getElementById('pe-apresentacao').value,
         email: email,
         senha: senha,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
