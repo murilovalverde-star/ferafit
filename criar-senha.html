@@ -89,7 +89,12 @@
       // persistSession: false — a sessão só existe durante a troca de senha, não sobrevive depois.
       // Achado da Segurança (D010, 17/09/2026): sem isso, o token de recuperação ficava
       // gravado no localStorage do navegador mesmo depois da senha trocada.
-      auth: { detectSessionInUrl: true, flowType: "pkce", persistSession: false }
+      // flowType: "implicit" — corrigido na D039 (2026-09-29). O app pede o link com
+      // signInWithOtp/emailRedirectTo, que usa o fluxo implícito (token vem no fragmento
+      // #access_token=...). Estava "pkce" por engano, e a biblioteca do Supabase recusa
+      // todo link (erro "Not a valid PKCE flow url") quando o formato não bate com o
+      // flowType configurado aqui — não é o link que vencia, era a página que recusava.
+      auth: { detectSessionInUrl: true, flowType: "implicit", persistSession: false }
     });
 
     var MIN_CARACTERES = 8;
@@ -104,12 +109,22 @@
       try {
         var resultado = await supabaseClient.auth.getSession();
         var session = resultado.data.session;
+        // Limpa o fragmento (#access_token=...) do endereço assim que a sessão é lida —
+        // nunca deixar o token na barra de endereço, no histórico ou em print (D039).
+        // Seguro chamar mesmo se a biblioteca já limpou: replaceState não recarrega
+        // a página e não cria uma nova entrada no histórico.
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
         if (session) {
           mostrarEstado("estado-formulario");
         } else {
           mostrarEstado("estado-invalido");
         }
       } catch (e) {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
         mostrarEstado("estado-invalido");
       }
     }
