@@ -111,6 +111,18 @@
 
     var MIN_CARACTERES = 8;
 
+    // D040 (2026-09-29): a sessão de recuperação não é mais encerrada a cada erro (isso
+    // fazia a segunda tentativa falhar sempre por "sessão ausente", mesmo com senha válida
+    // -- achado do Orquestrador no código publicado da D039). Agora só encerra no sucesso,
+    // ao sair da página, ou depois de 5 falhas seguidas (trava de segurança, já que
+    // persistSession:false por si só descarta a sessão ao fechar a aba).
+    var FALHAS_SEGUIDAS_SENHA = 0;
+    var LIMITE_FALHAS_SIGNOUT = 5;
+
+    window.addEventListener("pagehide", function () {
+      try { supabaseClient.auth.signOut(); } catch (e) {}
+    });
+
     // Botão de olho para mostrar/esconder a senha digitada (pedido de Murilo, 2026-09-29).
     function alternarVisibilidadeSenha(botao) {
       var input = document.getElementById(botao.getAttribute("data-alvo"));
@@ -151,6 +163,85 @@
       }
     }
 
+    // Código real do erro, para mostrar em letra pequena na tela (D040, item 2) — Murilo
+    // testa pelo celular, sem F12, então precisa do código no print para sabermos a causa.
+    // Nunca inclui token, senha nem e-mail: só o código/status que o próprio Supabase devolve.
+    function codigoDoErro(erro) {
+      if (!erro) return null;
+      if (erro.code) return String(erro.code);
+      if (typeof erro.status === "number") return String(erro.status);
+      return null;
+    }
+
+    // Item 3 da D040: distingue "a sessão acabou de verdade" (não adianta tentar de novo
+    // nesta mesma página, precisa de link novo) dos outros erros (onde tentar de novo pode
+    // funcionar). AuthSessionMissingError é a classe que a biblioteca usa tanto para "não
+    // tinha sessão nenhuma" quanto para o código de servidor "session_not_found".
+    function sessaoRealmenteAcabou(erro) {
+      if (!erro) return false;
+      if (erro.name === "AuthSessionMissingError") return true;
+      if (erro.code === "session_not_found") return true;
+      if (erro.status === 401 || erro.status === 403) return true;
+      return false;
+    }
+
+    async function tratarErroSalvar(erro) {
+      // Registra o código/mensagem real no console também (nunca o token) — cobre quem
+      // consegue abrir o F12, além do código já visível na tela para quem não consegue.
+      console.error("criar-senha.html: updateUser falhou", { name: erro && erro.name, code: erro && erro.code, status: erro && erro.status, message: erro && erro.message });
+
+      if (sessaoRealmenteAcabou(erro)) {
+        // "Tenta de novo em instantes" não ajuda quando a sessão já era — pede link novo.
+        mostrarEstado("estado-invalido");
+        return;
+      }
+
+      var erroEl = document.getElementById("erro-formulario");
+      var botao = document.getElementById("botao-salvar");
+
+      FALHAS_SEGUIDAS_SENHA++;
+
+      // Achado E15 (23/09/2026): quando o Supabase recusa a senha por ela já ter
+      // aparecido em vazamentos conhecidos (checagem HaveIBeenPwned), mostra um aviso
+      // específico em vez do erro genérico. Texto definido por Murilo. Intocado pela D040.
+      var senhaVazada = erro && erro.code === "weak_password" &&
+        erro.weak_password && Array.isArray(erro.weak_password.reasons) &&
+        erro.weak_password.reasons.indexOf("pwned") !== -1;
+      // Hipótese (não confirmada) de uma rodada anterior: o Supabase também pode recusar
+      // quando a nova senha é igual à atual (código "same_password"). Mensagem específica
+      // só quando o código realmente vier assim — nos outros casos, mensagem genérica +
+      // o código na tela (item 2 da D040), em vez de eu tentar adivinhar mais causas.
+      var senhaIgualAnterior = erro && erro.code === "same_password";
+
+      var mensagem = senhaVazada
+        ? "Senha de fácil dedução, troque por uma senha mais segura."
+        : senhaIgualAnterior
+          ? "Essa já é sua senha atual. Escolha uma senha diferente da anterior."
+          : "Não deu pra salvar agora. Tenta de novo em instantes.";
+
+      erroEl.innerHTML = "";
+      erroEl.appendChild(document.createTextNode(mensagem));
+      var codigo = codigoDoErro(erro);
+      if (codigo) {
+        var linhaCodigo = document.createElement("span");
+        linhaCodigo.style.display = "block";
+        linhaCodigo.style.fontSize = "0.72rem";
+        linhaCodigo.style.color = "var(--texto-secundario)";
+        linhaCodigo.style.marginTop = "4px";
+        linhaCodigo.textContent = "(código: " + codigo + ")";
+        erroEl.appendChild(linhaCodigo);
+      }
+      erroEl.style.display = "block";
+      botao.disabled = false;
+      botao.textContent = "Salvar nova senha";
+
+      // D040: não encerra mais a sessão em toda falha (ver comentário na declaração de
+      // FALHAS_SEGUIDAS_SENHA) — só depois de 5 falhas seguidas, como trava de segurança.
+      if (FALHAS_SEGUIDAS_SENHA >= LIMITE_FALHAS_SIGNOUT) {
+        try { await supabaseClient.auth.signOut(); } catch (e2) {}
+      }
+    }
+
     async function salvarSenha() {
       var nova = document.getElementById("senha-nova").value;
       var repetir = document.getElementById("senha-repetir").value;
@@ -176,48 +267,17 @@
       try {
         var resultado = await supabaseClient.auth.updateUser({ password: nova });
         if (resultado.error) {
-          var erro = resultado.error;
-          // Acompanhamento da D039 (2026-09-29): registra o código/mensagem real do erro
-          // no console (nunca o token) para dar pra diagnosticar sem depender de adivinhação
-          // quando o motivo não é nenhum dos já tratados abaixo.
-          console.error("criar-senha.html: updateUser retornou erro", { code: erro && erro.code, status: erro && erro.status, message: erro && erro.message });
-          // Achado E15 (23/09/2026): quando o Supabase recusa a senha por ela já ter
-          // aparecido em vazamentos conhecidos (checagem HaveIBeenPwned), mostra um aviso
-          // específico em vez do erro genérico. Texto definido por Murilo.
-          var senhaVazada = erro && erro.code === "weak_password" &&
-            erro.weak_password && Array.isArray(erro.weak_password.reasons) &&
-            erro.weak_password.reasons.indexOf("pwned") !== -1;
-          // Achado D039-A (2026-09-29): o Supabase recusa a nova senha quando ela é igual
-          // à senha atual da conta (código "same_password") — comum ao testar de novo com
-          // a mesma senha de antes. Mensagem específica em vez do erro genérico.
-          var senhaIgualAnterior = erro && erro.code === "same_password";
-          erroEl.textContent = senhaVazada
-            ? "Senha de fácil dedução, troque por uma senha mais segura."
-            : senhaIgualAnterior
-              ? "Essa já é sua senha atual. Escolha uma senha diferente da anterior."
-              : "Não deu pra salvar agora. Tenta de novo em instantes.";
-          erroEl.style.display = "block";
-          botao.disabled = false;
-          botao.textContent = "Salvar nova senha";
-          // Encerra a sessão de recuperação mesmo quando a troca falha — ela não deve
-          // sobrar válida no navegador se a pessoa desistir depois de um erro (D026, 23/09/2026).
-          try { await supabaseClient.auth.signOut(); } catch (e2) {}
+          await tratarErroSalvar(resultado.error);
           return;
         }
+        FALHAS_SEGUIDAS_SENHA = 0;
         // Encerra a sessão de recuperação assim que a senha é trocada — ela não deve
         // continuar válida no navegador depois disso (D010, achado da Segurança, 17/09/2026).
         // A pessoa volta pro app e entra de novo com a senha nova, como o texto já orienta.
         await supabaseClient.auth.signOut();
         mostrarEstado("estado-sucesso");
       } catch (e) {
-        console.error("criar-senha.html: updateUser lançou exceção", { code: e && e.code, status: e && e.status, message: e && e.message });
-        erroEl.textContent = "Não deu pra salvar agora. Tenta de novo em instantes.";
-        erroEl.style.display = "block";
-        botao.disabled = false;
-        botao.textContent = "Salvar nova senha";
-        // Mesmo motivo do bloco acima: não deixar a sessão de recuperação sobrando
-        // depois de uma falha inesperada (D026, 23/09/2026).
-        try { await supabaseClient.auth.signOut(); } catch (e2) {}
+        await tratarErroSalvar(e);
       }
     }
 
