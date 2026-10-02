@@ -304,7 +304,10 @@
           <div class="parceiro-box" id="meus-alunos-real" style="display:none;max-width:860px;margin:0 auto 24px;text-align:left;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
               <h1 style="font-size:1.2rem;font-weight:800;margin:0;">Meus alunos</h1>
-              <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
+                <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
+              </div>
             </div>
 
             <div id="alunos-lista-view">
@@ -317,6 +320,17 @@
 
             <div id="aluno-form-view" style="display:none;"></div>
             <div id="aluno-detalhe-view" style="display:none;"></div>
+
+            <div id="treinos-base-view" style="display:none;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+                <button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos alunos</button>
+                <button type="button" class="botao-primario" id="btn-novo-treino-base" onclick="abrirFormularioNovoTreinoBase()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo treino-base</button>
+              </div>
+              <div id="treinos-base-lista-view">
+                <div id="treinos-base-lista-corpo" style="color:var(--texto);font-size:0.9rem;"><p style="color:var(--texto-secundario);">Carregando…</p></div>
+              </div>
+              <div id="treino-base-form-view" style="display:none;"></div>
+            </div>
           </div>
 
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
@@ -477,6 +491,7 @@
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
   <script src="assets/js/fichas-store.js"></script>
+  <script src="assets/js/treinos-store.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -601,6 +616,8 @@
       document.getElementById('alunos-lista-view').style.display = 'block';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var treinosBaseView = document.getElementById('treinos-base-view');
+      if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
     }
 
     function renderMeusAlunos(conta) {
@@ -613,6 +630,9 @@
     function esconderMeusAlunos() {
       document.getElementById('meus-alunos-real').style.display = 'none';
       parceiroAtual = null;
+      treinosBaseCache = [];
+      treinoBaseEmEdicaoId = null;
+      exerciciosEmEdicao = [];
     }
 
     function buscarAlunosDebounced() {
@@ -1016,6 +1036,337 @@
         botao.textContent = 'Registrar';
         erroEl.textContent = mensagemSeguraErro(erro);
         erroEl.style.display = 'block';
+      });
+    }
+
+    // =========================================================
+    // D045, item 3/6.5 (2026-10-02, D050): biblioteca de treinos-base
+    // (até 20 por parceiro) e aplicação de treino na ficha do aluno,
+    // contra `treinos_base_parceiro` e as colunas `treino_*` de
+    // `fichas_aluno_parceiro` (migration 022) -- ver
+    // assets/js/treinos-store.js e a P34/P38 do STATUS.md.
+    //
+    // Cada exercício é gravado como {grupo, subgrupo, src, series,
+    // repeticoes, descanso} (D046/D050) -- `src` é o id do MOTOR do
+    // app (`srcMotor` em MAPA_ID_MOTOR_PARA_CATALOGO_190.json), não o
+    // id do catálogo do site. Os dois arquivos estáticos abaixo são
+    // carregados uma única vez, sem Supabase -- mesmo padrão que
+    // dados-demo.js já usa para o catálogo (e deliberadamente um
+    // carregamento PRÓPRIO, não compartilhado com o `catalogoCompleto`
+    // interno do módulo `DemoUI`, que é de um domínio separado).
+    // =========================================================
+
+    var catalogoTreinoCompleto = null;   // lista do catalogo-exercicios.json
+    var mapaSrcPorIdCatalogo = null;     // idCatalogoSite -> srcMotor
+    var mapaPorSrcMotor = null;          // srcMotor -> {grupo, subgrupo, idCatalogoSite, nomeOficialSite, arquivoDeCapa}
+    var catalogoTreinoPromise = null;
+
+    function urlImagemCatalogoTreino(arquivo) {
+      return 'https://jgzbxouzqtwfjapnfooj.supabase.co/storage/v1/object/public/capas-43/' + arquivo;
+    }
+
+    function carregarCatalogoTreino() {
+      if (catalogoTreinoPromise) { return catalogoTreinoPromise; }
+      catalogoTreinoPromise = Promise.all([
+        fetch('assets/data/catalogo-exercicios.json').then(function (r) {
+          if (!r.ok) { throw new Error('Não consegui carregar o catálogo de exercícios.'); }
+          return r.json();
+        }),
+        fetch('assets/data/MAPA_ID_MOTOR_PARA_CATALOGO_190.json').then(function (r) {
+          if (!r.ok) { throw new Error('Não consegui carregar o mapa de exercícios do motor.'); }
+          return r.json();
+        })
+      ]).then(function (resultados) {
+        catalogoTreinoCompleto = resultados[0];
+        mapaSrcPorIdCatalogo = {};
+        mapaPorSrcMotor = {};
+        resultados[1].forEach(function (m) {
+          mapaSrcPorIdCatalogo[m.idCatalogoSite] = m.srcMotor;
+          mapaPorSrcMotor[m.srcMotor] = m;
+        });
+        return true;
+      });
+      return catalogoTreinoPromise;
+    }
+
+    // Converte um exercício do catálogo do site (pelo id do catálogo)
+    // no item gravável {grupo, subgrupo, src, series, repeticoes, descanso}.
+    function montarItemTreinoDoCatalogo(idCatalogoSite, prescricaoAnterior) {
+      var ex = catalogoTreinoCompleto.filter(function (e) { return e.id === idCatalogoSite; })[0];
+      var src = mapaSrcPorIdCatalogo[idCatalogoSite];
+      if (!ex || !src) { return null; }
+      var p = prescricaoAnterior || {};
+      return {
+        grupo: ex.grupo,
+        subgrupo: ex.subgrupo,
+        src: src,
+        series: p.series || 3,
+        repeticoes: p.repeticoes || 10,
+        descanso: p.descanso || 60
+      };
+    }
+
+    // Acha o exercício do catálogo do site a partir do `src` gravado
+    // (pra mostrar nome/imagem) -- null se o catálogo mudou depois.
+    function exercicioCatalogoDoSrc(src) {
+      var m = mapaPorSrcMotor && mapaPorSrcMotor[src];
+      if (!m || !catalogoTreinoCompleto) { return null; }
+      return catalogoTreinoCompleto.filter(function (e) { return e.id === m.idCatalogoSite; })[0] || null;
+    }
+
+    function nomeDoExercicioEmEdicao(ex) {
+      return ex ? ex.nome : '(exercício removido do catálogo)';
+    }
+
+    // --- Seletor de exercícios compartilhado (treino-base aqui, e o
+    // treino personalizado da ficha mais adiante nesta mesma rodada
+    // do item 3) -- `exerciciosEmEdicao` é sempre a lista de trabalho
+    // ATUAL; quem abre o seletor decide o que fazer com ela ao salvar.
+    var exerciciosEmEdicao = [];
+
+    function exercicioJaEstaEmEdicao(src) {
+      return exerciciosEmEdicao.some(function (it) { return it.src === src; });
+    }
+
+    function alternarExercicioEmEdicao(idCatalogoSite) {
+      var srcDoClique = mapaSrcPorIdCatalogo[idCatalogoSite];
+      var pos = -1;
+      for (var i = 0; i < exerciciosEmEdicao.length; i++) {
+        if (exerciciosEmEdicao[i].src === srcDoClique) { pos = i; break; }
+      }
+      if (pos !== -1) {
+        exerciciosEmEdicao.splice(pos, 1);
+      } else {
+        var item = montarItemTreinoDoCatalogo(idCatalogoSite);
+        if (item) { exerciciosEmEdicao.push(item); }
+      }
+      renderSeletorExercicios();
+    }
+
+    function atualizarPrescricaoEmEdicao(indice, campo, valor) {
+      var item = exerciciosEmEdicao[indice];
+      if (!item) { return; }
+      var numero = parseInt(valor, 10);
+      if (!isNaN(numero) && numero > 0) { item[campo] = numero; }
+    }
+
+    function removerExercicioEmEdicao(indice) {
+      exerciciosEmEdicao.splice(indice, 1);
+      renderSeletorExercicios();
+    }
+
+    function criarChipCatalogoTreino(ex, selecionado) {
+      var chip = document.createElement('div');
+      chip.className = 'chip-exercicio' + (selecionado ? ' no-treino' : '');
+      var img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = ex.nome;
+      img.src = urlImagemCatalogoTreino(ex.arquivo);
+      var nome = document.createElement('span');
+      nome.className = 'chip-nome';
+      nome.textContent = ex.nome;
+      var acao = document.createElement('span');
+      acao.className = 'chip-acao';
+      acao.textContent = selecionado ? '− remover' : '+ adicionar';
+      chip.appendChild(img);
+      chip.appendChild(nome);
+      chip.appendChild(acao);
+      chip.addEventListener('click', function () { alternarExercicioEmEdicao(ex.id); });
+      return chip;
+    }
+
+    function renderCatalogoSeletorExercicios() {
+      var container = document.getElementById('seletor-catalogo-lista');
+      if (!container || !catalogoTreinoCompleto) { return; }
+      var termo = (document.getElementById('seletor-busca').value || '').trim().toLowerCase();
+      var grupo = document.getElementById('seletor-grupo').value;
+      var lista = catalogoTreinoCompleto.filter(function (ex) {
+        var bateBusca = !termo || ex.nome.toLowerCase().indexOf(termo) !== -1;
+        var bateGrupo = !grupo || ex.grupo === grupo;
+        return bateBusca && bateGrupo;
+      });
+      container.innerHTML = '';
+      if (lista.length === 0) {
+        container.innerHTML = '<p class="estado-vazio">Nenhum exercício encontrado com esse filtro.</p>';
+        return;
+      }
+      lista.forEach(function (ex) {
+        var src = mapaSrcPorIdCatalogo[ex.id];
+        container.appendChild(criarChipCatalogoTreino(ex, exercicioJaEstaEmEdicao(src)));
+      });
+    }
+
+    function renderSelecionadosSeletorExercicios() {
+      var container = document.getElementById('seletor-selecionados-lista');
+      if (!container) { return; }
+      if (exerciciosEmEdicao.length === 0) {
+        container.innerHTML = '<p class="estado-vazio">Nenhum exercício escolhido ainda.</p>';
+        return;
+      }
+      var html = '';
+      exerciciosEmEdicao.forEach(function (item, indice) {
+        var ex = exercicioCatalogoDoSrc(item.src);
+        html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--card-border);">';
+        html += '<span style="flex:1 1 180px;font-weight:600;">' + escaparHtmlAluno(nomeDoExercicioEmEdicao(ex)) + '</span>';
+        html += '<label style="font-size:0.75rem;color:var(--texto-secundario);">Séries <input type="number" min="1" value="' + item.series + '" style="width:54px;" onchange="atualizarPrescricaoEmEdicao(' + indice + ',\'series\',this.value)"></label>';
+        html += '<label style="font-size:0.75rem;color:var(--texto-secundario);">Reps <input type="number" min="1" value="' + item.repeticoes + '" style="width:54px;" onchange="atualizarPrescricaoEmEdicao(' + indice + ',\'repeticoes\',this.value)"></label>';
+        html += '<label style="font-size:0.75rem;color:var(--texto-secundario);">Descanso (s) <input type="number" min="1" value="' + item.descanso + '" style="width:60px;" onchange="atualizarPrescricaoEmEdicao(' + indice + ',\'descanso\',this.value)"></label>';
+        html += '<button type="button" onclick="removerExercicioEmEdicao(' + indice + ')" style="background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;font-size:0.75rem;">remover</button>';
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function renderSeletorExercicios() {
+      renderCatalogoSeletorExercicios();
+      renderSelecionadosSeletorExercicios();
+    }
+
+    function templateSeletorExercicios() {
+      var gruposUnicos = [];
+      (catalogoTreinoCompleto || []).forEach(function (ex) {
+        if (gruposUnicos.indexOf(ex.grupo) === -1) { gruposUnicos.push(ex.grupo); }
+      });
+      gruposUnicos.sort();
+      var optsGrupo = '<option value="">Todos os grupos</option>' + gruposUnicos.map(function (g) {
+        return '<option value="' + escaparHtmlAluno(g) + '">' + escaparHtmlAluno(g) + '</option>';
+      }).join('');
+      return '' +
+        '<div class="campo" style="margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;">' +
+          '<input id="seletor-busca" type="text" placeholder="Buscar exercício" oninput="renderCatalogoSeletorExercicios()" style="flex:1 1 200px;">' +
+          '<select id="seletor-grupo" onchange="renderCatalogoSeletorExercicios()" style="flex:0 1 180px;">' + optsGrupo + '</select>' +
+        '</div>' +
+        '<div style="display:flex;gap:16px;flex-wrap:wrap;">' +
+          '<div style="flex:1 1 260px;"><p class="campo-nota" style="margin:0 0 6px;">Catálogo (clique para adicionar)</p><div id="seletor-catalogo-lista" style="max-height:320px;overflow:auto;"></div></div>' +
+          '<div style="flex:1 1 260px;"><p class="campo-nota" style="margin:0 0 6px;">Exercícios escolhidos</p><div id="seletor-selecionados-lista"></div></div>' +
+        '</div>';
+    }
+
+    // --- Biblioteca de treinos-base ---
+
+    var treinosBaseCache = [];
+    var treinoBaseEmEdicaoId = null; // null = criando um novo
+
+    function mostrarTreinosBase() {
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      document.getElementById('treinos-base-view').style.display = 'block';
+      document.getElementById('treino-base-form-view').style.display = 'none';
+      document.getElementById('treinos-base-lista-view').style.display = 'block';
+      carregarTreinosBase();
+    }
+
+    function carregarTreinosBase() {
+      if (!parceiroAtual) { return; }
+      var corpo = document.getElementById('treinos-base-lista-corpo');
+      corpo.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      TreinosStore.listarTreinosBase(parceiroAtual).then(function (lista) {
+        treinosBaseCache = lista;
+        renderListaTreinosBase(lista);
+      }).catch(function (erro) {
+        corpo.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function renderListaTreinosBase(lista) {
+      var corpo = document.getElementById('treinos-base-lista-corpo');
+      var botaoNovo = document.getElementById('btn-novo-treino-base');
+      botaoNovo.style.display = lista.length >= TreinosStore.MAX_TREINOS_BASE ? 'none' : '';
+      var html = '';
+      if (lista.length >= TreinosStore.MAX_TREINOS_BASE) {
+        html += '<p class="campo-nota" style="margin:0 0 10px;">Limite de ' + TreinosStore.MAX_TREINOS_BASE + ' treinos-base atingido. Apague algum para criar um novo.</p>';
+      }
+      if (lista.length === 0) {
+        html += '<p style="color:var(--texto-secundario);">Você ainda não criou nenhum treino-base.</p>';
+        corpo.innerHTML = html;
+        return;
+      }
+      lista.forEach(function (tb) {
+        var qtd = (tb.exercicios || []).length;
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--card-border);flex-wrap:wrap;">';
+        html += '<span><strong>' + escaparHtmlAluno(tb.nome) + '</strong> <span style="color:var(--texto-secundario);">— ' + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + '</span></span>';
+        html += '<span style="display:flex;gap:8px;">';
+        html += '<button type="button" onclick="abrirFormularioEdicaoTreinoBase(' + tb.id + ')" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem;">Editar</button>';
+        html += '<button type="button" onclick="excluirTreinoBaseClicado(' + tb.id + ')" style="background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem;">Apagar</button>';
+        html += '</span></div>';
+      });
+      corpo.innerHTML = html;
+    }
+
+    function templateFormTreinoBase() {
+      return '' +
+        '<div class="campo"><label for="tb-nome">Nome do treino-base</label><input id="tb-nome" type="text" placeholder="Ex: Base iniciante"></div>' +
+        templateSeletorExercicios() +
+        '<p id="tb-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:12px 0 0;"></p>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;">' +
+          '<button type="button" class="botao-primario" id="tb-botao-salvar" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarFormularioTreinoBase()">Salvar</button>' +
+          '<button type="button" onclick="mostrarTreinosBase()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
+        '</div>';
+    }
+
+    function abrirFormularioNovoTreinoBase() {
+      treinoBaseEmEdicaoId = null;
+      exerciciosEmEdicao = [];
+      var view = document.getElementById('treino-base-form-view');
+      view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Novo treino-base</h2><p style="color:var(--texto-secundario);">Carregando catálogo…</p>';
+      document.getElementById('treinos-base-lista-view').style.display = 'none';
+      view.style.display = 'block';
+      carregarCatalogoTreino().then(function () {
+        view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Novo treino-base</h2>' + templateFormTreinoBase();
+        renderSeletorExercicios();
+      }).catch(function (erro) {
+        view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function abrirFormularioEdicaoTreinoBase(treinoBaseId) {
+      var tb = treinosBaseCache.filter(function (t) { return t.id === treinoBaseId; })[0];
+      if (!tb) { return; }
+      treinoBaseEmEdicaoId = treinoBaseId;
+      exerciciosEmEdicao = (tb.exercicios || []).slice();
+      var view = document.getElementById('treino-base-form-view');
+      view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Editar ' + escaparHtmlAluno(tb.nome) + '</h2><p style="color:var(--texto-secundario);">Carregando catálogo…</p>';
+      document.getElementById('treinos-base-lista-view').style.display = 'none';
+      view.style.display = 'block';
+      carregarCatalogoTreino().then(function () {
+        view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Editar treino-base</h2>' + templateFormTreinoBase();
+        document.getElementById('tb-nome').value = tb.nome;
+        renderSeletorExercicios();
+      }).catch(function (erro) {
+        view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function salvarFormularioTreinoBase() {
+      var nome = document.getElementById('tb-nome').value;
+      var erroEl = document.getElementById('tb-erro');
+      erroEl.style.display = 'none';
+      var botao = document.getElementById('tb-botao-salvar');
+      botao.disabled = true;
+      botao.textContent = 'Salvando…';
+
+      var acao = treinoBaseEmEdicaoId
+        ? TreinosStore.atualizarTreinoBase(treinoBaseEmEdicaoId, { nome: nome, exercicios: exerciciosEmEdicao })
+        : TreinosStore.criarTreinoBase(parceiroAtual, nome, exerciciosEmEdicao);
+
+      acao.then(function () {
+        botao.disabled = false;
+        botao.textContent = 'Salvar';
+        mostrarTreinosBase();
+      }).catch(function (erro) {
+        botao.disabled = false;
+        botao.textContent = 'Salvar';
+        erroEl.textContent = mensagemSeguraErro(erro);
+        erroEl.style.display = 'block';
+      });
+    }
+
+    function excluirTreinoBaseClicado(treinoBaseId) {
+      TreinosStore.excluirTreinoBase(treinoBaseId).then(function () {
+        carregarTreinosBase();
+      }).catch(function (erro) {
+        alert(mensagemSeguraErro(erro));
       });
     }
 

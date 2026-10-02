@@ -7,6 +7,14 @@
 // anamnese só é vista por quem cadastrou e pelo admin. Da foto
 // inicial, só a informação de que existe, nunca o arquivo."
 //
+// D050 do Orquestrador (2026-10-02) destrava o item 3 (6.5,
+// montador de treino): este arquivo ganha `aplicarTreinoBase` e
+// `aplicarTreinoPersonalizado`, que gravam o treino ATUAL da ficha
+// (colunas `treino_*`). A biblioteca de treinos-base em si (até 20
+// por parceiro, tabela `treinos_base_parceiro`) mora num arquivo
+// próprio, `assets/js/treinos-store.js` -- mesma separação de
+// domínio do resto do projeto.
+//
 // Escrito contra o contrato real (D100 da Backend):
 //   C:\XGym\Fera Fit backend infrastructure\fase2\CONTRATO_para_Site_migrations_022_024.md
 // e o SQL real da migration 022 (`022_dados_do_parceiro.sql`), os
@@ -89,8 +97,11 @@
 
   // Colunas que esta camada aceita gravar direto da tela -- nunca
   // personal_id/academia_id/criado_por/aluno_user_id (identidade da
-  // ficha, não se mexe por aqui) nem treino_* (item 3 da D045,
-  // montador de treino, ainda não ligado).
+  // ficha, não se mexe por aqui), e de propósito também nunca
+  // treino_modo/treino_base_id/treino_exercicios/treino_config/
+  // treino_atualizado_em -- esses cinco só mudam juntos, pelas
+  // funções dedicadas `aplicarTreinoBase`/`aplicarTreinoPersonalizado`
+  // abaixo (item 3 da D045/D050), nunca por aqui.
   var CAMPOS_FICHA_GRAVAVEIS = [
     "nome", "data_nascimento", "cpf", "rg", "sexo", "email", "telefone",
     "endereco", "contato_emergencia_nome", "contato_emergencia_telefone",
@@ -216,6 +227,69 @@
       .then(function (resultado) {
         if (resultado.error) {
           throw new Error("Não deu para salvar essa ficha agora.");
+        }
+        return resultado.data;
+      });
+  };
+
+  // --- Treino atual da ficha (item 3 da D045/D050) ---
+  //
+  // Cada item de `exercicios` já vem pronto da tela no formato
+  // `{grupo, subgrupo, src, series, repeticoes, descanso}` (D046/D050)
+  // -- este arquivo nunca decide esse formato, só grava o que recebe
+  // como um array (nunca undefined/objeto solto).
+  function listaDeExerciciosDaFicha(exercicios) {
+    return Array.isArray(exercicios) ? exercicios : [];
+  }
+
+  // Aplica um treino-base da biblioteca (`treinos_base_parceiro`,
+  // ver `treinos-store.js`): grava uma CÓPIA da lista de exercícios
+  // no momento da aplicação -- nunca um link vivo (conferido no
+  // comentário real da coluna `treino_exercicios` na migration 022).
+  // Editar depois destes exercícios na ficha não toca o treino-base
+  // original -- isso é responsabilidade de quem chama, usando
+  // `aplicarTreinoPersonalizado` para a próxima edição. `treino_base_id`
+  // é validado pelo próprio banco (trigger `valida_treino_base_da_ficha`
+  // da 022) -- só aceita um treino-base do mesmo dono desta ficha.
+  FichasStoreSupabase.aplicarTreinoBase = function (fichaId, treinoBaseId, exercicios) {
+    var cliente = clienteSupabase();
+    var corpo = {
+      treino_modo: "base",
+      treino_base_id: treinoBaseId,
+      treino_exercicios: listaDeExerciciosDaFicha(exercicios),
+      treino_config: null,
+      treino_atualizado_em: new Date().toISOString()
+    };
+    return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
+      .then(function (resultado) {
+        if (resultado.error) {
+          if ((resultado.error.message || "").indexOf("não pertence a este parceiro") !== -1) {
+            throw new Error("Esse treino-base não pertence a este parceiro.");
+          }
+          throw new Error("Não deu para aplicar esse treino-base agora.");
+        }
+        return resultado.data;
+      });
+  };
+
+  // Monta/edita um treino personalizado direto na ficha, sem vínculo
+  // com nenhum treino-base da biblioteca (`treino_base_id` volta a
+  // NULL). Mesmo comportamento já usado no modo de demonstração:
+  // editar os exercícios de um treino que tinha sido aplicado de uma
+  // base também passa por aqui (vira personalizado) -- decidir QUANDO
+  // isso acontece é responsabilidade da tela, não desta função.
+  FichasStoreSupabase.aplicarTreinoPersonalizado = function (fichaId, exercicios) {
+    var cliente = clienteSupabase();
+    var corpo = {
+      treino_modo: "personalizado",
+      treino_base_id: null,
+      treino_exercicios: listaDeExerciciosDaFicha(exercicios),
+      treino_atualizado_em: new Date().toISOString()
+    };
+    return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error("Não deu para salvar esse treino agora.");
         }
         return resultado.data;
       });
