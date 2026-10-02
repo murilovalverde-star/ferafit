@@ -301,6 +301,24 @@
             </p>
           </div>
 
+          <div class="parceiro-box" id="meus-alunos-real" style="display:none;max-width:860px;margin:0 auto 24px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+              <h1 style="font-size:1.2rem;font-weight:800;margin:0;">Meus alunos</h1>
+              <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
+            </div>
+
+            <div id="alunos-lista-view">
+              <div class="campo" style="margin-bottom:12px;">
+                <input id="alunos-busca" type="text" placeholder="Buscar aluno pelo nome" oninput="buscarAlunosDebounced()">
+              </div>
+              <div id="alunos-lista-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
+              <div id="alunos-paginacao" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:0.8rem;color:var(--texto-secundario);"></div>
+            </div>
+
+            <div id="aluno-form-view" style="display:none;"></div>
+            <div id="aluno-detalhe-view" style="display:none;"></div>
+          </div>
+
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
             <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 8px;">Entrar como…</h1>
             <p style="color:var(--texto-secundario);font-size:0.9rem;margin:0 0 20px;">
@@ -458,6 +476,7 @@
 
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
+  <script src="assets/js/fichas-store.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -486,6 +505,7 @@
         document.getElementById('escolha-modo').style.display = 'none';
         document.getElementById('painel-conta').style.display = 'none';
         renderMinhaContaReal(conta);
+        renderMeusAlunos(conta);
       }).catch(function (erroLogin) {
         erro.textContent = (erroLogin && erroLogin.message) || 'E-mail ou senha incorretos.';
         erro.style.display = 'block';
@@ -497,6 +517,7 @@
     // é mais o caminho padrão do formulário de e-mail/senha (D045).
     function verDemonstracao() {
       document.getElementById('minha-conta-real').style.display = 'none';
+      esconderMeusAlunos();
       document.getElementById('parceiro-hero-pitch').style.display = 'none';
       document.getElementById('caixa-parceiro').style.display = 'none';
       document.getElementById('area-logada').style.display = 'block';
@@ -543,10 +564,458 @@
       ParceirosStore.sairDaConta().then(function () {
         document.getElementById('area-logada').style.display = 'none';
         document.getElementById('minha-conta-real').style.display = 'none';
+        esconderMeusAlunos();
         document.getElementById('parceiro-hero-pitch').style.display = '';
         document.getElementById('caixa-parceiro').style.display = '';
         document.getElementById('email-parceiro').value = '';
         document.getElementById('senha-parceiro').value = '';
+      });
+    }
+
+    // =========================================================
+    // D045, item 2/6.6 (2026-10-01): ficha e gestão de alunos de
+    // verdade, contra `fichas_aluno_parceiro`/`medidas_parceiro`
+    // (migration 022) -- ver assets/js/fichas-store.js e a P34 do
+    // STATUS.md para o contrato completo e o que ficou de fora
+    // nesta rodada (dias_treino e o próprio treino, que são
+    // território do item 3, montador de treino).
+    // =========================================================
+
+    var parceiroAtual = null; // {tipo, id} -- setado em renderMeusAlunos()
+    var alunosPaginaAtual = 1;
+    var ALUNOS_POR_PAGINA = 10;
+    var alunoAbertoId = null;
+    var buscarAlunosTimeout = null;
+
+    function escaparHtmlAluno(s) {
+      var div = document.createElement('div');
+      div.textContent = s == null ? '' : String(s);
+      return div.innerHTML;
+    }
+
+    function mensagemSeguraErro(erro) {
+      return escaparHtmlAluno((erro && erro.message) || 'Não deu para completar essa ação agora.');
+    }
+
+    function mostrarListaAlunos() {
+      document.getElementById('alunos-lista-view').style.display = 'block';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+    }
+
+    function renderMeusAlunos(conta) {
+      parceiroAtual = { tipo: conta.tipo, id: conta.id };
+      document.getElementById('meus-alunos-real').style.display = 'block';
+      document.getElementById('alunos-busca').value = '';
+      carregarListaAlunos(1);
+    }
+
+    function esconderMeusAlunos() {
+      document.getElementById('meus-alunos-real').style.display = 'none';
+      parceiroAtual = null;
+    }
+
+    function buscarAlunosDebounced() {
+      clearTimeout(buscarAlunosTimeout);
+      buscarAlunosTimeout = setTimeout(function () { carregarListaAlunos(1); }, 350);
+    }
+
+    function carregarListaAlunos(pagina) {
+      if (!parceiroAtual) { return; }
+      mostrarListaAlunos();
+      var termo = document.getElementById('alunos-busca').value;
+      var corpo = document.getElementById('alunos-lista-corpo');
+      corpo.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      FichasStore.listarFichas(parceiroAtual, { busca: termo, pagina: pagina, porPagina: ALUNOS_POR_PAGINA }).then(function (resultado) {
+        alunosPaginaAtual = resultado.pagina;
+        renderListaAlunos(resultado);
+      }).catch(function (erro) {
+        corpo.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+        document.getElementById('alunos-paginacao').innerHTML = '';
+      });
+    }
+
+    function renderListaAlunos(resultado) {
+      var corpo = document.getElementById('alunos-lista-corpo');
+      corpo.innerHTML = '';
+      if (resultado.itens.length === 0) {
+        var vazio = document.createElement('p');
+        vazio.style.color = 'var(--texto-secundario)';
+        vazio.textContent = resultado.total === 0 && !document.getElementById('alunos-busca').value.trim()
+          ? 'Você ainda não cadastrou nenhum aluno.'
+          : 'Nenhum aluno encontrado com esse nome.';
+        corpo.appendChild(vazio);
+      } else {
+        resultado.itens.forEach(function (ficha) {
+          var linha = document.createElement('div');
+          linha.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--card-border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;';
+          var rotulo = document.createElement('span');
+          rotulo.innerHTML = '<strong>' + escaparHtmlAluno(ficha.nome) + '</strong>' +
+            (ficha.telefone ? ' <span style="color:var(--texto-secundario);">— ' + escaparHtmlAluno(ficha.telefone) + '</span>' : '');
+          var seta = document.createElement('span');
+          seta.style.color = 'var(--texto-secundario)';
+          seta.textContent = '›';
+          linha.appendChild(rotulo);
+          linha.appendChild(seta);
+          linha.addEventListener('click', function () { abrirDetalheAluno(ficha.id); });
+          corpo.appendChild(linha);
+        });
+      }
+
+      var pag = document.getElementById('alunos-paginacao');
+      pag.innerHTML = '';
+      var totalPaginas = Math.max(1, Math.ceil(resultado.total / resultado.porPagina));
+      if (resultado.total > 0) {
+        var legenda = document.createElement('span');
+        legenda.textContent = resultado.total + (resultado.total === 1 ? ' aluno — página ' : ' alunos — página ') + resultado.pagina + ' de ' + totalPaginas;
+        pag.appendChild(legenda);
+
+        if (totalPaginas > 1) {
+          var botoes = document.createElement('span');
+          var btnAnterior = document.createElement('button');
+          btnAnterior.type = 'button';
+          btnAnterior.textContent = '← Anterior';
+          btnAnterior.disabled = resultado.pagina <= 1;
+          btnAnterior.style.cssText = 'background:none;border:1px solid var(--card-border);border-radius:8px;padding:6px 10px;margin-right:8px;cursor:pointer;font-family:inherit;font-size:0.78rem;color:inherit;';
+          btnAnterior.onclick = function () { carregarListaAlunos(resultado.pagina - 1); };
+          var btnProxima = document.createElement('button');
+          btnProxima.type = 'button';
+          btnProxima.textContent = 'Próxima →';
+          btnProxima.disabled = resultado.pagina >= totalPaginas;
+          btnProxima.style.cssText = btnAnterior.style.cssText;
+          btnProxima.onclick = function () { carregarListaAlunos(resultado.pagina + 1); };
+          botoes.appendChild(btnAnterior);
+          botoes.appendChild(btnProxima);
+          pag.appendChild(botoes);
+        }
+      }
+    }
+
+    // --- Formulário da ficha (criação e edição compartilham o
+    // mesmo template -- af-ficha-id vazio = criação) ---
+
+    function templateFormAluno() {
+      return '' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Identificação</div>' +
+          '<div class="campo"><label for="af-nome">Nome *</label><input id="af-nome" type="text" placeholder="Nome completo"></div>' +
+          '<div class="campo"><label for="af-data-nascimento">Data de nascimento</label><input id="af-data-nascimento" type="date"></div>' +
+          '<div class="campo"><label for="af-cpf">CPF</label><input id="af-cpf" type="text"></div>' +
+          '<div class="campo"><label for="af-rg">RG</label><input id="af-rg" type="text"></div>' +
+          '<div class="campo"><label for="af-sexo">Sexo</label><select id="af-sexo"><option value="">—</option><option value="masculino">Masculino</option><option value="feminino">Feminino</option></select></div>' +
+          '<div class="campo"><label for="af-email">E-mail</label><input id="af-email" type="email"></div>' +
+          '<div class="campo"><label for="af-telefone">Telefone / WhatsApp</label><input id="af-telefone" type="text" placeholder="(00) 00000-0000"></div>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Endereço</div>' +
+          '<div class="campo"><label for="af-end-cep">CEP</label><input id="af-end-cep" type="text"></div>' +
+          '<div class="campo"><label for="af-end-rua">Rua</label><input id="af-end-rua" type="text"></div>' +
+          '<div class="campo"><label for="af-end-numero">Número</label><input id="af-end-numero" type="text"></div>' +
+          '<div class="campo"><label for="af-end-bairro">Bairro</label><input id="af-end-bairro" type="text"></div>' +
+          '<div class="campo"><label for="af-end-cidade">Cidade</label><input id="af-end-cidade" type="text"></div>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Contato de emergência</div>' +
+          '<div class="campo"><label for="af-emerg-nome">Nome</label><input id="af-emerg-nome" type="text"></div>' +
+          '<div class="campo"><label for="af-emerg-telefone">Telefone</label><input id="af-emerg-telefone" type="text"></div>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Observação (só você e o admin veem)</div>' +
+          '<div class="campo"><textarea id="af-observacao" rows="2"></textarea></div>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Contrato</div>' +
+          '<div class="campo"><label for="af-ctr-plano">Plano</label><input id="af-ctr-plano" type="text"></div>' +
+          '<div class="campo"><label for="af-ctr-forma-pagamento">Forma de pagamento</label><input id="af-ctr-forma-pagamento" type="text"></div>' +
+          '<div class="campo"><label for="af-ctr-data-inicio">Data de início</label><input id="af-ctr-data-inicio" type="date"></div>' +
+          '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:0.85rem;"><input id="af-ctr-termo" type="checkbox"> Termo de responsabilidade assinado</label>' +
+          '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:0.85rem;"><input id="af-ctr-atestado" type="checkbox"> Atestado médico entregue</label>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Anamnese — dado de saúde, visível só para você e o admin</div>' +
+          '<div class="campo"><label for="af-an-objetivo">Objetivo</label><input id="af-an-objetivo" type="text"></div>' +
+          '<div class="campo"><label for="af-an-nivel">Nível de experiência</label><select id="af-an-nivel"><option value="">—</option><option value="iniciante">Iniciante</option><option value="intermediario">Intermediário</option><option value="avancado">Avançado</option></select></div>' +
+          '<div class="campo"><label for="af-an-frequencia">Frequência semanal desejada</label><input id="af-an-frequencia" type="text"></div>' +
+          '<div class="campo"><label for="af-an-historico">Histórico de atividade física</label><textarea id="af-an-historico" rows="2"></textarea></div>' +
+          '<div class="campo"><label for="af-an-doencas">Doenças</label><textarea id="af-an-doencas" rows="2"></textarea></div>' +
+          '<div class="campo"><label for="af-an-lesoes">Lesões</label><textarea id="af-an-lesoes" rows="2"></textarea></div>' +
+          '<div class="campo"><label for="af-an-medicamentos">Medicamentos</label><textarea id="af-an-medicamentos" rows="2"></textarea></div>' +
+          '<div class="campo"><label for="af-an-restricoes">Restrições médicas</label><textarea id="af-an-restricoes" rows="2"></textarea></div>' +
+          '<div class="campo"><label for="af-an-gestacao">Gestação / pós-parto</label><input id="af-an-gestacao" type="text"></div>' +
+          '<div class="campo"><label for="af-an-habitos">Hábitos</label><textarea id="af-an-habitos" rows="2"></textarea></div>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Avaliação física</div>' +
+          '<div class="campo"><label for="af-testes-fisicos">Testes físicos</label><textarea id="af-testes-fisicos" rows="2"></textarea></div>' +
+          '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:0.85rem;"><input id="af-tem-foto" type="checkbox"> Tem foto inicial registrada (nunca o arquivo, só esta marcação)</label>' +
+        '</div>' +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Contato complementar</div>' +
+          '<div class="campo"><label for="af-profissao">Profissão</label><input id="af-profissao" type="text"></div>' +
+          '<div class="campo"><label for="af-redes">Redes sociais</label><input id="af-redes" type="text"></div>' +
+          '<div class="campo"><label for="af-preferencia-horario">Preferência de horário</label><input id="af-preferencia-horario" type="text"></div>' +
+        '</div>' +
+        '<p id="af-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 14px;"></p>' +
+        '<div style="display:flex;gap:10px;">' +
+          '<button type="button" class="botao-primario" id="af-botao-salvar" style="width:auto;padding:10px 20px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarFormularioAluno()">Salvar</button>' +
+          '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:10px 20px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
+        '</div>';
+    }
+
+    function abrirFormularioNovoAluno() {
+      alunoAbertoId = null;
+      var view = document.getElementById('aluno-form-view');
+      view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Novo aluno</h2>' + templateFormAluno();
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      view.style.display = 'block';
+    }
+
+    // Lê os campos do formulário e monta o objeto no formato que
+    // fichas-store.js espera (colunas diretas + jsonb endereco/contrato/anamnese).
+    function lerFormularioAluno() {
+      var v = function (id) { return document.getElementById(id).value; };
+      var c = function (id) { return document.getElementById(id).checked; };
+      var vazio = function (s) { return (s || '').trim() === ''; };
+
+      var endereco = { cep: v('af-end-cep'), rua: v('af-end-rua'), numero: v('af-end-numero'), bairro: v('af-end-bairro'), cidade: v('af-end-cidade') };
+      var contrato = { plano: v('af-ctr-plano'), formaPagamento: v('af-ctr-forma-pagamento'), dataInicio: v('af-ctr-data-inicio'), termoResponsabilidade: c('af-ctr-termo'), atestadoMedico: c('af-ctr-atestado') };
+      var anamnese = {
+        objetivo: v('af-an-objetivo'), nivelExperiencia: v('af-an-nivel'), frequenciaSemanalDesejada: v('af-an-frequencia'),
+        historicoAtividade: v('af-an-historico'), doencas: v('af-an-doencas'), lesoes: v('af-an-lesoes'),
+        medicamentos: v('af-an-medicamentos'), restricoesMedicas: v('af-an-restricoes'), gestacaoPosParto: v('af-an-gestacao'),
+        habitos: v('af-an-habitos')
+      };
+
+      return {
+        nome: v('af-nome'),
+        data_nascimento: vazio(v('af-data-nascimento')) ? null : v('af-data-nascimento'),
+        cpf: v('af-cpf'), rg: v('af-rg'), sexo: v('af-sexo') || null,
+        email: v('af-email'), telefone: v('af-telefone'),
+        endereco: endereco,
+        contato_emergencia_nome: v('af-emerg-nome'), contato_emergencia_telefone: v('af-emerg-telefone'),
+        observacao: v('af-observacao'),
+        contrato: contrato,
+        anamnese: anamnese,
+        testes_fisicos: v('af-testes-fisicos'),
+        tem_foto_inicial: c('af-tem-foto'),
+        profissao: v('af-profissao'), redes_sociais: v('af-redes'), preferencia_horario: v('af-preferencia-horario')
+      };
+    }
+
+    function preencherFormularioAluno(ficha) {
+      var s = function (id, valor) { document.getElementById(id).value = valor == null ? '' : valor; };
+      var m = function (id, valor) { document.getElementById(id).checked = !!valor; };
+      var endereco = ficha.endereco || {};
+      var contrato = ficha.contrato || {};
+      var anamnese = ficha.anamnese || {};
+
+      s('af-nome', ficha.nome); s('af-data-nascimento', ficha.data_nascimento); s('af-cpf', ficha.cpf); s('af-rg', ficha.rg);
+      s('af-sexo', ficha.sexo || ''); s('af-email', ficha.email); s('af-telefone', ficha.telefone);
+      s('af-end-cep', endereco.cep); s('af-end-rua', endereco.rua); s('af-end-numero', endereco.numero); s('af-end-bairro', endereco.bairro); s('af-end-cidade', endereco.cidade);
+      s('af-emerg-nome', ficha.contato_emergencia_nome); s('af-emerg-telefone', ficha.contato_emergencia_telefone);
+      s('af-observacao', ficha.observacao);
+      s('af-ctr-plano', contrato.plano); s('af-ctr-forma-pagamento', contrato.formaPagamento); s('af-ctr-data-inicio', contrato.dataInicio);
+      m('af-ctr-termo', contrato.termoResponsabilidade); m('af-ctr-atestado', contrato.atestadoMedico);
+      s('af-an-objetivo', anamnese.objetivo); s('af-an-nivel', anamnese.nivelExperiencia || ''); s('af-an-frequencia', anamnese.frequenciaSemanalDesejada);
+      s('af-an-historico', anamnese.historicoAtividade); s('af-an-doencas', anamnese.doencas); s('af-an-lesoes', anamnese.lesoes);
+      s('af-an-medicamentos', anamnese.medicamentos); s('af-an-restricoes', anamnese.restricoesMedicas); s('af-an-gestacao', anamnese.gestacaoPosParto);
+      s('af-an-habitos', anamnese.habitos);
+      s('af-testes-fisicos', ficha.testes_fisicos); m('af-tem-foto', ficha.tem_foto_inicial);
+      s('af-profissao', ficha.profissao); s('af-redes', ficha.redes_sociais); s('af-preferencia-horario', ficha.preferencia_horario);
+    }
+
+    function salvarFormularioAluno() {
+      var dados = lerFormularioAluno();
+      var erroEl = document.getElementById('af-erro');
+      erroEl.style.display = 'none';
+      var botao = document.getElementById('af-botao-salvar');
+      botao.disabled = true;
+      botao.textContent = 'Salvando…';
+
+      var promessa = alunoAbertoId
+        ? FichasStore.atualizarFicha(alunoAbertoId, dados)
+        : FichasStore.criarFicha(parceiroAtual, dados);
+
+      promessa.then(function () {
+        botao.disabled = false;
+        botao.textContent = 'Salvar';
+        if (alunoAbertoId) {
+          abrirDetalheAluno(alunoAbertoId);
+        } else {
+          carregarListaAlunos(1);
+        }
+      }).catch(function (erro) {
+        botao.disabled = false;
+        botao.textContent = 'Salvar';
+        erroEl.textContent = mensagemSeguraErro(erro);
+        erroEl.style.display = 'block';
+      });
+    }
+
+    // --- Detalhe de um aluno: ficha completa (modo leitura, com
+    // "Editar") + histórico de medições + formulário de nova medição ---
+
+    function abrirDetalheAluno(fichaId) {
+      alunoAbertoId = fichaId;
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      var view = document.getElementById('aluno-detalhe-view');
+      view.style.display = 'block';
+      view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+
+      FichasStore.buscarFicha(fichaId).then(function (ficha) {
+        renderDetalheAluno(ficha);
+        return FichasStore.listarMedicoes(fichaId);
+      }).then(function (medicoes) {
+        renderMedicoes(medicoes);
+      }).catch(function (erro) {
+        view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>' +
+          '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">← Voltar</button>';
+      });
+    }
+
+    function linhaDetalhe(rotulo, valor) {
+      var texto = (valor === null || valor === undefined || String(valor).trim() === '') ? '—' : String(valor);
+      return '<p style="margin:0 0 6px;"><strong>' + escaparHtmlAluno(rotulo) + ':</strong> ' + escaparHtmlAluno(texto) + '</p>';
+    }
+
+    function renderDetalheAluno(ficha) {
+      var endereco = ficha.endereco || {};
+      var contrato = ficha.contrato || {};
+      var anamnese = ficha.anamnese || {};
+      var enderecoTexto = [endereco.rua, endereco.numero, endereco.bairro, endereco.cidade, endereco.cep].filter(Boolean).join(', ');
+
+      var html = '';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">';
+      html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0;">' + escaparHtmlAluno(ficha.nome) + '</h2>';
+      html += '<div style="display:flex;gap:8px;">';
+      html += '<button type="button" onclick="abrirEdicaoAluno()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Editar</button>';
+      html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar</button>';
+      html += '</div></div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Identificação</div>';
+      html += linhaDetalhe('Data de nascimento', ficha.data_nascimento);
+      html += linhaDetalhe('CPF', ficha.cpf) + linhaDetalhe('RG', ficha.rg) + linhaDetalhe('Sexo', ficha.sexo);
+      html += linhaDetalhe('E-mail', ficha.email) + linhaDetalhe('Telefone', ficha.telefone);
+      html += linhaDetalhe('Endereço', enderecoTexto);
+      html += linhaDetalhe('Contato de emergência', [ficha.contato_emergencia_nome, ficha.contato_emergencia_telefone].filter(Boolean).join(' — '));
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Observação</div>' + linhaDetalhe('', ficha.observacao) + '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Contrato</div>';
+      html += linhaDetalhe('Plano', contrato.plano) + linhaDetalhe('Forma de pagamento', contrato.formaPagamento) + linhaDetalhe('Início', contrato.dataInicio);
+      html += linhaDetalhe('Termo de responsabilidade', contrato.termoResponsabilidade ? 'Assinado' : 'Pendente');
+      html += linhaDetalhe('Atestado médico', contrato.atestadoMedico ? 'Entregue' : 'Pendente');
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Anamnese — dado de saúde, só você e o admin veem</div>';
+      html += linhaDetalhe('Objetivo', anamnese.objetivo) + linhaDetalhe('Nível de experiência', anamnese.nivelExperiencia) + linhaDetalhe('Frequência semanal desejada', anamnese.frequenciaSemanalDesejada);
+      html += linhaDetalhe('Histórico de atividade', anamnese.historicoAtividade) + linhaDetalhe('Doenças', anamnese.doencas) + linhaDetalhe('Lesões', anamnese.lesoes);
+      html += linhaDetalhe('Medicamentos', anamnese.medicamentos) + linhaDetalhe('Restrições médicas', anamnese.restricoesMedicas);
+      html += linhaDetalhe('Gestação / pós-parto', anamnese.gestacaoPosParto) + linhaDetalhe('Hábitos', anamnese.habitos);
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Avaliação física</div>';
+      html += linhaDetalhe('Testes físicos', ficha.testes_fisicos) + linhaDetalhe('Tem foto inicial', ficha.tem_foto_inicial ? 'Sim' : 'Não');
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Contato complementar</div>';
+      html += linhaDetalhe('Profissão', ficha.profissao) + linhaDetalhe('Redes sociais', ficha.redes_sociais) + linhaDetalhe('Preferência de horário', ficha.preferencia_horario);
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Medições</div>';
+      html += '<div id="medicoes-lista"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
+      html += '<button type="button" onclick="abrirFormularioMedicao()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-top:8px;">+ Registrar medição</button>';
+      html += '<div id="medicao-form" style="display:none;margin-top:12px;"></div>';
+      html += '</div>';
+
+      document.getElementById('aluno-detalhe-view').innerHTML = html;
+    }
+
+    function abrirEdicaoAluno() {
+      var fichaId = alunoAbertoId;
+      FichasStore.buscarFicha(fichaId).then(function (ficha) {
+        var view = document.getElementById('aluno-form-view');
+        view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Editar ' + escaparHtmlAluno(ficha.nome) + '</h2>' + templateFormAluno();
+        preencherFormularioAluno(ficha);
+        document.getElementById('aluno-detalhe-view').style.display = 'none';
+        view.style.display = 'block';
+      }).catch(function (erro) {
+        alert(mensagemSeguraErro(erro));
+      });
+    }
+
+    // --- Medições (histórico, nunca sobrescrito) ---
+
+    function renderMedicoes(medicoes) {
+      var lista = document.getElementById('medicoes-lista');
+      if (!lista) { return; }
+      if (!medicoes || medicoes.length === 0) {
+        lista.innerHTML = '<p style="color:var(--texto-secundario);">Nenhuma medição registrada ainda.</p>';
+        return;
+      }
+      var html = '';
+      medicoes.forEach(function (m) {
+        var imc = FichasStore.calcularImc(m.peso_kg, m.altura_cm);
+        var partes = [];
+        if (m.peso_kg) { partes.push(m.peso_kg + ' kg'); }
+        if (m.altura_cm) { partes.push(m.altura_cm + ' cm'); }
+        if (imc) { partes.push('IMC ' + imc.toFixed(1)); }
+        if (m.percentual_gordura) { partes.push(m.percentual_gordura + '% gordura'); }
+        html += '<p style="margin:0 0 6px;"><strong>' + escaparHtmlAluno(m.data) + ':</strong> ' + escaparHtmlAluno(partes.join(' · ') || 'sem valores') + '</p>';
+      });
+      lista.innerHTML = html;
+    }
+
+    function abrirFormularioMedicao() {
+      var hoje = new Date().toISOString().slice(0, 10);
+      var form = document.getElementById('medicao-form');
+      form.innerHTML = '' +
+        '<div class="campo"><label for="med-data">Data</label><input id="med-data" type="date" value="' + hoje + '"></div>' +
+        '<div class="campo"><label for="med-altura">Altura (cm)</label><input id="med-altura" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-peso">Peso (kg)</label><input id="med-peso" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-gordura">% de gordura</label><input id="med-gordura" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-abdomen">Abdômen (cm)</label><input id="med-abdomen" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-quadril">Quadril (cm)</label><input id="med-quadril" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-peito">Peito (cm)</label><input id="med-peito" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-braco">Braço (cm)</label><input id="med-braco" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-coxa">Coxa (cm)</label><input id="med-coxa" type="number" step="0.1"></div>' +
+        '<div class="campo"><label for="med-panturrilha">Panturrilha (cm)</label><input id="med-panturrilha" type="number" step="0.1"></div>' +
+        '<p id="med-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 12px;"></p>' +
+        '<div style="display:flex;gap:10px;">' +
+        '<button type="button" class="botao-primario" id="med-botao-salvar" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarFormularioMedicao()">Registrar</button>' +
+        '<button type="button" onclick="document.getElementById(\'medicao-form\').style.display=\'none\';" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
+        '</div>';
+      form.style.display = 'block';
+    }
+
+    function salvarFormularioMedicao() {
+      var v = function (id) { var el = document.getElementById(id); return el.value === '' ? undefined : el.value; };
+      var medicao = {
+        data: v('med-data'), altura_cm: v('med-altura'), peso_kg: v('med-peso'),
+        percentual_gordura: v('med-gordura'), abdomen_cm: v('med-abdomen'), quadril_cm: v('med-quadril'),
+        peito_cm: v('med-peito'), braco_cm: v('med-braco'), coxa_cm: v('med-coxa'), panturrilha_cm: v('med-panturrilha')
+      };
+      var erroEl = document.getElementById('med-erro');
+      erroEl.style.display = 'none';
+      var botao = document.getElementById('med-botao-salvar');
+      botao.disabled = true;
+      botao.textContent = 'Registrando…';
+
+      FichasStore.adicionarMedicao(alunoAbertoId, medicao).then(function () {
+        botao.disabled = false;
+        botao.textContent = 'Registrar';
+        document.getElementById('medicao-form').style.display = 'none';
+        return FichasStore.listarMedicoes(alunoAbertoId);
+      }).then(function (medicoes) {
+        if (medicoes) { renderMedicoes(medicoes); }
+      }).catch(function (erro) {
+        botao.disabled = false;
+        botao.textContent = 'Registrar';
+        erroEl.textContent = mensagemSeguraErro(erro);
+        erroEl.style.display = 'block';
       });
     }
 
