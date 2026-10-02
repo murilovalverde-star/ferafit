@@ -618,6 +618,7 @@
       document.getElementById('aluno-detalhe-view').style.display = 'none';
       var treinosBaseView = document.getElementById('treinos-base-view');
       if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
+      limparTreinoFormResidual();
     }
 
     function renderMeusAlunos(conta) {
@@ -886,6 +887,7 @@
 
       FichasStore.buscarFicha(fichaId).then(function (ficha) {
         renderDetalheAluno(ficha);
+        carregarCatalogoTreino().then(function () { renderTreinoResumo(ficha); }).catch(function () {});
         return FichasStore.listarMedicoes(fichaId);
       }).then(function (medicoes) {
         renderMedicoes(medicoes);
@@ -943,6 +945,15 @@
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Contato complementar</div>';
       html += linhaDetalhe('Profissão', ficha.profissao) + linhaDetalhe('Redes sociais', ficha.redes_sociais) + linhaDetalhe('Preferência de horário', ficha.preferencia_horario);
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Treino</div>';
+      html += '<div id="treino-resumo"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">';
+      html += '<button type="button" onclick="abrirSeletorAplicarBase()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Aplicar um treino-base</button>';
+      html += '<button type="button" onclick="abrirMontadorTreinoPersonalizado()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Montar/editar personalizado</button>';
+      html += '</div>';
+      html += '<div id="treino-form" style="display:none;margin-top:12px;"></div>';
       html += '</div>';
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Medições</div>';
@@ -1254,6 +1265,7 @@
       document.getElementById('treinos-base-view').style.display = 'block';
       document.getElementById('treino-base-form-view').style.display = 'none';
       document.getElementById('treinos-base-lista-view').style.display = 'block';
+      limparTreinoFormResidual();
       carregarTreinosBase();
     }
 
@@ -1369,6 +1381,145 @@
         alert(mensagemSeguraErro(erro));
       });
     }
+
+    // --- Aplicar treino na ficha do aluno (parte 2 do item 3) ---
+    //
+    // `#treino-form`, dentro do detalhe do aluno, reaproveita o MESMO
+    // seletor de exercícios da biblioteca de treinos-base (função
+    // `templateSeletorExercicios`/`renderSeletorExercicios` da parte 1)
+    // -- por isso ele precisa estar sempre limpo (innerHTML vazio e
+    // escondido) quando o usuário sai do detalhe do aluno sem salvar,
+    // senão os ids do seletor (`seletor-busca` etc.) ficam duplicados
+    // na página se o usuário abrir "Treinos-base" em seguida.
+    function limparTreinoFormResidual() {
+      var tf = document.getElementById('treino-form');
+      if (tf) { tf.innerHTML = ''; tf.style.display = 'none'; }
+    }
+
+    function fecharFormTreino() {
+      limparTreinoFormResidual();
+    }
+
+    function renderTreinoResumo(ficha) {
+      var container = document.getElementById('treino-resumo');
+      if (!container) { return; }
+      var exercicios = ficha.treino_exercicios || [];
+      var modo = ficha.treino_modo || 'nenhum';
+      if (modo === 'nenhum' || exercicios.length === 0) {
+        container.innerHTML = '<p style="color:var(--texto-secundario);">Nenhum treino aplicado ainda.</p>';
+        return;
+      }
+      var tituloModo = modo === 'base' ? 'Treino-base aplicado' : 'Treino personalizado';
+      var html = '<p style="margin:0 0 8px;"><strong>' + escaparHtmlAluno(tituloModo) + '</strong> — ' +
+        exercicios.length + (exercicios.length === 1 ? ' exercício' : ' exercícios') + '</p>';
+      exercicios.forEach(function (item) {
+        var ex = exercicioCatalogoDoSrc(item.src);
+        html += '<p style="margin:0 0 4px;font-size:0.85rem;color:var(--texto);">' +
+          escaparHtmlAluno(nomeDoExercicioEmEdicao(ex)) + ' — ' +
+          escaparHtmlAluno(item.series + 'x' + item.repeticoes + ', descanso ' + item.descanso + 's') + '</p>';
+      });
+      container.innerHTML = html;
+    }
+
+    // --- Aplicar um treino-base já pronto ---
+
+    var treinosBaseParaAplicarCache = [];
+
+    function abrirSeletorAplicarBase() {
+      var form = document.getElementById('treino-form');
+      form.innerHTML = '<p style="color:var(--texto-secundario);">Carregando treinos-base…</p>';
+      form.style.display = 'block';
+      TreinosStore.listarTreinosBase(parceiroAtual).then(function (lista) {
+        treinosBaseParaAplicarCache = lista;
+        if (lista.length === 0) {
+          form.innerHTML = '<p style="color:var(--texto-secundario);">Você ainda não tem nenhum treino-base. Crie um em "Treinos-base", no topo da tela.</p>' +
+            '<button type="button" onclick="fecharFormTreino()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Fechar</button>';
+          return;
+        }
+        var opts = lista.map(function (tb) {
+          var qtd = (tb.exercicios || []).length;
+          return '<option value="' + tb.id + '">' + escaparHtmlAluno(tb.nome) + ' (' + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + ')</option>';
+        }).join('');
+        form.innerHTML =
+          '<div class="campo"><label for="aplicar-treino-base-select">Escolha um treino-base</label><select id="aplicar-treino-base-select">' + opts + '</select></div>' +
+          '<p id="treino-base-aplicar-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 10px;"></p>' +
+          '<div style="display:flex;gap:10px;">' +
+          '<button type="button" class="botao-primario" id="treino-base-botao-aplicar" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;" onclick="aplicarTreinoBaseClicado()">Aplicar</button>' +
+          '<button type="button" onclick="fecharFormTreino()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
+          '</div>';
+      }).catch(function (erro) {
+        form.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function aplicarTreinoBaseClicado() {
+      var select = document.getElementById('aplicar-treino-base-select');
+      var treinoBaseId = parseInt(select.value, 10);
+      var base = treinosBaseParaAplicarCache.filter(function (t) { return t.id === treinoBaseId; })[0];
+      if (!base) { return; }
+      var botao = document.getElementById('treino-base-botao-aplicar');
+      botao.disabled = true;
+      botao.textContent = 'Aplicando…';
+      FichasStore.aplicarTreinoBase(alunoAbertoId, treinoBaseId, base.exercicios).then(function () {
+        fecharFormTreino();
+        return FichasStore.buscarFicha(alunoAbertoId);
+      }).then(function (ficha) {
+        if (ficha) { renderTreinoResumo(ficha); }
+      }).catch(function (erro) {
+        botao.disabled = false;
+        botao.textContent = 'Aplicar';
+        var erroEl = document.getElementById('treino-base-aplicar-erro');
+        erroEl.textContent = mensagemSeguraErro(erro);
+        erroEl.style.display = 'block';
+      });
+    }
+
+    // --- Montar/editar um treino personalizado direto na ficha ---
+    //
+    // Reaproveita o seletor de exercícios da parte 1 (mesma
+    // `exerciciosEmEdicao` de trabalho) -- editar os exercícios de um
+    // treino que tinha sido aplicado de uma base também passa por
+    // aqui, e vira personalizado (mesmo comportamento documentado no
+    // modo de demonstração e nas funções de fichas-store.js).
+
+    function abrirMontadorTreinoPersonalizado() {
+      var form = document.getElementById('treino-form');
+      form.innerHTML = '<p style="color:var(--texto-secundario);">Carregando catálogo…</p>';
+      form.style.display = 'block';
+      FichasStore.buscarFicha(alunoAbertoId).then(function (ficha) {
+        exerciciosEmEdicao = (ficha.treino_exercicios || []).slice();
+        return carregarCatalogoTreino();
+      }).then(function () {
+        form.innerHTML = templateSeletorExercicios() +
+          '<p id="treino-personalizado-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:10px 0 0;"></p>' +
+          '<div style="display:flex;gap:10px;margin-top:10px;">' +
+          '<button type="button" class="botao-primario" id="treino-personalizado-botao-salvar" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarTreinoPersonalizadoClicado()">Salvar treino</button>' +
+          '<button type="button" onclick="fecharFormTreino()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
+          '</div>';
+        renderSeletorExercicios();
+      }).catch(function (erro) {
+        form.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function salvarTreinoPersonalizadoClicado() {
+      var botao = document.getElementById('treino-personalizado-botao-salvar');
+      botao.disabled = true;
+      botao.textContent = 'Salvando…';
+      FichasStore.aplicarTreinoPersonalizado(alunoAbertoId, exerciciosEmEdicao).then(function () {
+        fecharFormTreino();
+        return FichasStore.buscarFicha(alunoAbertoId);
+      }).then(function (ficha) {
+        if (ficha) { renderTreinoResumo(ficha); }
+      }).catch(function (erro) {
+        botao.disabled = false;
+        botao.textContent = 'Salvar treino';
+        var erroEl = document.getElementById('treino-personalizado-erro');
+        erroEl.textContent = mensagemSeguraErro(erro);
+        erroEl.style.display = 'block';
+      });
+    }
+
 
     function mostrarTipo(tipo) {
       document.getElementById('tipo-academia').classList.toggle('ativo', tipo === 'academia');
