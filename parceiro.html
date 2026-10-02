@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <div class="tarja-demo">Modo teste — dados fictícios. Área do parceiro funcional para testes internos, ainda sem login de verdade e sem indexação (noindex).</div>
+  <div class="tarja-demo">Login real para academia/personal (D045) — cadastro passa por aprovação. Alunos e Montar treino continuam em modo teste, com dados fictícios, até ligarmos essa parte ao banco. Sem indexação (noindex).</div>
 
   <header class="site-header">
     <div class="container">
@@ -34,12 +34,12 @@
         <!-- LOGIN — sempre visível, não fica escondido atrás de uma aba (redesenho 2026-09-29, feedback de Murilo) -->
         <div class="login-canto" id="login-canto">
           <div class="campo">
-            <label for="email-parceiro">E-mail (demonstração: admin)</label>
-            <input id="email-parceiro" type="text" placeholder="admin">
+            <label for="email-parceiro">E-mail</label>
+            <input id="email-parceiro" type="text" placeholder="seuemail@exemplo.com">
           </div>
           <div class="campo">
-            <label for="senha-parceiro">Senha (demonstração: admin)</label>
-            <input id="senha-parceiro" type="password" placeholder="admin">
+            <label for="senha-parceiro">Senha</label>
+            <input id="senha-parceiro" type="password" placeholder="Sua senha">
           </div>
           <p id="parceiro-login-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">E-mail ou senha incorretos.</p>
           <button class="botao-primario largura-total" type="button" onclick="entrarParceiro()">Entrar</button>
@@ -47,6 +47,9 @@
             <a href="#">Esqueci minha senha</a>
             <a href="contato.html">Falar com o Fera Fit</a>
           </div>
+          <p style="margin:14px 0 0;">
+            <a href="#" onclick="verDemonstracao();return false;" style="font-size:0.78rem;color:var(--texto-secundario);">Ver painel de demonstração (dados fictícios, sem login) →</a>
+          </p>
         </div>
 
         <div class="parceiro-hero-conteudo">
@@ -281,6 +284,23 @@
         <!-- TELA PÓS-LOGIN — DEMANDA 032 (2026-09-25): áreas funcionais de teste (Academia/Personal), dados fictícios em localStorage. Ver STATUS.md (D032). -->
         <div id="area-logada" style="display:none;">
 
+          <!-- D045, item 1/6.3 (2026-10-01): tela real pós-login, perfil lido
+               do Supabase pelo próprio dono (RLS). Alunos/Montar treino abaixo
+               (escolha-modo/painel-conta) continuam só demonstração até os
+               itens 2 e 3 da D045 ligarem os dados reais. -->
+          <div class="parceiro-box" id="minha-conta-real" style="display:none;max-width:560px;margin:0 auto 24px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+              <h1 id="minha-conta-titulo" style="font-size:1.2rem;font-weight:800;margin:0;"></h1>
+              <button type="button" onclick="sairDaMinhaConta()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:999px;padding:8px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">Sair</button>
+            </div>
+            <div id="minha-conta-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
+            <p style="color:var(--texto-secundario);font-size:0.78rem;margin:14px 0 0;">
+              Alunos e Montar treino ainda não estão ligados à sua conta real — use
+              <a href="#" onclick="verDemonstracao();return false;">o modo de demonstração</a>
+              para testar essas telas com dados fictícios, por enquanto.
+            </p>
+          </div>
+
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
             <h1 style="font-size:1.3rem;font-weight:800;margin:0 0 8px;">Entrar como…</h1>
             <p style="color:var(--texto-secundario);font-size:0.9rem;margin:0 0 20px;">
@@ -439,20 +459,95 @@
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
   <script>
-    // Login cosmético — só compara texto digitado, roda 100% no navegador.
-    // Não é autenticação de verdade: não cria sessão, não guarda token, não chama nenhuma API.
-    // Combinado em D009 (16/09/2026): sai do ar antes de existir login de verdade.
+    // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
+    // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
+    // O login cosmetico (admin/admin) saiu do ar aqui -- ver verDemonstracao()
+    // abaixo para continuar testando Alunos/Montar treino com dados ficticios
+    // enquanto os itens 2 e 3 da D045 nao ligam esses dados ao banco real.
     function entrarParceiro() {
-      var usuario = document.getElementById('email-parceiro').value;
+      var email = document.getElementById('email-parceiro').value;
       var senha = document.getElementById('senha-parceiro').value;
       var erro = document.getElementById('parceiro-login-erro');
-      if (usuario === 'admin' && senha === 'admin') {
+      erro.style.display = 'none';
+      erro.textContent = 'E-mail ou senha incorretos.';
+
+      ParceirosStore.entrarComEmailSenha(email, senha).then(function () {
+        return ParceirosStore.minhaConta();
+      }).then(function (conta) {
+        if (!conta) {
+          ParceirosStore.sairDaConta();
+          erro.textContent = 'Esta conta não tem cadastro de academia ou personal no Fera Fit.';
+          erro.style.display = 'block';
+          return;
+        }
         document.getElementById('parceiro-hero-pitch').style.display = 'none';
         document.getElementById('caixa-parceiro').style.display = 'none';
         document.getElementById('area-logada').style.display = 'block';
-      } else {
+        document.getElementById('escolha-modo').style.display = 'none';
+        document.getElementById('painel-conta').style.display = 'none';
+        renderMinhaContaReal(conta);
+      }).catch(function (erroLogin) {
+        erro.textContent = (erroLogin && erroLogin.message) || 'E-mail ou senha incorretos.';
         erro.style.display = 'block';
+      });
+    }
+
+    // Modo de demonstração (comportamento antigo, D032/D036, dados
+    // fictícios em localStorage) — continua acessível sem login, só não
+    // é mais o caminho padrão do formulário de e-mail/senha (D045).
+    function verDemonstracao() {
+      document.getElementById('minha-conta-real').style.display = 'none';
+      document.getElementById('parceiro-hero-pitch').style.display = 'none';
+      document.getElementById('caixa-parceiro').style.display = 'none';
+      document.getElementById('area-logada').style.display = 'block';
+      document.getElementById('escolha-modo').style.display = 'block';
+    }
+
+    // Tela real pós-login (D045, item 1/6.3) — mostra o perfil de verdade
+    // (lido da tabela academias/personais pelo próprio dono, via RLS) e
+    // avisa com clareza que Alunos/Montar treino ainda são só demonstração
+    // até os itens 2 e 3 da D045 ligarem essa parte ao banco.
+    function renderMinhaContaReal(conta) {
+      document.getElementById('minha-conta-real').style.display = 'block';
+      var tituloConta = conta.tipo === 'academia' ? 'Academia' : 'Personal';
+      document.getElementById('minha-conta-titulo').textContent = 'Minha conta — ' + tituloConta;
+      var linhas = [];
+      linhas.push(['Nome', conta.nome]);
+      if (conta.tipo === 'personal') {
+        linhas.push(['CREF', conta.cref]);
+        linhas.push(['Formação', conta.formacao]);
+        linhas.push(['Especialização', conta.especializacao]);
+        linhas.push(['Cidade / bairro', [conta.cidade, conta.bairro].filter(Boolean).join(' / ')]);
+        linhas.push(['Status', conta.ativo ? 'Aprovado' : 'Cadastro em análise']);
+      } else {
+        linhas.push(['CNPJ', conta.cnpj]);
+        linhas.push(['Endereço', conta.endereco]);
+        linhas.push(['Responsável', conta.responsavel]);
+        linhas.push(['Cidade / UF', [conta.cidade, conta.uf].filter(Boolean).join(' / ')]);
+        linhas.push(['Status', conta.ativa ? 'Aprovado' : 'Cadastro em análise']);
       }
+      linhas.push(['Telefone / WhatsApp', conta.telefone]);
+      linhas.push(['Apresentação', conta.apresentacao]);
+      var corpo = document.getElementById('minha-conta-corpo');
+      corpo.innerHTML = '';
+      linhas.forEach(function (par) {
+        var valor = par[1] && String(par[1]).trim() ? par[1] : '—';
+        var linha = document.createElement('p');
+        linha.style.margin = '0 0 8px';
+        linha.innerHTML = '<strong>' + par[0] + ':</strong> ' + valor.replace(/</g, '&lt;');
+        corpo.appendChild(linha);
+      });
+    }
+
+    function sairDaMinhaConta() {
+      ParceirosStore.sairDaConta().then(function () {
+        document.getElementById('area-logada').style.display = 'none';
+        document.getElementById('minha-conta-real').style.display = 'none';
+        document.getElementById('parceiro-hero-pitch').style.display = '';
+        document.getElementById('caixa-parceiro').style.display = '';
+        document.getElementById('email-parceiro').value = '';
+        document.getElementById('senha-parceiro').value = '';
+      });
     }
 
     function mostrarTipo(tipo) {
@@ -500,7 +595,10 @@
       erro.style.display = 'none';
 
       var arquivoFoto = document.getElementById('ac-foto').files;
-      ParceirosStore.cadastrarAcademia({
+      var senha = document.getElementById('ac-senha').value;
+      var botaoEnviar = document.querySelector('#cadastro-academia button.botao-primario');
+      if (botaoEnviar) { botaoEnviar.disabled = true; }
+      Promise.resolve(ParceirosStore.cadastrarAcademia({
         nome: nome,
         cnpj: document.getElementById('ac-cnpj').value,
         endereco: document.getElementById('ac-endereco').value,
@@ -509,11 +607,18 @@
         telefone: document.getElementById('ac-telefone').value,
         apresentacao: document.getElementById('ac-apresentacao').value,
         email: email,
+        senha: senha,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
         galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
+      })).then(function () {
+        document.getElementById('cadastro-academia').style.display = 'none';
+        document.getElementById('cadastro-academia-recebido').style.display = 'block';
+      }).catch(function (erroCadastro) {
+        erro.textContent = (erroCadastro && erroCadastro.message) || 'Não deu para concluir o cadastro agora. Tenta de novo em instantes.';
+        erro.style.display = 'block';
+      }).then(function () {
+        if (botaoEnviar) { botaoEnviar.disabled = false; }
       });
-      document.getElementById('cadastro-academia').style.display = 'none';
-      document.getElementById('cadastro-academia-recebido').style.display = 'block';
     }
 
     // D013 (2026-09-18): "não construa o envio para o banco ainda" — continua valendo, isto NÃO
@@ -554,23 +659,34 @@
 
       // Chamada antiga — continua alimentando o Módulo 2.5 (Portfólio de
       // parceiros, D032/D033) de admin.html, sem nenhuma mudança de
-      // comportamento para quem já usava aquela tela.
-      DadosDemo.cadastrarPersonalPendente({
-        nome: document.getElementById('pe-nome').value,
-        cref: document.getElementById('pe-cref').value,
-        formacao: document.getElementById('pe-formacao').value,
-        especializacao: document.getElementById('pe-especializacao').value,
-        cidade: document.getElementById('pe-cidade').value,
-        bairro: document.getElementById('pe-bairro').value,
-        experiencias: document.getElementById('pe-experiencias').value,
-        telefone: document.getElementById('pe-telefone').value,
-        email: email,
-        temFoto: !!(arquivoFoto && arquivoFoto.length)
-      });
+      // comportamento para quem já usava aquela tela. Fica em localStorage
+      // mesmo (DadosDemo nunca falou com o Supabase, e o Portfólio não é
+      // escopo da D045) -- erro aqui nunca bloqueia o cadastro real abaixo.
+      try {
+        DadosDemo.cadastrarPersonalPendente({
+          nome: document.getElementById('pe-nome').value,
+          cref: document.getElementById('pe-cref').value,
+          formacao: document.getElementById('pe-formacao').value,
+          especializacao: document.getElementById('pe-especializacao').value,
+          cidade: document.getElementById('pe-cidade').value,
+          bairro: document.getElementById('pe-bairro').value,
+          experiencias: document.getElementById('pe-experiencias').value,
+          telefone: document.getElementById('pe-telefone').value,
+          email: email,
+          temFoto: !!(arquivoFoto && arquivoFoto.length)
+        });
+      } catch (erroPortfolio) {
+        console.warn('Portfólio de parceiros (D032) não recebeu este cadastro:', erroPortfolio);
+      }
 
-      // Chamada nova (D036) — alimenta o Módulo 2.6 (Gestão de parceiros),
-      // que cobre academia + personal, aprovação, perfil e cobrança.
-      ParceirosStore.cadastrarPersonal({
+      // Chamada real (D045, item 1/6.3) — Supabase Auth + Edge Function
+      // signup-personal (019) + perfil completo da 024. Reaproveita o
+      // parágrafo de erro da senha (pe-senha-erro) para mostrar também
+      // um erro vindo do cadastro em si, já que não existe outro campo
+      // de erro dedicado nesta tela.
+      var botaoEnviarPersonal = document.querySelector('#cadastro-personal button.botao-primario');
+      if (botaoEnviarPersonal) { botaoEnviarPersonal.disabled = true; }
+      Promise.resolve(ParceirosStore.cadastrarPersonal({
         nome: document.getElementById('pe-nome').value,
         cref: document.getElementById('pe-cref').value,
         formacao: document.getElementById('pe-formacao').value,
@@ -584,10 +700,15 @@
         senha: senha,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
         galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
+      })).then(function () {
+        document.getElementById('cadastro-personal').style.display = 'none';
+        document.getElementById('cadastro-personal-recebido').style.display = 'block';
+      }).catch(function (erroCadastro) {
+        erroSenha.textContent = (erroCadastro && erroCadastro.message) || 'Não deu para concluir o cadastro agora. Tenta de novo em instantes.';
+        erroSenha.style.display = 'block';
+      }).then(function () {
+        if (botaoEnviarPersonal) { botaoEnviarPersonal.disabled = false; }
       });
-
-      document.getElementById('cadastro-personal').style.display = 'none';
-      document.getElementById('cadastro-personal-recebido').style.display = 'block';
     }
   </script>
   <script>

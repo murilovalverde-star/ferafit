@@ -660,6 +660,44 @@
 
   // --- Cadastro (signUp + Edge Function — nunca INSERT direto) ---
 
+  // O formulario de academia junta cidade e UF num campo so ("Sao
+  // Paulo / SP" -- decisao de tela, registrada na propria migration
+  // 024). A Edge Function signup-academia (019) espera os dois campos
+  // separados, entao dividimos aqui antes de chamar.
+  function dividirCidadeUf(textoCombinado) {
+    var texto = (textoCombinado || "").trim();
+    if (!texto) {
+      return { cidade: "", uf: "" };
+    }
+    var partes = texto.split("/");
+    if (partes.length >= 2) {
+      return { cidade: partes[0].trim(), uf: partes.slice(1).join("/").trim() };
+    }
+    return { cidade: texto, uf: "" };
+  }
+
+  // Envia foto de perfil + galeria depois que o cadastro (Edge
+  // Function) ja criou a linha -- nunca bloqueia o cadastro em si: se
+  // uma foto falhar, a conta e a aprovacao continuam valendo, so fica
+  // registrado no console para diagnostico (D045, item 1/6.3).
+  function enviarFotosCadastro(tipo, id, arquivoFoto, arquivosGaleria) {
+    var tarefas = [];
+    if (arquivoFoto) {
+      tarefas.push(ParceirosStoreSupabase.enviarFotoPerfil(tipo, id, arquivoFoto));
+    }
+    (arquivosGaleria || []).forEach(function (arquivo) {
+      tarefas.push(ParceirosStoreSupabase.enviarFotoGaleria(tipo, id, arquivo));
+    });
+    if (tarefas.length === 0) {
+      return Promise.resolve();
+    }
+    return Promise.all(tarefas).catch(function (erroFoto) {
+      if (global.console && global.console.warn) {
+        global.console.warn("Cadastro criado, mas pelo menos uma foto nao subiu:", erroFoto);
+      }
+    });
+  }
+
   ParceirosStoreSupabase.cadastrarAcademia = function (dados) {
     dados = dados || {};
     var cliente = clienteSupabase();
@@ -680,16 +718,39 @@
         // em vez de estourar um erro genérico de "token indefinido".
         throw new Error("Conta criada. Confirme seu e-mail antes de continuar o cadastro.");
       }
+      var cidadeUf = dividirCidadeUf(dados.cidade);
       return chamarEdgeFunctionCadastro("signup-academia", sessao.access_token, {
         nome: (dados.nome || "").trim(),
-        cidade: (dados.cidade || "").trim() || undefined,
-        uf: (dados.uf || "").trim() || undefined
+        cidade: cidadeUf.cidade || undefined,
+        uf: cidadeUf.uf || undefined
       }).then(function (corpoResposta) {
-        return {
-          id: corpoResposta.academia_id,
-          jaExistia: !!corpoResposta.ja_existia,
-          userId: sessao.user && sessao.user.id
-        };
+        var academiaId = corpoResposta.academia_id;
+        // Campos novos da migration 024 (CNPJ, endereco, responsavel,
+        // telefone, apresentacao) nao existem na Edge Function signup-academia
+        // (escrita contra a 019, antes da 024) -- gravados a seguir por UPDATE
+        // direto, permitido pela politica de RLS "academias: dono e admin"
+        // (FOR ALL, migration 004, a 024 so acrescentou colunas e nao mudou
+        // nenhuma politica -- conferido no arquivo real antes de escrever
+        // esta funcao, nao presumido). Nunca bloqueia o cadastro em si.
+        return ParceirosStoreSupabase.atualizarMeuPerfil("academia", academiaId, {
+          cnpj: dados.cnpj,
+          endereco: dados.endereco,
+          responsavel: dados.responsavel,
+          telefone: dados.telefone,
+          apresentacao: dados.apresentacao
+        }).catch(function (erroPerfil) {
+          if (global.console && global.console.warn) {
+            global.console.warn("Cadastro de academia criado, mas o perfil completo (024) nao salvou:", erroPerfil);
+          }
+        }).then(function () {
+          return enviarFotosCadastro("academia", academiaId, dados.fotoPerfil, dados.galeria);
+        }).then(function () {
+          return {
+            id: academiaId,
+            jaExistia: !!corpoResposta.ja_existia,
+            userId: sessao.user && sessao.user.id
+          };
+        });
       });
     });
   };
@@ -714,12 +775,150 @@
         nome_exibicao: (dados.nome || "").trim(),
         cref: (dados.cref || "").trim() || undefined
       }).then(function (corpoResposta) {
-        return {
-          id: corpoResposta.personal_id,
-          jaExistia: !!corpoResposta.ja_existia,
-          userId: sessao.user && sessao.user.id
-        };
+        var personalId = corpoResposta.personal_id;
+        // Campos novos da migration 024 (formacao, especializacao, cidade,
+        // bairro, experiencias, telefone, apresentacao) nao existem na Edge
+        // Function signup-personal (019) -- gravados a seguir por UPDATE
+        // direto, mesma logica e mesmo motivo do cadastro de academia acima.
+        return ParceirosStoreSupabase.atualizarMeuPerfil("personal", personalId, {
+          formacao: dados.formacao,
+          especializacao: dados.especializacao,
+          cidade: dados.cidade,
+          bairro: dados.bairro,
+          experiencias: dados.experiencias,
+          telefone: dados.telefone,
+          apresentacao: dados.apresentacao
+        }).catch(function (erroPerfil) {
+          if (global.console && global.console.warn) {
+            global.console.warn("Cadastro de personal criado, mas o perfil completo (024) nao salvou:", erroPerfil);
+          }
+        }).then(function () {
+          return enviarFotosCadastro("personal", personalId, dados.fotoPerfil, dados.galeria);
+        }).then(function () {
+          return {
+            id: personalId,
+            jaExistia: !!corpoResposta.ja_existia,
+            userId: sessao.user && sessao.user.id
+          };
+        });
       });
+    });
+  };
+
+  // --- "Minha conta" (D045, item 1/6.3): visao e edicao do proprio
+  //     parceiro logado -- diferente de `perfilParceiro` acima, que usa a
+  //     RPC admin_perfil_parceiro (so admin, nunca expoe CNPJ/endereco). Aqui
+  //     o dono le e edita a propria linha inteira, permitido pela politica de
+  //     RLS "academias/personais: dono e admin" (FOR ALL, migration 004 --
+  //     conferido no arquivo real da 024 antes de escrever: ela so acrescenta
+  //     colunas, nao mexe em nenhuma politica existente). ---
+
+  function linhaAcademiaParaMinhaConta(linha) {
+    return {
+      id: linha.id,
+      tipo: "academia",
+      nome: linha.nome,
+      cidade: linha.cidade,
+      uf: linha.uf,
+      ativa: linha.ativa,
+      cnpj: linha.cnpj,
+      endereco: linha.endereco,
+      responsavel: linha.responsavel_nome,
+      telefone: linha.telefone,
+      apresentacao: linha.apresentacao,
+      faixaId: linha.faixa_comercial_id,
+      criadoEm: linha.criada_em
+    };
+  }
+
+  function linhaPersonalParaMinhaConta(linha) {
+    return {
+      id: linha.id,
+      tipo: "personal",
+      nome: linha.nome_exibicao,
+      cref: linha.cref,
+      ativo: linha.ativo,
+      formacao: linha.formacao,
+      especializacao: linha.especializacao,
+      cidade: linha.cidade,
+      bairro: linha.bairro,
+      experiencias: linha.experiencias,
+      telefone: linha.telefone,
+      apresentacao: linha.apresentacao,
+      faixaId: linha.faixa_comercial_id,
+      criadoEm: linha.criado_em
+    };
+  }
+
+  // Descobre se a conta logada e academia ou personal, e devolve o
+  // perfil completo (nunca precisa saber o id de antemao -- le pelo
+  // user_id/dono_id da sessao). Devolve null se a conta estiver logada
+  // mas nao for parceiro nenhum (ex.: uma conta so-admin).
+  ParceirosStoreSupabase.minhaConta = function () {
+    var cliente = clienteSupabase();
+    return cliente.auth.getUser().then(function (resultadoUser) {
+      if (resultadoUser.error || !resultadoUser.data || !resultadoUser.data.user) {
+        throw new Error("Sessao invalida -- faca login de novo.");
+      }
+      var uid = resultadoUser.data.user.id;
+      return Promise.all([
+        cliente.from("personais").select("*").eq("user_id", uid).maybeSingle(),
+        cliente.from("academias").select("*").eq("dono_id", uid).maybeSingle()
+      ]).then(function (resultados) {
+        if (resultados[0].error) {
+          throw new Error("Nao deu para ler sua conta de personal agora.");
+        }
+        if (resultados[1].error) {
+          throw new Error("Nao deu para ler sua conta de academia agora.");
+        }
+        if (resultados[0].data) {
+          return linhaPersonalParaMinhaConta(resultados[0].data);
+        }
+        if (resultados[1].data) {
+          return linhaAcademiaParaMinhaConta(resultados[1].data);
+        }
+        return null;
+      });
+    });
+  };
+
+  // Atualiza so os campos de perfil publico/privado da 024 -- nunca
+  // mexe em faixa comercial, aprovacao ou cobranca (isso e escopo so
+  // do admin, nas funcoes abaixo). Campos ausentes em `campos` nao sao
+  // tocados (permite atualizacao parcial).
+  ParceirosStoreSupabase.atualizarMeuPerfil = function (tipo, id, campos) {
+    var cliente = clienteSupabase();
+    campos = campos || {};
+    var tabela, corpo = {};
+    if (tipo === "academia") {
+      tabela = "academias";
+      if (campos.cnpj !== undefined) corpo.cnpj = (campos.cnpj || "").trim();
+      if (campos.endereco !== undefined) corpo.endereco = (campos.endereco || "").trim();
+      if (campos.cidade !== undefined) corpo.cidade = (campos.cidade || "").trim();
+      if (campos.uf !== undefined) corpo.uf = (campos.uf || "").trim();
+      if (campos.responsavel !== undefined) corpo.responsavel_nome = (campos.responsavel || "").trim();
+      if (campos.telefone !== undefined) corpo.telefone = (campos.telefone || "").trim();
+      if (campos.apresentacao !== undefined) corpo.apresentacao = (campos.apresentacao || "").trim().slice(0, 500);
+    } else if (tipo === "personal") {
+      tabela = "personais";
+      if (campos.formacao !== undefined) corpo.formacao = (campos.formacao || "").trim();
+      if (campos.especializacao !== undefined) corpo.especializacao = (campos.especializacao || "").trim();
+      if (campos.cidade !== undefined) corpo.cidade = (campos.cidade || "").trim();
+      if (campos.bairro !== undefined) corpo.bairro = (campos.bairro || "").trim();
+      if (campos.experiencias !== undefined) corpo.experiencias = (campos.experiencias || "").trim();
+      if (campos.telefone !== undefined) corpo.telefone = (campos.telefone || "").trim();
+      if (campos.apresentacao !== undefined) corpo.apresentacao = (campos.apresentacao || "").trim().slice(0, 500);
+    } else {
+      return Promise.reject(new Error("Tipo de parceiro invalido: " + tipo));
+    }
+    if (Object.keys(corpo).length === 0) {
+      return Promise.resolve({ id: id, tipo: tipo });
+    }
+    return cliente.from(tabela).update(corpo).eq("id", id).select("id").then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Nao deu para salvar os dados do perfil agora.");
+      }
+      return { id: id, tipo: tipo };
     });
   };
 
@@ -1227,7 +1426,7 @@
   // Backend confirmar (D089 dela) que a migration 019 foi aplicada em
   // produção. Ver aviso completo no cabeçalho da seção Supabase acima
   // e no STATUS.md (P26/D037).
-  global.ParceirosStore = ParceirosStoreDemo;
+  global.ParceirosStore = ParceirosStoreSupabase; // D045 (2026-10-01): switch ligado -- ver STATUS.md P34
   global.ParceirosStoreDemo = ParceirosStoreDemo;
   global.ParceirosStoreSupabase = ParceirosStoreSupabase;
 })(window);
