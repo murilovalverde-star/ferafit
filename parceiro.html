@@ -776,11 +776,74 @@
           '<div class="campo"><label for="af-redes">Redes sociais</label><input id="af-redes" type="text"></div>' +
           '<div class="campo"><label for="af-preferencia-horario">Preferência de horário</label><input id="af-preferencia-horario" type="text"></div>' +
         '</div>' +
+        templateDiasTreino() +
         '<p id="af-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 14px;"></p>' +
         '<div style="display:flex;gap:10px;">' +
           '<button type="button" class="botao-primario" id="af-botao-salvar" style="width:auto;padding:10px 20px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarFormularioAluno()">Salvar</button>' +
           '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:10px 20px;cursor:pointer;font-family:inherit;">Cancelar</button>' +
         '</div>';
+    }
+
+    // --- Dias de treino (parte 3 do item 3 da D045/D050) ---
+    //
+    // `dias_treino` já era uma coluna gravável desde o item 2
+    // (conferido no arquivo real antes de escrever esta parte -- não
+    // presumido) -- faltava só a tela. Mesmo formato já usado no modo
+    // de demonstração -- `{comAcademia:[], presencialComPersonal:[],
+    // soApp:[]}` -- e mesmo `DIAS_SEMANA` -- mas com um atributo
+    // (`data-afdias-grupo`) deliberadamente DIFERENTE do
+    // `data-dias-grupo` que o modo de demonstração usa, para nunca
+    // misturar os dois conjuntos de checkboxes se as duas telas
+    // acabarem co-existindo na mesma página (mesmo cuidado já tomado
+    // com `aplicar-treino-base-select` na parte 2).
+    function templateCheckboxesDias(grupo) {
+      return DIAS_SEMANA.map(function (d) {
+        return '<label><input type="checkbox" value="' + d.chave + '" data-afdias-grupo="' + grupo + '"> ' + escaparHtmlAluno(d.rotulo) + '</label>';
+      }).join('');
+    }
+
+    function templateDiasTreino() {
+      var tipo = parceiroAtual ? parceiroAtual.tipo : 'personal';
+      if (tipo === 'academia') {
+        return '<div class="cadastro-grupo"><div class="titulo-grupo">Dias de treino</div>' +
+          '<p class="campo-nota" style="margin:0 0 8px;">Dias em que o aluno treina na academia</p>' +
+          '<div class="dias-semana">' + templateCheckboxesDias('comAcademia') + '</div>' +
+          '</div>';
+      }
+      return '<div class="cadastro-grupo"><div class="titulo-grupo">Dias de treino</div>' +
+        '<p class="campo-nota" style="margin:0 0 8px;">Dias presenciais com o personal</p>' +
+        '<div class="dias-semana">' + templateCheckboxesDias('presencial') + '</div>' +
+        '<p class="campo-nota" style="margin:12px 0 8px;">Dias só com o app (não presenciais)</p>' +
+        '<div class="dias-semana">' + templateCheckboxesDias('soapp') + '</div>' +
+        '</div>';
+    }
+
+    function diasMarcados(grupo) {
+      var valores = [];
+      document.querySelectorAll('input[data-afdias-grupo="' + grupo + '"]:checked').forEach(function (el) { valores.push(el.value); });
+      return valores;
+    }
+
+    function lerDiasTreinoFormulario() {
+      var tipo = parceiroAtual ? parceiroAtual.tipo : 'personal';
+      if (tipo === 'academia') {
+        return { comAcademia: diasMarcados('comAcademia'), presencialComPersonal: [], soApp: [] };
+      }
+      return { comAcademia: [], presencialComPersonal: diasMarcados('presencial'), soApp: diasMarcados('soapp') };
+    }
+
+    function marcarCheckboxesDias(grupo, valoresMarcados) {
+      var lista = valoresMarcados || [];
+      document.querySelectorAll('input[data-afdias-grupo="' + grupo + '"]').forEach(function (el) {
+        el.checked = lista.indexOf(el.value) !== -1;
+      });
+    }
+
+    function preencherDiasTreinoFormulario(diasTreino) {
+      var d = diasTreino || {};
+      marcarCheckboxesDias('comAcademia', d.comAcademia);
+      marcarCheckboxesDias('presencial', d.presencialComPersonal);
+      marcarCheckboxesDias('soapp', d.soApp);
     }
 
     function abrirFormularioNovoAluno() {
@@ -820,7 +883,8 @@
         anamnese: anamnese,
         testes_fisicos: v('af-testes-fisicos'),
         tem_foto_inicial: c('af-tem-foto'),
-        profissao: v('af-profissao'), redes_sociais: v('af-redes'), preferencia_horario: v('af-preferencia-horario')
+        profissao: v('af-profissao'), redes_sociais: v('af-redes'), preferencia_horario: v('af-preferencia-horario'),
+        dias_treino: lerDiasTreinoFormulario()
       };
     }
 
@@ -844,6 +908,7 @@
       s('af-an-habitos', anamnese.habitos);
       s('af-testes-fisicos', ficha.testes_fisicos); m('af-tem-foto', ficha.tem_foto_inicial);
       s('af-profissao', ficha.profissao); s('af-redes', ficha.redes_sociais); s('af-preferencia-horario', ficha.preferencia_horario);
+      preencherDiasTreinoFormulario(ficha.dias_treino);
     }
 
     function salvarFormularioAluno() {
