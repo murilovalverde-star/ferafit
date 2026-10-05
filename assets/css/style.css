@@ -602,6 +602,110 @@ footer.site-footer a:hover {
   padding: 30px 30px 26px;
 }
 
+/* REDESENHO 2026-10-02 (P39 do STATUS.md) — formularios de cadastro
+   passaram a usar .form-grade (2 colunas), entao o cartao de cadastro
+   precisa de mais largura que o antigo login/cadastro simples. */
+.parceiro-box.parceiro-box-largo {
+  max-width: 620px;
+}
+
+.parceiro-link-voltar {
+  display: inline-block;
+  margin-bottom: 18px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-decoration: none;
+}
+
+.parceiro-link-voltar:hover {
+  color: var(--laranja);
+}
+
+/* Tela de escolha "Sou Personal Trainer" / "Sou Academia" (cartao grande),
+   substituindo as antigas abas Sou academia/Sou personal no topo do hero. */
+.parceiro-cartoes-escolha {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.parceiro-cartao-escolha {
+  flex: 1;
+  min-width: 260px;
+  max-width: 330px;
+  text-align: left;
+  text-decoration: none;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--raio);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--texto);
+}
+
+.parceiro-cartao-escolha.destaque {
+  border: 2px solid var(--laranja);
+}
+
+.parceiro-cartao-icone {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.parceiro-cartao-escolha.destaque .parceiro-cartao-icone {
+  background: rgba(255, 106, 26, 0.16);
+}
+
+.parceiro-cartao-titulo {
+  display: block;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.parceiro-cartao-texto {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--texto-secundario);
+}
+
+.parceiro-cartao-cta-secundaria {
+  display: block;
+  margin-top: auto;
+  padding: 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--texto);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.parceiro-cartao-escolha .botao-primario.largura-total {
+  margin-top: auto;
+}
+
+/* #login-parceiro-view precisa vencer a regra ".login-canto { width:300px }"
+   do media query abaixo (que so fazia sentido dentro da antiga grade
+   login+pitch lado a lado) -- especificidade por id garante a largura certa
+   mesmo fora daquele contexto. */
+#login-parceiro-view {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
 .parceiro-tabs {
   display: flex;
   gap: 8px;

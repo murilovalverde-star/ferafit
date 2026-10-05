@@ -29,10 +29,46 @@
 
   <main>
     <section class="parceiro-hero" id="parceiro-hero-pitch">
-      <div class="container parceiro-hero-grid">
+      <div class="container">
 
-        <!-- LOGIN — sempre visível, não fica escondido atrás de uma aba (redesenho 2026-09-29, feedback de Murilo) -->
-        <div class="login-canto" id="login-canto">
+        <!-- REDESENHO 2026-10-02 (pedido direto de Murilo, P39 do STATUS.md): a antiga
+             grade fixa login+pitch virou um alternador simples Entrar/Cadastre-se no
+             topo, mais escolha por cartão grande (pesquisa com 10+ concorrentes,
+             mockup aprovado no canvas "Parceiro Fera Fit — opções de layout"). "Sou
+             Personal Trainer" vem primeiro e em destaque, por pedido de Murilo
+             (espera bem mais cadastro de personal do que de academia). -->
+        <div class="parceiro-tabs" id="escolha-entrar-cadastrar" style="max-width:320px;margin:0 auto 28px;">
+          <button class="ativo" type="button" id="tab-cadastrar" onclick="mostrarEscolhaCadastro()">Cadastre-se</button>
+          <button type="button" id="tab-entrar" onclick="mostrarLoginParceiro()">Entrar</button>
+        </div>
+
+        <div id="escolha-cartao-view">
+          <span class="eyebrow">Área do Parceiro</span>
+          <h1>Como você quer entrar no Fera Fit?</h1>
+          <p class="parceiro-pitch-texto">Escolha um perfil para ver só os campos que fazem sentido para você.</p>
+
+          <div class="parceiro-cartoes-escolha">
+            <a href="#" class="parceiro-cartao-escolha destaque" onclick="mostrarTipo('personal');return false;">
+              <span class="parceiro-cartao-icone">🏋️</span>
+              <span class="parceiro-cartao-titulo">Sou Personal Trainer</span>
+              <span class="parceiro-cartao-texto">Monte treinos e acompanhe a evolução de cada aluno, mesmo à distância.</span>
+              <span class="botao-primario largura-total">Cadastrar como personal</span>
+            </a>
+            <a href="#" class="parceiro-cartao-escolha" onclick="mostrarTipo('academia');return false;">
+              <span class="parceiro-cartao-icone">🏢</span>
+              <span class="parceiro-cartao-titulo">Sou Academia</span>
+              <span class="parceiro-cartao-texto">Coloque seus alunos no Fera Fit e deixe o app ajudar no dia a dia do treino.</span>
+              <span class="parceiro-cartao-cta-secundaria">Cadastrar como academia</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- LOGIN — agora é uma tela própria, trocada pelo botão "Entrar" do topo, em vez
+             de ficar sempre visível ao lado do pitch (redesenho 2026-10-02). Mesmos ids
+             (email-parceiro/senha-parceiro/parceiro-login-erro) usados por entrarParceiro(). -->
+        <div class="login-canto" id="login-parceiro-view" style="display:none;">
+          <h1 style="font-size:1.3rem;text-align:center;margin:0 0 4px;">Entrar como parceiro</h1>
+          <p class="parceiro-pitch-texto" style="margin:0 0 18px;">Para academias e personal trainers já cadastrados.</p>
           <div class="campo">
             <label for="email-parceiro">E-mail</label>
             <input id="email-parceiro" type="text" placeholder="seuemail@exemplo.com">
@@ -47,28 +83,12 @@
             <a href="#">Esqueci minha senha</a>
             <a href="contato.html">Falar com o Fera Fit</a>
           </div>
-          <p style="margin:14px 0 0;">
+          <p style="margin:14px 0 0;text-align:center;">
             <a href="#" onclick="verDemonstracao();return false;" style="font-size:0.78rem;color:var(--texto-secundario);">Ver painel de demonstração (dados fictícios, sem login) →</a>
           </p>
-        </div>
-
-        <div class="parceiro-hero-conteudo">
-          <span class="eyebrow">Área do Parceiro</span>
-
-          <div class="parceiro-tabs" id="escolha-tipo-cadastro">
-            <button class="ativo" type="button" onclick="mostrarTipo('academia')" id="tipo-academia">Sou academia</button>
-            <button type="button" onclick="mostrarTipo('personal')" id="tipo-personal">Sou personal</button>
-          </div>
-
-          <!-- PITCH — texto de convencimento, muda conforme a escolha acima -->
-          <div id="pitch-academia">
-            <h1>Sua academia, com um personal digital para cada aluno.</h1>
-            <p class="parceiro-pitch-texto">Cada aluno que você matricula entra com o Fera Fit rodando no bolso: o app monta o treino, ajusta carga e repetição sozinho, aula após aula. Você continua sendo quem ensina e acompanha de perto — só não precisa montar e atualizar treinos todos os dias, mas fique tranquilo, temos a opção de personalização total caso deseje. Cadastre sua academia e comece a colocar seus alunos no Fera Fit.</p>
-          </div>
-          <div id="pitch-personal" style="display:none;">
-            <h1>Seus alunos treinando certo, mesmo quando você não está do lado.</h1>
-            <p class="parceiro-pitch-texto">Você monta a aula, mas quem cuida da evolução de carga de cada aluno, treino a treino, é o Fera Fit. Menos ficha de papel, menos "quanto eu levantei semana passada", mais resultado. Cadastre-se como personal parceiro e comece a usar o Fera Fit com seus alunos.</p>
-          </div>
+          <p style="margin:14px 0 0;text-align:center;font-size:0.82rem;">
+            Ainda não é parceiro? <a href="#" onclick="mostrarEscolhaCadastro();return false;">Cadastre-se aqui</a>
+          </p>
         </div>
 
       </div>
@@ -76,7 +96,7 @@
 
     <section class="bloco">
       <div class="container">
-        <div class="parceiro-box" id="caixa-parceiro">
+        <div class="parceiro-box parceiro-box-largo" id="caixa-parceiro">
 
           <div id="aba-cadastro">
 
@@ -85,7 +105,9 @@
                  senha escolhida no próprio cadastro e foto de perfil + galeria de até 6 fotos
                  (SPEC_parceiro_auth_e_fotos_001.md, seção 3). Só a tela: não fala com o Supabase
                  — grava via ParceirosStore (assets/js/parceiros-store.js), camada trocável. -->
-            <div id="cadastro-academia">
+            <div id="cadastro-academia" style="display:none;">
+
+              <a href="#" class="parceiro-link-voltar" onclick="mostrarEscolhaCadastro();return false;">← Voltar para a escolha de perfil</a>
 
               <div class="aviso-desenho" style="margin:0 0 20px;">
                 ⚠ Este cadastro passa por aprovação. Depois de enviar, alguém do Fera Fit confere os
@@ -95,29 +117,31 @@
 
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Dados da academia</div>
-                <div class="campo">
+                <div class="campo campo-largo">
                   <label for="ac-nome">Nome da academia</label>
                   <input id="ac-nome" type="text" placeholder="Ex: Fera Fit Studio">
                 </div>
-                <div class="campo">
-                  <label for="ac-cnpj">CNPJ</label>
-                  <input id="ac-cnpj" type="text" placeholder="00.000.000/0000-00">
-                </div>
-                <div class="campo">
-                  <label for="ac-endereco">Endereço</label>
-                  <input id="ac-endereco" type="text" placeholder="Rua, número, bairro">
-                </div>
-                <div class="campo">
-                  <label for="ac-cidade">Cidade / UF</label>
-                  <input id="ac-cidade" type="text" placeholder="São Paulo / SP">
-                </div>
-                <div class="campo">
-                  <label for="ac-responsavel">Nome do responsável</label>
-                  <input id="ac-responsavel" type="text" placeholder="Nome completo">
-                </div>
-                <div class="campo">
-                  <label for="ac-telefone">Telefone / WhatsApp</label>
-                  <input id="ac-telefone" type="text" placeholder="(00) 00000-0000">
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="ac-cnpj">CNPJ</label>
+                    <input id="ac-cnpj" type="text" placeholder="00.000.000/0000-00">
+                  </div>
+                  <div class="campo">
+                    <label for="ac-responsavel">Nome do responsável</label>
+                    <input id="ac-responsavel" type="text" placeholder="Nome completo">
+                  </div>
+                  <div class="campo campo-largo">
+                    <label for="ac-endereco">Endereço</label>
+                    <input id="ac-endereco" type="text" placeholder="Rua, número, bairro">
+                  </div>
+                  <div class="campo">
+                    <label for="ac-cidade">Cidade / UF</label>
+                    <input id="ac-cidade" type="text" placeholder="São Paulo / SP">
+                  </div>
+                  <div class="campo">
+                    <label for="ac-telefone">Telefone / WhatsApp</label>
+                    <input id="ac-telefone" type="text" placeholder="(00) 00000-0000">
+                  </div>
                 </div>
                 <div class="campo">
                   <label for="ac-apresentacao">Apresentação</label>
@@ -128,28 +152,32 @@
 
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Foto e galeria</div>
-                <div class="campo">
-                  <label for="ac-foto">Foto de perfil</label>
-                  <input id="ac-foto" type="file" accept="image/*">
-                  <p class="campo-nota" style="margin-top:6px;">Aparece publicamente no perfil da academia, depois de aprovado.</p>
-                </div>
-                <div class="campo">
-                  <label for="ac-galeria">Galeria (até 6 fotos)</label>
-                  <input id="ac-galeria" type="file" accept="image/*" multiple>
-                  <p id="ac-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
-                  <p class="campo-nota" style="margin-top:6px;">Para divulgar o espaço da academia, do jeito que a academia faria nas redes sociais.</p>
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="ac-foto">Foto de perfil</label>
+                    <input id="ac-foto" type="file" accept="image/*">
+                    <p class="campo-nota" style="margin-top:6px;">Aparece publicamente no perfil da academia, depois de aprovado.</p>
+                  </div>
+                  <div class="campo">
+                    <label for="ac-galeria">Galeria (até 6 fotos)</label>
+                    <input id="ac-galeria" type="file" accept="image/*" multiple>
+                    <p id="ac-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
+                    <p class="campo-nota" style="margin-top:6px;">Para divulgar o espaço da academia, do jeito que a academia faria nas redes sociais.</p>
+                  </div>
                 </div>
               </div>
 
               <div class="cadastro-grupo">
                 <div class="titulo-grupo">Acesso</div>
-                <div class="campo">
-                  <label for="ac-email">E-mail</label>
-                  <input id="ac-email" type="email" placeholder="contato@suaacademia.com">
-                </div>
-                <div class="campo">
-                  <label for="ac-senha">Senha</label>
-                  <input id="ac-senha" type="password" placeholder="Escolha uma senha">
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="ac-email">E-mail</label>
+                    <input id="ac-email" type="email" placeholder="contato@suaacademia.com">
+                  </div>
+                  <div class="campo">
+                    <label for="ac-senha">Senha</label>
+                    <input id="ac-senha" type="password" placeholder="Escolha uma senha">
+                  </div>
                 </div>
               </div>
 
@@ -177,6 +205,8 @@
                  com dupla digitação como reforço barato contra erro de digitação (recomendação dada no D014). -->
             <div id="cadastro-personal" style="display:none;">
 
+              <a href="#" class="parceiro-link-voltar" onclick="mostrarEscolhaCadastro();return false;">← Voltar para a escolha de perfil</a>
+
               <div class="aviso-desenho" style="margin:0 0 20px;">
                 ⚠ Este cadastro passa por aprovação. Depois de enviar, alguém do Fera Fit confere seus
                 dados e, se aprovado, a senha provisória para o primeiro acesso chega no seu e-mail — não
@@ -184,49 +214,36 @@
               </div>
 
               <div class="cadastro-grupo">
-                <div class="titulo-grupo">Dados do personal</div>
-                <div class="campo">
+                <div class="titulo-grupo">Identificação</div>
+                <div class="campo campo-largo">
                   <label for="pe-nome">Nome completo</label>
                   <input id="pe-nome" type="text" placeholder="Seu nome completo">
                 </div>
-                <div class="campo">
-                  <label for="pe-foto">Foto de perfil</label>
-                  <input id="pe-foto" type="file" accept="image/*">
-                  <p class="campo-nota" style="margin-top:6px;">Sua foto vai aparecer publicamente na busca de personais do Fera Fit.</p>
-                </div>
-                <div class="campo">
-                  <label for="pe-galeria">Galeria (até 6 fotos)</label>
-                  <input id="pe-galeria" type="file" accept="image/*" multiple>
-                  <p id="pe-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
-                  <p class="campo-nota" style="margin-top:6px;">Para divulgar seu trabalho, do jeito que você já faz nas redes sociais.</p>
-                </div>
-                <div class="campo">
-                  <label for="pe-cref">CREF (registro profissional)</label>
-                  <input id="pe-cref" type="text" placeholder="000000-G/SP">
-                </div>
-                <div class="campo">
-                  <label for="pe-formacao">Formação</label>
-                  <input id="pe-formacao" type="text" placeholder="Ex: Educação Física — USP">
-                </div>
-                <div class="campo">
-                  <label for="pe-especializacao">Especialização</label>
-                  <input id="pe-especializacao" type="text" placeholder="Ex: Hipertrofia, reabilitação, emagrecimento">
-                </div>
-                <div class="campo">
-                  <label for="pe-cidade">Cidade de atuação</label>
-                  <input id="pe-cidade" type="text" placeholder="São Paulo / SP">
-                </div>
-                <div class="campo">
-                  <label for="pe-bairro">Bairro de atuação</label>
-                  <input id="pe-bairro" type="text" placeholder="Ex: Moema">
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="pe-cref">CREF (registro profissional)</label>
+                    <input id="pe-cref" type="text" placeholder="000000-G/SP">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-cidade">Cidade de atuação</label>
+                    <input id="pe-cidade" type="text" placeholder="São Paulo / SP">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-bairro">Bairro de atuação</label>
+                    <input id="pe-bairro" type="text" placeholder="Ex: Moema">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-formacao">Formação</label>
+                    <input id="pe-formacao" type="text" placeholder="Ex: Educação Física — USP">
+                  </div>
+                  <div class="campo campo-largo">
+                    <label for="pe-especializacao">Especialização</label>
+                    <input id="pe-especializacao" type="text" placeholder="Ex: Hipertrofia, reabilitação, emagrecimento">
+                  </div>
                 </div>
                 <div class="campo">
                   <label for="pe-experiencias">Experiências</label>
                   <textarea id="pe-experiencias" rows="3" placeholder="Conte um pouco da sua experiência como personal"></textarea>
-                </div>
-                <div class="campo">
-                  <label for="pe-telefone">Telefone / WhatsApp</label>
-                  <input id="pe-telefone" type="text" placeholder="(00) 00000-0000">
                 </div>
                 <div class="campo">
                   <label for="pe-apresentacao">Apresentação</label>
@@ -236,23 +253,48 @@
               </div>
 
               <div class="cadastro-grupo">
-                <div class="titulo-grupo">E-mail e senha — a senha já é sua, escolhida agora (D036, 2026-09-29)</div>
-                <div class="campo">
-                  <label for="pe-email">E-mail</label>
-                  <input id="pe-email" type="email" placeholder="seuemail@exemplo.com">
+                <div class="titulo-grupo">Fotos</div>
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="pe-foto">Foto de perfil</label>
+                    <input id="pe-foto" type="file" accept="image/*">
+                    <p class="campo-nota" style="margin-top:6px;">Sua foto vai aparecer publicamente na busca de personais do Fera Fit.</p>
+                  </div>
+                  <div class="campo">
+                    <label for="pe-galeria">Galeria (até 6 fotos)</label>
+                    <input id="pe-galeria" type="file" accept="image/*" multiple>
+                    <p id="pe-galeria-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 0;">Escolha no máximo 6 fotos.</p>
+                    <p class="campo-nota" style="margin-top:6px;">Para divulgar seu trabalho, do jeito que você já faz nas redes sociais.</p>
+                  </div>
                 </div>
-                <div class="campo">
-                  <label for="pe-email-confirmar">Repita o e-mail</label>
-                  <input id="pe-email-confirmar" type="email" placeholder="Repita o e-mail">
+              </div>
+
+              <div class="cadastro-grupo">
+                <div class="titulo-grupo">Contato e acesso — a senha já é sua, escolhida agora (D036, 2026-09-29)</div>
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="pe-telefone">Telefone / WhatsApp</label>
+                    <input id="pe-telefone" type="text" placeholder="(00) 00000-0000">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-email">E-mail</label>
+                    <input id="pe-email" type="email" placeholder="seuemail@exemplo.com">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-email-confirmar">Repita o e-mail</label>
+                    <input id="pe-email-confirmar" type="email" placeholder="Repita o e-mail">
+                  </div>
                 </div>
                 <p id="pe-email-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">Os e-mails digitados não coincidem.</p>
-                <div class="campo">
-                  <label for="pe-senha">Senha</label>
-                  <input id="pe-senha" type="password" placeholder="Escolha uma senha">
-                </div>
-                <div class="campo">
-                  <label for="pe-senha-confirmar">Repita a senha</label>
-                  <input id="pe-senha-confirmar" type="password" placeholder="Repita a senha">
+                <div class="form-grade">
+                  <div class="campo">
+                    <label for="pe-senha">Senha</label>
+                    <input id="pe-senha" type="password" placeholder="Escolha uma senha">
+                  </div>
+                  <div class="campo">
+                    <label for="pe-senha-confirmar">Repita a senha</label>
+                    <input id="pe-senha-confirmar" type="password" placeholder="Repita a senha">
+                  </div>
                 </div>
                 <p id="pe-senha-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;">As senhas digitadas não coincidem.</p>
                 <p class="campo-nota">Confira o e-mail com atenção — é o seu login. A senha é escolhida por você agora, já pronta para o primeiro acesso: só falta a aprovação para o painel abrir de verdade.</p>
@@ -582,6 +624,7 @@
         esconderMeusAlunos();
         document.getElementById('parceiro-hero-pitch').style.display = '';
         document.getElementById('caixa-parceiro').style.display = '';
+        mostrarLoginParceiro();
         document.getElementById('email-parceiro').value = '';
         document.getElementById('senha-parceiro').value = '';
       });
@@ -1586,15 +1629,41 @@
     }
 
 
+    // REDESENHO 2026-10-02 (P39 do STATUS.md, pedido direto de Murilo): a
+    // escolha de tipo agora acontece nos dois cartões grandes (mockup
+    // aprovado), não mais nas abas "Sou academia"/"Sou personal". Esta
+    // função passou a só mostrar o formulário certo e esconder a tela de
+    // escolha; mostrarEscolhaCadastro()/mostrarLoginParceiro() abaixo cuidam
+    // da alternância de telas (cartões / login / formulário).
     function mostrarTipo(tipo) {
-      document.getElementById('tipo-academia').classList.toggle('ativo', tipo === 'academia');
-      document.getElementById('tipo-personal').classList.toggle('ativo', tipo === 'personal');
-      document.getElementById('pitch-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
-      document.getElementById('pitch-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
+      document.getElementById('escolha-cartao-view').style.display = 'none';
+      document.getElementById('login-parceiro-view').style.display = 'none';
       document.getElementById('cadastro-academia').style.display = (tipo === 'academia') ? 'block' : 'none';
       document.getElementById('cadastro-personal').style.display = (tipo === 'personal') ? 'block' : 'none';
       document.getElementById('cadastro-personal-recebido').style.display = 'none';
       document.getElementById('cadastro-academia-recebido').style.display = 'none';
+      document.getElementById('tab-cadastrar').classList.add('ativo');
+      document.getElementById('tab-entrar').classList.remove('ativo');
+    }
+
+    function mostrarEscolhaCadastro() {
+      document.getElementById('escolha-cartao-view').style.display = 'block';
+      document.getElementById('login-parceiro-view').style.display = 'none';
+      document.getElementById('cadastro-academia').style.display = 'none';
+      document.getElementById('cadastro-personal').style.display = 'none';
+      document.getElementById('cadastro-personal-recebido').style.display = 'none';
+      document.getElementById('cadastro-academia-recebido').style.display = 'none';
+      document.getElementById('tab-cadastrar').classList.add('ativo');
+      document.getElementById('tab-entrar').classList.remove('ativo');
+    }
+
+    function mostrarLoginParceiro() {
+      document.getElementById('escolha-cartao-view').style.display = 'none';
+      document.getElementById('login-parceiro-view').style.display = 'block';
+      document.getElementById('cadastro-academia').style.display = 'none';
+      document.getElementById('cadastro-personal').style.display = 'none';
+      document.getElementById('tab-entrar').classList.add('ativo');
+      document.getElementById('tab-cadastrar').classList.remove('ativo');
     }
 
     // D036 (2026-09-29): cadastro de academia passa a gravar de verdade (via
