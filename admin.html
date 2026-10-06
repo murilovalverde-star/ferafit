@@ -75,18 +75,22 @@
     <!-- MODULO 0 -- NUMEROS (D058 proposta visual + D059 escolha da opcao B e implementacao, 2026-10-06) -->
     <section class="admin-modulo" id="modulo-numeros">
       <div class="container">
-        <span class="status-modulo depende">Tela pronta -- dado real depende da Backend (migration 036, D124)</span>
+        <span class="status-modulo depende">Tela pronta -- dado real depende da migration 036 ir para produção (arquivo já fechado, D125)</span>
         <h2>Números<span class="tag-exemplo">dados de exemplo</span></h2>
         <p style="color:var(--texto-secundario);max-width:680px;margin:0 0 10px;">
           Painel de métricas do produto, filtrável por período e sempre comparado ao período
-          anterior equivalente (▲/▼). Enquanto a migration 036 (Backend, D124) não estiver no ar,
-          todo número aqui é <span class="tag-exemplo">exemplo</span> -- o código já chama, como
-          admin logado, <code>metricas_periodo()</code>, <code>usuarios_ativos_periodo()</code>,
-          <code>distribuicao_pagamento_atual()</code> e <code>comparativo_tempo_treino()</code> por
-          RPC, e cai no dado de exemplo sempre que a função ainda não existir no banco (ver
-          <code>chamarRpcOuExemplo()</code> no script desta seção). O mapeamento exato de campos só
-          será ligado quando a Backend fechar o formato de retorno dessas funções -- hoje elas ainda
-          estão em revisão, então não dá pra afirmar o formato final.
+          anterior equivalente (▲/▼). A migration 036 (Backend) já fechou o <strong>arquivo</strong>
+          com o formato final de <code>metricas_periodo()</code>, <code>usuarios_ativos_periodo()</code>,
+          <code>distribuicao_pagamento_atual()</code> e <code>comparativo_tempo_treino()</code> --
+          mas ela só vai para produção com autorização do Murilo e da Segurança (ver o próprio
+          cabeçalho da migration). Até esse dia, todo número aqui é <span class="tag-exemplo">exemplo</span>:
+          o código já chama essas 4 funções por RPC, como admin logado, no formato exato que a 036
+          define, e cai no dado de exemplo sempre que a função ainda não existir no banco (ver
+          <code>chamarRpcOuExemplo()</code> no script desta seção) -- quando a migration for para
+          produção, os números passam a ser reais sem precisar mexer em mais nada aqui. Nem todo
+          número desta tela tem função correspondente na 036 -- os que não têm ficam marcados
+          "sem dado real" e a lista completa dessas lacunas, aba por aba, está no STATUS.md
+          (P49/D060) para o Orquestrador levar à Backend.
         </p>
 
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
@@ -936,37 +940,35 @@
   </script>
   <script>
     // ===========================================================
-    // D058/D059 (2026-10-06) -- Painel de Numeros, opcao B (abas por
-    // grupo), escolhida por Murilo. 9 abas: Usuarios, Treino, Tempo
-    // escolhido x real (nova, pedido do adendo de Murilo), Cardio,
-    // Anuncios, Medalhas e Tour, Funil, Parceiros, Feedback do Beta.
-    // Campanhas e roupinhas saem por decisao de Murilo (depois do
-    // Beta 1). Funil comeca em "cadastrou" (so usuario logado, sem
-    // instalacao anonima).
+    // D058/D059/D060 (2026-10-06) -- Painel de Numeros, opcao B (abas
+    // por grupo), escolhida por Murilo. 9 abas: Usuarios, Treino, Tempo
+    // escolhido x real, Cardio, Anuncios, Medalhas e Tour, Funil,
+    // Parceiros, Feedback do Beta. Campanhas e roupinhas saem por
+    // decisao de Murilo (depois do Beta 1). Funil comeca em "cadastrou"
+    // (so usuario logado, sem instalacao anonima).
     //
-    // DADOS: tudo EXEMPLO. O codigo ja chama, como admin logado (usa o
-    // mesmo clienteAdmin da sessao), as 4 funcoes da Backend previstas
-    // na migration 036 -- metricas_periodo(), usuarios_ativos_periodo(),
-    // distribuicao_pagamento_atual() e comparativo_tempo_treino() -- via
-    // chamarRpcOuExemplo() abaixo. Essa migration ainda esta em revisao
-    // (D059 do Orquestrador), ou seja, nem o formato final do retorno
-    // esta fechado -- por isso o resultado de hoje (funcao inexistente)
-    // so fica registrado no console e o painel continua mostrando o
-    // dado de exemplo estatico. Quando a Backend publicar a 036, o
-    // ajuste fica isolado dentro das 4 funcoes "exemploXxx()" -- o
-    // resto (abas, cartoes, tabela, grafico, CSV, rolagem no celular)
-    // nao muda.
+    // D060: a migration 036 fechou o ARQUIVO (D125) -- ainda NAO esta
+    // em producao (so Murilo + Seguranca autorizam isso). Este script
+    // ja chama as 4 funcoes com os parametros reais (periodo atual e
+    // periodo anterior, calculados aqui mesmo -- o comentario da propria
+    // 036 diz "o painel chama esta funcao duas vezes, a comparacao nao
+    // mora no banco") e ja sabe mapear cada campo real pro cartao/linha
+    // certo. Hoje a funcao ainda nao existe no banco -> cai no exemplo
+    // (chamarRpcOuExemplo devolve ehReal:false) -- quando a migration
+    // for pra producao, os cartoes/linhas marcados com "fonte" passam
+    // a mostrar dado real sozinhos, sem precisar mexer em mais nada
+    // aqui.
     //
-    // ESCALA POR PERIODO: cada linha marcada com escala:true tem um
-    // valor-base (equivalente a 1 mes) multiplicado pelo fator do
-    // periodo escolhido -- so pra dar uma nocao de grandeza; taxas e
-    // medias (ex.: duracao media, % de meta) nao escalam, ja que nao
-    // crescem com o tamanho do periodo. O delta (vs. periodo anterior)
-    // e um numero de exemplo fixo por linha, nao calculado de verdade.
+    // NEM TUDO que desenhei na D058/D059 tem funcao na 036 -- linhas
+    // sem "fonte" (fonte: null) ficam em EXEMPLO para sempre, com uma
+    // tag discreta "sem dado real" -- lista completa dessas lacunas,
+    // aba por aba, esta no STATUS.md (P49/D060), para o Orquestrador
+    // levar a Backend.
     // ===========================================================
 
     var abaNumerosAtiva = 'usuarios';
     var _numerosLinhasAtuais = []; // pra exportar CSV da aba visivel
+    var _numerosDadosReaisAtuais = null; // resultado da ultima recarregarPainelNumeros()
 
     function fatorPeriodoNumeros(periodo) {
       var fatores = { dia: 0.035, semana: 0.25, mes: 1, bimestre: 2, trimestre: 3, semestre: 6, ano: 12, livre: 1.5 };
@@ -980,6 +982,80 @@
 
     function formatarNumeroBr(n) {
       return Math.round(n).toLocaleString('pt-BR');
+    }
+
+    // ---------------------------------------------------------
+    // D060 -- limites de data (periodo atual + periodo anterior
+    // equivalente), mesma logica de public.periodo_bounds() na 036
+    // (date_trunc por semana ISO -- segunda a domingo -- mes,
+    // bimestre, trimestre, semestre, ano), calculada aqui porque é o
+    // próprio painel que compara (a função no banco só soma um
+    // intervalo por vez). "livre" devolve null -- esta tela ainda não
+    // tem campos de data para o usuário escolher um intervalo, então
+    // fica em exemplo até esse seletor existir (lacuna registrada no
+    // STATUS).
+    // ---------------------------------------------------------
+    function calcularLimitesNumeros(periodo, agora) {
+      agora = agora || new Date();
+      var ano = agora.getUTCFullYear();
+      var mes = agora.getUTCMonth();
+      var dia = agora.getUTCDate();
+
+      function fmt(d) { return d.toISOString().slice(0, 10); }
+      function ymd(a, m, d) { return new Date(Date.UTC(a, m, d)); }
+
+      if (periodo === 'dia') {
+        var ini = ymd(ano, mes, dia);
+        var iniAnt = ymd(ano, mes, dia - 1);
+        return { inicio: fmt(ini), fim: fmt(ini), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(iniAnt) };
+      }
+      if (periodo === 'semana') {
+        var diaSemanaIso = (agora.getUTCDay() + 6) % 7; // 0 = segunda
+        var ini = ymd(ano, mes, dia - diaSemanaIso);
+        var fim = ymd(ini.getUTCFullYear(), ini.getUTCMonth(), ini.getUTCDate() + 6);
+        var iniAnt = ymd(ini.getUTCFullYear(), ini.getUTCMonth(), ini.getUTCDate() - 7);
+        var fimAnt = ymd(ini.getUTCFullYear(), ini.getUTCMonth(), ini.getUTCDate() - 1);
+        return { inicio: fmt(ini), fim: fmt(fim), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
+      }
+      if (periodo === 'mes') {
+        var ini = ymd(ano, mes, 1);
+        var fim = ymd(ano, mes + 1, 0);
+        var iniAnt = ymd(ano, mes - 1, 1);
+        var fimAnt = ymd(ano, mes, 0);
+        return { inicio: fmt(ini), fim: fmt(fim), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
+      }
+      if (periodo === 'bimestre' || periodo === 'trimestre' || periodo === 'semestre') {
+        var tamanho = periodo === 'bimestre' ? 2 : (periodo === 'trimestre' ? 3 : 6);
+        var grupo = Math.floor(mes / tamanho);
+        var ini = ymd(ano, grupo * tamanho, 1);
+        var fim = ymd(ano, grupo * tamanho + tamanho, 0);
+        var iniAnt = ymd(ano, grupo * tamanho - tamanho, 1);
+        var fimAnt = ymd(ano, grupo * tamanho, 0);
+        return { inicio: fmt(ini), fim: fmt(fim), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
+      }
+      if (periodo === 'ano') {
+        var ini = ymd(ano, 0, 1);
+        var fim = ymd(ano, 11, 31);
+        var iniAnt = ymd(ano - 1, 0, 1);
+        var fimAnt = ymd(ano - 1, 11, 31);
+        return { inicio: fmt(ini), fim: fmt(fim), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
+      }
+      return null; // 'livre' -- sem seletor de datas ainda
+    }
+
+    function deltaPercentualNumeros(atual, anterior) {
+      if (anterior === null || anterior === undefined || anterior === 0) {
+        return { texto: '—', direcao: '' };
+      }
+      var pct = ((atual - anterior) / anterior) * 100;
+      var sinal = pct >= 0 ? '+' : '';
+      return { texto: sinal + pct.toFixed(0) + '%', direcao: pct >= 0 ? 'up' : 'down' };
+    }
+
+    function semanasNoPeriodo(limites) {
+      if (!limites) { return 1; }
+      var dias = (new Date(limites.fim) - new Date(limites.inicio)) / 86400000 + 1;
+      return Math.max(1, dias / 7);
     }
 
     function svgBarrasNumeros(valores, cor, fator, escalaGrafico) {
@@ -1035,120 +1111,207 @@
     }
 
     // ---------------------------------------------------------
-    // Stub das 4 funcoes da Backend (migration 036, D124/D059).
-    // Chama por RPC, como admin logado (mesmo clienteAdmin da sessao,
-    // que ja passou por sou_admin() no login) -- quem nao for admin
-    // recebe erro de permissao da propria funcao, nunca deste codigo.
-    // Hoje a funcao nao existe ainda -> cai no exemplo, so registrando
-    // no console (nunca mostra erro pro usuario, isso e esperado).
+    // Chama a funcao real por RPC (como admin logado, mesmo
+    // clienteAdmin da sessao, D043) e devolve {ehReal, dados}.
+    // Hoje (migration so em arquivo, D125/D060) a funcao nao existe
+    // no banco -> ehReal:false, dados = montarExemplo(). Quando a
+    // 036 for pra producao, ehReal:true e dados = o retorno de
+    // verdade do Supabase, no formato exato da funcao (ver comentario
+    // de cada chamada em recarregarPainelNumeros).
     // ---------------------------------------------------------
     function chamarRpcOuExemplo(nomeFuncao, params, montarExemplo) {
       if (typeof clienteAdmin === 'undefined' || !clienteAdmin || typeof clienteAdmin.rpc !== 'function') {
-        return Promise.resolve(montarExemplo());
+        return Promise.resolve({ ehReal: false, dados: montarExemplo() });
       }
       return clienteAdmin.rpc(nomeFuncao, params || {})
         .then(function (resultado) {
           if (!resultado || resultado.error || resultado.data == null) {
-            console.info('[Números] ' + nomeFuncao + '() ainda não está disponível (migration 036) -- usando dado de exemplo.');
-            return montarExemplo();
+            console.info('[Números] ' + nomeFuncao + '() ainda não está disponível (migration 036 não está em produção) -- usando dado de exemplo.');
+            return { ehReal: false, dados: montarExemplo() };
           }
-          // Formato final do retorno ainda nao fechado pela Backend (D059: "ainda em
-          // revisao") -- quando fechar, o mapeamento de resultado.data pros cartoes/
-          // abas entra aqui, sem mudar o resto do arquivo.
-          return montarExemplo();
+          var dados = resultado.data;
+          // Toda função "RETURNS TABLE" na 036 volta do PostgREST como
+          // ARRAY de linhas -- mesmo metricas_periodo(), que (por ser um
+          // SUM sem GROUP BY) sempre devolve exatamente 1 linha. O
+          // exemplo dela é um objeto só (pra ficar fácil ler os campos),
+          // então aqui desembrulha esse array de 1 elemento pro mesmo
+          // formato -- senão, no dia que a migration for pra produção,
+          // os campos leriam undefined mesmo com ehReal:true (bug
+          // silencioso). Funções cujo exemplo já é array (lista de
+          // linhas, tipo distribuicao_pagamento_atual e
+          // comparativo_tempo_treino) ou valor escalar (int) passam
+          // direto, sem desembrulhar.
+          var exemplo = montarExemplo();
+          if (!Array.isArray(exemplo) && Array.isArray(dados)) {
+            dados = dados.length ? dados[0] : {};
+          }
+          return { ehReal: true, dados: dados };
         })
         .catch(function () {
           console.info('[Números] ' + nomeFuncao + '() falhou -- usando dado de exemplo.');
-          return montarExemplo();
+          return { ehReal: false, dados: montarExemplo() };
         });
     }
 
-    function exemploMetricasPeriodo(periodo) { return { periodo: periodo, exemplo: true }; }
-    function exemploUsuariosAtivosPeriodo(periodo) { return { periodo: periodo, exemplo: true }; }
-    function exemploDistribuicaoPagamentoAtual() { return { exemplo: true }; }
-    function exemploComparativoTempoTreino(periodo) { return { periodo: periodo, exemplo: true }; }
+    function exemploMetricasPeriodo() {
+      return { cadastros_novos: 1240, treinos_iniciados: 1480, treinos_concluidos: 1268, treinos_abandonados: 212, duracao_total_segundos: 1268 * 47 * 60, minutos_cardio_total: 74 * semanasNoPeriodo(calcularLimitesNumeros('mes')), segundos_exposicao_anuncio_total: 38 * 1268 };
+    }
+    function exemploUsuariosAtivosPeriodo() { return 3248; }
+    function exemploDistribuicaoPagamentoAtual() { return [{ situacao: 'gratis', total: 2102 }, { situacao: 'pro', total: 980 }, { situacao: 'patrocinado', total: 166 }]; }
+    function exemploComparativoTempoTreino() {
+      // Formato igual ao real (linha por sessao) -- so pra manter a
+      // mesma logica de agregacao (agregarComparativoTempo) rodando
+      // tanto no exemplo quanto no dado real.
+      var divisoes = ['ABC', 'AB', 'ABCDE', 'Full Body'];
+      var linhas = [];
+      for (var i = 0; i < 60; i++) {
+        var escolhido = [40, 50, 60, 70, 80][i % 5];
+        var real = escolhido * (0.75 + (i % 7) * 0.08);
+        var diferenca = real - escolhido;
+        var pct = (diferenca / escolhido) * 100;
+        var faixa = pct < -20 ? 'muito_abaixo' : (pct > 20 ? 'acima' : 'perto');
+        linhas.push({
+          sessao_id: i, aluno_id: 'exemplo-' + i, tempo_escolhido_min: escolhido,
+          duracao_real_min: Math.round(real * 10) / 10, diferenca_min: Math.round(diferenca * 10) / 10,
+          diferenca_pct: Math.round(pct * 10) / 10, faixa: faixa,
+          num_exercicios: 5 + (i % 7), divisao: divisoes[i % divisoes.length]
+        });
+      }
+      return linhas;
+    }
 
     // ---------------------------------------------------------
-    // Os 5 cartoes do topo (iguais aos da proposta visual da D058).
+    // D060 -- agrega as linhas (de verdade ou de exemplo, mesmo
+    // formato) de comparativo_tempo_treino() pra tabela da aba
+    // "Tempo escolhido x real". Faixas 80%/120% -- limiar da própria
+    // função (seção 6 da 036), não mais o 70%/110% que eu tinha
+    // inventado como exemplo antes da 036 existir.
+    // ---------------------------------------------------------
+    function agregarComparativoTempo(linhas) {
+      if (!linhas || !linhas.length) { return null; }
+      var n = linhas.length;
+      var somaEscolhido = 0, somaReal = 0, somaDif = 0;
+      var faixaCount = { muito_abaixo: 0, perto: 0, acima: 0 };
+      var porDivisao = {};
+      var porFaixaExercicios = { '≤ 6': { soma: 0, n: 0 }, '7–8': { soma: 0, n: 0 }, '9+': { soma: 0, n: 0 } };
+      linhas.forEach(function (l) {
+        somaEscolhido += l.tempo_escolhido_min;
+        somaReal += l.duracao_real_min;
+        somaDif += l.diferenca_min;
+        if (faixaCount[l.faixa] === undefined) { faixaCount[l.faixa] = 0; }
+        faixaCount[l.faixa] += 1;
+        var div = l.divisao || 'não identificada';
+        if (!porDivisao[div]) { porDivisao[div] = { soma: 0, n: 0 }; }
+        porDivisao[div].soma += l.diferenca_pct;
+        porDivisao[div].n += 1;
+        var chaveEx = l.num_exercicios <= 6 ? '≤ 6' : (l.num_exercicios <= 8 ? '7–8' : '9+');
+        porFaixaExercicios[chaveEx].soma += l.diferenca_pct;
+        porFaixaExercicios[chaveEx].n += 1;
+      });
+      function piorChave(mapa) {
+        var pior = null, piorMedia = 0;
+        Object.keys(mapa).forEach(function (k) {
+          if (!mapa[k].n) { return; }
+          var media = mapa[k].soma / mapa[k].n;
+          if (pior === null || Math.abs(media) > Math.abs(piorMedia)) { pior = k; piorMedia = media; }
+        });
+        return pior === null ? null : { chave: pior, media: piorMedia };
+      }
+      var piorDiv = piorChave(porDivisao);
+      var piorEx = piorChave(porFaixaExercicios);
+      var medioEscolhido = somaEscolhido / n;
+      var medioReal = somaReal / n;
+      var medioDif = somaDif / n;
+      var medioDifPct = medioEscolhido ? (medioDif / medioEscolhido * 100) : 0;
+      return {
+        n: n, medioEscolhido: medioEscolhido, medioReal: medioReal, medioDif: medioDif, medioDifPct: medioDifPct,
+        faixaCount: faixaCount, piorDivisao: piorDiv, piorFaixaExercicios: piorEx
+      };
+    }
+
+    // ---------------------------------------------------------
+    // Os 5 cartoes do topo. "fonte" diz qual funcao da 036 cobre o
+    // cartao -- null = sem funcao, fica em exemplo pra sempre (ver
+    // STATUS.md P49/D060 para a lista completa de lacunas).
     // ---------------------------------------------------------
     var CARTOES_NUMEROS = [
-      { rotulo: 'Ativos no período', valorBase: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
-      { rotulo: 'Treinos concluídos', valorBase: 18902, escala: true, sufixo: '', delta: '+7%', direcao: 'up' },
-      { rotulo: 'Duração média', valorBase: 47, escala: false, sufixo: ' min', delta: '-3%', direcao: 'down' },
-      { rotulo: 'Retenção 2ª semana', valorBase: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up' },
-      { rotulo: 'Tempo médio de anúncio', valorBase: 38, escala: false, sufixo: ' s', delta: '-6%', direcao: 'down' }
+      { rotulo: 'Ativos no período', valorBase: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up', fonte: 'usuarios_ativos_periodo' },
+      { rotulo: 'Treinos concluídos', valorBase: 18902, escala: true, sufixo: '', delta: '+7%', direcao: 'up', fonte: 'metricas_periodo', campo: 'treinos_concluidos' },
+      { rotulo: 'Duração média', valorBase: 47, escala: false, sufixo: ' min', delta: '-3%', direcao: 'down', fonte: 'metricas_periodo', campo: 'duracao_media' },
+      { rotulo: 'Retenção 2ª semana', valorBase: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: null },
+      { rotulo: 'Tempo médio de anúncio', valorBase: 38, escala: false, sufixo: ' s', delta: '-6%', direcao: 'down', fonte: 'metricas_periodo', campo: 'tempo_medio_anuncio', aproximado: true }
     ];
 
     // ---------------------------------------------------------
-    // As 9 abas. Cada linha da tabela: {label, valor (numero-base ou
-    // texto), escala (true = multiplica pelo fator do periodo),
-    // sufixo, delta (texto pronto, ja formatado), texto (true = linha
-    // so de texto, sem numero/delta).
+    // As 9 abas. "fonte" por linha (null = sem função na 036, fica
+    // exemplo pra sempre, com uma tag "sem dado real" no rótulo).
+    // "semComparacao": true = a função real não aceita período, não
+    // dá pra comparar com o anterior (ex.: distribuicao_pagamento_atual,
+    // que só devolve "agora").
     // ---------------------------------------------------------
     var GRUPOS_NUMEROS = [
       {
         id: 'usuarios', nome: 'Usuários', cor: 'var(--laranja)',
         grafico: { tipo: 'barras', valores: [120, 180, 140, 210, 260, 230, 300], escala: true },
         linhas: [
-          { label: 'Cadastros novos', valor: 1240, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
-          { label: 'Ativos no período (≥ 1 treino)', valor: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
-          { label: 'Grátis', valor: 2102, escala: true, sufixo: '', delta: '+4%', direcao: 'up' },
-          { label: 'PRO', valor: 980, escala: true, sufixo: '', delta: '+18%', direcao: 'up' },
-          { label: 'Patrocinado (parceiro)', valor: 166, escala: true, sufixo: '', delta: '+22%', direcao: 'up' },
-          { label: 'Retenção 2ª semana', valor: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up' },
-          { label: 'Retenção 2º mês', valor: 44, escala: false, sufixo: '%', delta: '+2 p.p.', direcao: 'up' }
+          { label: 'Cadastros novos', valor: 1240, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cadastros_novos' },
+          { label: 'Ativos no período (≥ 1 treino)', valor: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up', fonte: 'usuarios_ativos_periodo' },
+          { label: 'Grátis', valor: 2102, escala: true, sufixo: '', delta: '+4%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'gratis', semComparacao: true },
+          { label: 'PRO', valor: 980, escala: true, sufixo: '', delta: '+18%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'pro', semComparacao: true },
+          { label: 'Patrocinado (parceiro)', valor: 166, escala: true, sufixo: '', delta: '+22%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'patrocinado', semComparacao: true },
+          { label: 'Retenção 2ª semana', valor: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: null },
+          { label: 'Retenção 2º mês', valor: 44, escala: false, sufixo: '%', delta: '+2 p.p.', direcao: 'up', fonte: null }
         ]
       },
       {
         id: 'treino', nome: 'Treino', cor: 'var(--ambar)',
         grafico: { tipo: 'linha', valores: [38, 41, 44, 43, 47, 46, 49], escala: false },
         linhas: [
-          { label: 'Divisão ABC (mais usada)', valor: 1204, escala: true, sufixo: ' usuários', delta: '+6%', direcao: 'up' },
-          { label: 'Divisão AB', valor: 842, escala: true, sufixo: ' usuários', delta: '-2%', direcao: 'down' },
-          { label: 'Divisão ABCDE', valor: 390, escala: true, sufixo: ' usuários', delta: '+11%', direcao: 'up' },
-          { label: 'Full Body', valor: 512, escala: true, sufixo: ' usuários', delta: '+4%', direcao: 'up' },
-          { label: 'Frequência escolhida (média)', valor: '4,2x/semana', texto: true, delta: '+0,1', direcao: 'up' },
-          { label: 'Frequência real (média)', valor: '3,6x/semana', texto: true, delta: '-0,2', direcao: 'down' },
-          { label: 'Duração média do treino', valor: '47 min', texto: true, delta: '-3%', direcao: 'down' },
-          { label: 'Treinos abandonados no meio', valor: 212, escala: true, sufixo: '', delta: '+5%', direcao: 'down' },
-          { label: 'Exercício mais feito', valor: 'Supino reto (exemplo)', texto: true, delta: '—', direcao: '' },
-          { label: 'Evolução média de carga no período', valor: '+3,8%', texto: true, delta: '—', direcao: '' }
+          { label: 'Divisão ABC (mais usada)', valor: 1204, escala: true, sufixo: ' usuários', delta: '+6%', direcao: 'up', fonte: null },
+          { label: 'Divisão AB', valor: 842, escala: true, sufixo: ' usuários', delta: '-2%', direcao: 'down', fonte: null },
+          { label: 'Divisão ABCDE', valor: 390, escala: true, sufixo: ' usuários', delta: '+11%', direcao: 'up', fonte: null },
+          { label: 'Full Body', valor: 512, escala: true, sufixo: ' usuários', delta: '+4%', direcao: 'up', fonte: null },
+          { label: 'Frequência escolhida (média)', valor: '4,2x/semana', texto: true, delta: '+0,1', direcao: 'up', fonte: null },
+          { label: 'Frequência real (média)', valor: '3,6x/semana', texto: true, delta: '-0,2', direcao: 'down', fonte: null },
+          { label: 'Duração média do treino', valor: '47 min', texto: true, delta: '-3%', direcao: 'down', fonte: 'metricas_periodo', campo: 'duracao_media' },
+          { label: 'Treinos abandonados no meio', valor: 212, escala: true, sufixo: '', delta: '+5%', direcao: 'down', fonte: 'metricas_periodo', campo: 'treinos_abandonados' },
+          { label: 'Exercício mais feito', valor: 'Supino reto (exemplo)', texto: true, delta: '—', direcao: '', fonte: null },
+          { label: 'Evolução média de carga no período', valor: '+3,8%', texto: true, delta: '—', direcao: '', fonte: null }
         ]
       },
       {
         id: 'tempo-real', nome: 'Tempo escolhido x real', cor: 'var(--laranja)',
-        aviso: 'Pendência da Backend: <code>treino_sessoes</code> hoje só guarda a duração real (<code>duracao_segundos</code>), não o tempo escolhido na Home (40/50/60/70/80 min) -- falta criar essa coluna ou evento (pedido no adendo de Murilo da D058). Até isso existir, os números desta aba são só exemplo, inclusive a forma de calcular a distribuição.',
         grafico: { tipo: 'duas-linhas', valoresA: [60, 58, 55, 50, 52, 48, 50], valoresB: [55, 54, 50, 46, 49, 44, 47], corA: 'var(--texto-secundario)', corB: 'var(--laranja)' },
         legendaGrafico: 'Linha cinza: tempo escolhido na Home · Linha laranja: duração real',
         linhas: [
-          { label: 'Tempo médio escolhido (Home)', valor: '58 min', texto: true, delta: '—', direcao: '' },
-          { label: 'Tempo médio real (duração ativa)', valor: '51 min', texto: true, delta: '-3%', direcao: 'down' },
-          { label: 'Diferença média', valor: '-7 min (-12%)', texto: true, delta: '—', direcao: '' },
-          { label: 'Treinos muito abaixo do escolhido (< 70%)', valor: 412, escala: true, sufixo: '', delta: '+6%', direcao: 'down' },
-          { label: 'Treinos perto do escolhido (70% a 110%)', valor: 2608, escala: true, sufixo: '', delta: '+10%', direcao: 'up' },
-          { label: 'Treinos acima do escolhido (> 110%)', valor: 228, escala: true, sufixo: '', delta: '-4%', direcao: 'up' },
-          { label: 'Maior desvio por divisão', valor: 'ABCDE (-18% em média)', texto: true, delta: '—', direcao: '' },
-          { label: 'Maior desvio por nº de exercícios', valor: '9+ exercícios (-15% em média)', texto: true, delta: '—', direcao: '' }
+          { label: 'Tempo médio escolhido (Home)', valor: '58 min', texto: true, delta: '—', direcao: '', fonte: 'comparativo_tempo_treino' },
+          { label: 'Tempo médio real (duração ativa)', valor: '51 min', texto: true, delta: '-3%', direcao: 'down', fonte: 'comparativo_tempo_treino' },
+          { label: 'Diferença média', valor: '-7 min (-12%)', texto: true, delta: '—', direcao: '', fonte: 'comparativo_tempo_treino' },
+          { label: 'Treinos muito abaixo do escolhido (< 80%)', valor: 412, escala: true, sufixo: '', delta: '+6%', direcao: 'down', fonte: 'comparativo_tempo_treino' },
+          { label: 'Treinos perto do escolhido (80% a 120%)', valor: 2608, escala: true, sufixo: '', delta: '+10%', direcao: 'up', fonte: 'comparativo_tempo_treino' },
+          { label: 'Treinos acima do escolhido (> 120%)', valor: 228, escala: true, sufixo: '', delta: '-4%', direcao: 'up', fonte: 'comparativo_tempo_treino' },
+          { label: 'Maior desvio por divisão', valor: 'ABCDE (-18% em média)', texto: true, delta: '—', direcao: '', fonte: 'comparativo_tempo_treino' },
+          { label: 'Maior desvio por nº de exercícios', valor: '9+ exercícios (-15% em média)', texto: true, delta: '—', direcao: '', fonte: 'comparativo_tempo_treino' }
         ]
       },
       {
         id: 'cardio', nome: 'Cardio', cor: 'var(--ambar)',
         grafico: { tipo: 'barras', valores: [60, 75, 50, 90, 82, 95, 70], escala: false, cor: 'var(--ambar)' },
         linhas: [
-          { label: 'Minutos de cardio por semana (média)', valor: '74 min', texto: true, delta: '+8%', direcao: 'up' },
-          { label: '% que bate a meta semanal', valor: '58%', texto: true, delta: '+5 p.p.', direcao: 'up' },
-          { label: 'Usuários que fazem cardio no período', valor: 2340, escala: true, sufixo: '', delta: '+9%', direcao: 'up' }
+          { label: 'Minutos de cardio por semana (média)', valor: '74 min', texto: true, delta: '+8%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cardio_media_semanal', aproximado: true },
+          { label: '% que bate a meta semanal', valor: '58%', texto: true, delta: '+5 p.p.', direcao: 'up', fonte: null },
+          { label: 'Usuários que fazem cardio no período', valor: 2340, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: null }
         ]
       },
       {
         id: 'anuncios', nome: 'Anúncios', cor: 'var(--vermelho)',
         grafico: { tipo: 'barras', valores: [12, 18, 9, 22, 16, 20, 14], escala: false, cor: 'var(--vermelho)' },
         linhas: [
-          { label: 'Anúncio do Google exibido', valor: 8420, escala: true, sufixo: '', delta: '+14%', direcao: 'up' },
-          { label: 'Anúncio da casa exibido', valor: 3190, escala: true, sufixo: '', delta: '+6%', direcao: 'up' },
-          { label: 'Sem anúncio (nada exibido)', valor: 1780, escala: true, sufixo: '', delta: '-9%', direcao: 'down' },
-          { label: 'Tempo médio de exposição', valor: '38 s', texto: true, delta: '-6%', direcao: 'down' },
-          { label: '% que aceitou anúncio personalizado (consent_ads_v2)', valor: '47%', texto: true, delta: '+3 p.p.', direcao: 'up' }
+          { label: 'Anúncio do Google exibido', valor: 8420, escala: true, sufixo: '', delta: '+14%', direcao: 'up', fonte: null },
+          { label: 'Anúncio da casa exibido', valor: 3190, escala: true, sufixo: '', delta: '+6%', direcao: 'up', fonte: null },
+          { label: 'Sem anúncio (nada exibido)', valor: 1780, escala: true, sufixo: '', delta: '-9%', direcao: 'down', fonte: null },
+          { label: 'Tempo médio de exposição', valor: '38 s', texto: true, delta: '-6%', direcao: 'down', fonte: 'metricas_periodo', campo: 'tempo_medio_anuncio', aproximado: true },
+          { label: '% que aceitou anúncio personalizado (consent_ads_v2)', valor: '47%', texto: true, delta: '+3 p.p.', direcao: 'up', fonte: null }
         ]
       },
       {
@@ -1156,10 +1319,10 @@
         aviso: 'Campanhas e roupinhas (mascote) ficam de fora deste painel por decisão de Murilo -- voltam depois do Beta 1.',
         grafico: { tipo: 'barras', valores: [3, 4, 4, 5, 6, 6, 7], escala: true, cor: 'var(--verde)' },
         linhas: [
-          { label: 'Medalhas ganhas no período', valor: 612, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
-          { label: 'Tour concluído', valor: 1840, escala: true, sufixo: '', delta: '+7%', direcao: 'up' },
-          { label: 'Tour pulado', valor: 290, escala: true, sufixo: '', delta: '-11%', direcao: 'up' },
-          { label: 'Tour abandonado no meio (passo médio)', valor: 'passo 3 de 5', texto: true, delta: '—', direcao: '' }
+          { label: 'Medalhas ganhas no período', valor: 612, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: null },
+          { label: 'Tour concluído', valor: 1840, escala: true, sufixo: '', delta: '+7%', direcao: 'up', fonte: null },
+          { label: 'Tour pulado', valor: 290, escala: true, sufixo: '', delta: '-11%', direcao: 'up', fonte: null },
+          { label: 'Tour abandonado no meio (passo médio)', valor: 'passo 3 de 5', texto: true, delta: '—', direcao: '', fonte: null }
         ]
       },
       {
@@ -1167,32 +1330,33 @@
         aviso: 'Só usuário logado -- o funil começa em "cadastrou", sem instalação anônima (decisão da D059).',
         grafico: { tipo: 'barras', valores: [820, 610, 480, 310], escala: true },
         linhas: [
-          { label: 'Cadastrou', valor: 820, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
-          { label: 'Concluiu o Tour', valor: 610, escala: true, sufixo: '', delta: '+5%', direcao: 'up' },
-          { label: 'Fez o 1º treino', valor: 480, escala: true, sufixo: '', delta: '+3%', direcao: 'up' },
-          { label: 'Treinou na 2ª semana', valor: 310, escala: true, sufixo: '', delta: '-2%', direcao: 'down' },
-          { label: 'Conversão cadastro → 2ª semana', valor: '37,8%', texto: true, delta: '+1,2 p.p.', direcao: 'up' }
+          { label: 'Cadastrou', valor: 820, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cadastros_novos' },
+          { label: 'Concluiu o Tour', valor: 610, escala: true, sufixo: '', delta: '+5%', direcao: 'up', fonte: null },
+          { label: 'Fez o 1º treino', valor: 480, escala: true, sufixo: '', delta: '+3%', direcao: 'up', fonte: null },
+          { label: 'Treinou na 2ª semana', valor: 310, escala: true, sufixo: '', delta: '-2%', direcao: 'down', fonte: null },
+          { label: 'Conversão cadastro → 2ª semana', valor: '37,8%', texto: true, delta: '+1,2 p.p.', direcao: 'up', fonte: null }
         ]
       },
       {
         id: 'parceiros', nome: 'Parceiros', cor: 'var(--laranja)',
+        aviso: 'Fora do escopo da migration 036 -- o dado real dessa aba já existe via Gestão de parceiros (migration 020), não entra sozinho com a 036.',
         grafico: { tipo: 'barras', valores: [40, 55, 48, 62, 58, 70, 66], escala: true },
         linhas: [
-          { label: 'Academias ativas', valor: 38, escala: true, sufixo: '', delta: '+5%', direcao: 'up' },
-          { label: 'Personais ativos', valor: 94, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
-          { label: 'Alunos vinculados', valor: 1860, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
-          { label: 'Alunos patrocinados', valor: 310, escala: true, sufixo: '', delta: '+22%', direcao: 'up' }
+          { label: 'Academias ativas', valor: 38, escala: true, sufixo: '', delta: '+5%', direcao: 'up', fonte: null },
+          { label: 'Personais ativos', valor: 94, escala: true, sufixo: '', delta: '+12%', direcao: 'up', fonte: null },
+          { label: 'Alunos vinculados', valor: 1860, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: null },
+          { label: 'Alunos patrocinados', valor: 310, escala: true, sufixo: '', delta: '+22%', direcao: 'up', fonte: null }
         ]
       },
       {
         id: 'feedback-beta', nome: 'Feedback do Beta', cor: 'var(--ambar)',
-        aviso: 'Visão de tendência por período. A lista operacional completa (canal, pontos, tela, versão) continua no módulo "Feedback do Beta" mais abaixo, com dado real da <code>beta_feedback</code> quando o login de admin for reconhecido (D092 da Backend).',
+        aviso: 'Fora do escopo da migration 036 -- o dado real dessa aba já existe via beta_feedback (migration 006), usado no módulo "Feedback do Beta" mais abaixo.',
         grafico: { tipo: 'barras', valores: [8, 12, 6, 15, 10, 18, 13], escala: true, cor: 'var(--ambar)' },
         linhas: [
-          { label: 'Feedback recebido no período', valor: 142, escala: true, sufixo: '', delta: '+15%', direcao: 'up' },
-          { label: 'Reação positiva', valor: 96, escala: true, sufixo: '', delta: '+18%', direcao: 'up' },
-          { label: 'Reação negativa', valor: 24, escala: true, sufixo: '', delta: '-6%', direcao: 'down' },
-          { label: 'Categoria mais citada', valor: 'Treino (exemplo)', texto: true, delta: '—', direcao: '' }
+          { label: 'Feedback recebido no período', valor: 142, escala: true, sufixo: '', delta: '+15%', direcao: 'up', fonte: null },
+          { label: 'Reação positiva', valor: 96, escala: true, sufixo: '', delta: '+18%', direcao: 'up', fonte: null },
+          { label: 'Reação negativa', valor: 24, escala: true, sufixo: '', delta: '-6%', direcao: 'down', fonte: null },
+          { label: 'Categoria mais citada', valor: 'Treino (exemplo)', texto: true, delta: '—', direcao: '', fonte: null }
         ]
       }
     ];
@@ -1200,7 +1364,7 @@
     function construirAbasNumerosUmaVez() {
       var container = document.getElementById('numeros-abas');
       if (!container || container.children.length > 0) { return; }
-      container.innerHTML = GRUPOS_NUMEROS.map(function (grupo, i) {
+      container.innerHTML = GRUPOS_NUMEROS.map(function (grupo) {
         return '<button type="button" class="' + (grupo.id === abaNumerosAtiva ? 'ativa' : '') +
           '" onclick="mostrarAbaNumeros(\'' + grupo.id + '\')">' + grupo.nome + '</button>';
       }).join('');
@@ -1215,24 +1379,125 @@
       renderizarAbaNumerosAtiva();
     }
 
+    // ---------------------------------------------------------
+    // Le o campo real (quando ehReal) a partir de _numerosDadosReaisAtuais,
+    // de acordo com "fonte"/"campo" da linha/cartao. Devolve
+    // {valor, valorAnterior, semComparacao} ou null se nao houver
+    // dado real pra essa fonte (cai no exemplo de qualquer jeito).
+    // ---------------------------------------------------------
+    function lerValorReal(item) {
+      var d = _numerosDadosReaisAtuais;
+      if (!d || !item.fonte) { return null; }
+
+      if (item.fonte === 'metricas_periodo') {
+        if (!d.ehReal.metricas) { return null; }
+        var atual = d.metricasAtual, anterior = d.metricasAnterior;
+        if (item.campo === 'duracao_media') {
+          var vAtual = atual.treinos_concluidos ? (atual.duracao_total_segundos / atual.treinos_concluidos / 60) : 0;
+          var vAnterior = anterior.treinos_concluidos ? (anterior.duracao_total_segundos / anterior.treinos_concluidos / 60) : 0;
+          return { valor: vAtual, valorAnterior: vAnterior };
+        }
+        if (item.campo === 'tempo_medio_anuncio') {
+          var vAtual = atual.treinos_concluidos ? (atual.segundos_exposicao_anuncio_total / atual.treinos_concluidos) : 0;
+          var vAnterior = anterior.treinos_concluidos ? (anterior.segundos_exposicao_anuncio_total / anterior.treinos_concluidos) : 0;
+          return { valor: vAtual, valorAnterior: vAnterior };
+        }
+        if (item.campo === 'cardio_media_semanal') {
+          var semanasAtual = semanasNoPeriodo(d.limites);
+          var semanasAnterior = semanasNoPeriodo(d.limitesAnterior);
+          return { valor: atual.minutos_cardio_total / semanasAtual, valorAnterior: anterior.minutos_cardio_total / semanasAnterior };
+        }
+        return { valor: atual[item.campo], valorAnterior: anterior[item.campo] };
+      }
+
+      if (item.fonte === 'usuarios_ativos_periodo') {
+        if (!d.ehReal.ativos) { return null; }
+        return { valor: d.ativosAtual, valorAnterior: d.ativosAnterior };
+      }
+
+      if (item.fonte === 'distribuicao_pagamento_atual') {
+        if (!d.ehReal.distribuicao) { return null; }
+        return { valor: d.distribuicao[item.campo] || 0, valorAnterior: null, semComparacao: true };
+      }
+
+      if (item.fonte === 'comparativo_tempo_treino') {
+        if (!d.ehReal.tempoTreino || !d.agregadoTempoTreino) { return null; }
+        return { agregado: d.agregadoTempoTreino };
+      }
+
+      return null;
+    }
+
     function renderizarCartoesNumeros(periodo) {
       var fator = fatorPeriodoNumeros(periodo);
       var container = document.getElementById('numeros-cartoes');
       if (!container) { return; }
       container.innerHTML = CARTOES_NUMEROS.map(function (c) {
-        var valor = c.escala ? formatarNumeroBr(c.valorBase * fator) : c.valorBase;
+        var real = lerValorReal(c);
+        var valorTexto, deltaTexto, deltaDirecao, deltaRotulo;
+        if (real && real.agregado === undefined) {
+          valorTexto = (c.sufixo === '%' ? real.valor.toFixed(0) : formatarNumeroBr(real.valor)) + c.sufixo;
+          if (real.semComparacao) {
+            deltaTexto = '— (sem comparação por período)'; deltaDirecao = ''; deltaRotulo = '';
+          } else {
+            var d = deltaPercentualNumeros(real.valor, real.valorAnterior);
+            deltaTexto = d.texto; deltaDirecao = d.direcao; deltaRotulo = ' vs. ' + rotuloPeriodoNumeros(periodo) + ' anterior';
+          }
+        } else {
+          valorTexto = (c.escala ? formatarNumeroBr(c.valorBase * fator) : c.valorBase) + c.sufixo;
+          deltaTexto = c.delta; deltaDirecao = c.direcao; deltaRotulo = ' vs. ' + rotuloPeriodoNumeros(periodo) + ' anterior';
+        }
+        var tagFonte = c.fonte ? (c.aproximado ? ' <span title="Aproximado -- a função da 036 não tem exatamente este número pronto." style="cursor:help;">≈</span>' : '') : ' <span style="color:var(--texto-secundario);font-weight:400;">· sem dado real</span>';
         return '<div class="numeros-kpi">' +
-          '<div class="rotulo">' + c.rotulo + '</div>' +
-          '<div class="valor">' + valor + c.sufixo + '</div>' +
-          '<div class="delta ' + c.direcao + '">' + c.delta + ' vs. ' + rotuloPeriodoNumeros(periodo) + ' anterior</div>' +
+          '<div class="rotulo">' + c.rotulo + tagFonte + '</div>' +
+          '<div class="valor">' + valorTexto + '</div>' +
+          '<div class="delta ' + deltaDirecao + '">' + deltaTexto + deltaRotulo + '</div>' +
           '</div>';
       }).join('');
     }
 
-    function linhaTabelaNumerosHtml(linha, fator) {
-      var valorFmt = linha.texto ? linha.valor : (formatarNumeroBr(linha.escala ? linha.valor * fator : linha.valor) + (linha.sufixo || ''));
-      var deltaClasse = linha.direcao === 'up' ? 'color:var(--verde);' : (linha.direcao === 'down' ? 'color:var(--vermelho);' : 'color:var(--texto-secundario);');
-      return '<tr><td>' + linha.label + '</td><td>' + valorFmt + '</td><td style="' + deltaClasse + '">' + linha.delta + '</td></tr>';
+    function linhaTabelaNumerosHtml(linha, fator, periodo) {
+      var real = linha.fonte && linha.fonte !== 'comparativo_tempo_treino' ? lerValorReal(linha) : null;
+      var valorFmt, deltaTexto, deltaDirecao;
+      if (real) {
+        var valorNum = linha.texto ? real.valor : Math.round(real.valor);
+        valorFmt = linha.texto ? (typeof real.valor === 'number' ? real.valor.toFixed(0) + (linha.sufixo || '') : real.valor) : (formatarNumeroBr(real.valor) + (linha.sufixo || ''));
+        if (real.semComparacao) {
+          deltaTexto = '— (hoje, sem período)'; deltaDirecao = '';
+        } else {
+          var d = deltaPercentualNumeros(real.valor, real.valorAnterior);
+          deltaTexto = d.texto; deltaDirecao = d.direcao;
+        }
+      } else {
+        valorFmt = linha.texto ? linha.valor : (formatarNumeroBr(linha.escala ? linha.valor * fator : linha.valor) + (linha.sufixo || ''));
+        deltaTexto = linha.delta; deltaDirecao = linha.direcao;
+      }
+      var tagFonte = linha.fonte ? '' : ' <span style="color:var(--texto-secundario);font-size:0.68rem;">· sem dado real</span>';
+      var deltaClasse = deltaDirecao === 'up' ? 'color:var(--verde);' : (deltaDirecao === 'down' ? 'color:var(--vermelho);' : 'color:var(--texto-secundario);');
+      return '<tr><td>' + linha.label + tagFonte + '</td><td>' + valorFmt + '</td><td style="' + deltaClasse + '">' + deltaTexto + '</td></tr>';
+    }
+
+    // Linhas especiais da aba "Tempo escolhido x real" quando o dado
+    // real (agregado de comparativo_tempo_treino) existir.
+    function linhasReaisTempoReal(agregado) {
+      var faixaRotulo = { muito_abaixo: 'Treinos muito abaixo do escolhido (< 80%)', perto: 'Treinos perto do escolhido (80% a 120%)', acima: 'Treinos acima do escolhido (> 120%)' };
+      var linhas = [
+        { label: 'Tempo médio escolhido (Home)', valor: agregado.medioEscolhido.toFixed(0) + ' min', delta: '—' },
+        { label: 'Tempo médio real (duração ativa)', valor: agregado.medioReal.toFixed(0) + ' min', delta: '—' },
+        { label: 'Diferença média', valor: agregado.medioDif.toFixed(1) + ' min (' + (agregado.medioDifPct >= 0 ? '+' : '') + agregado.medioDifPct.toFixed(0) + '%)', delta: '—' }
+      ];
+      ['muito_abaixo', 'perto', 'acima'].forEach(function (chave) {
+        linhas.push({ label: faixaRotulo[chave], valor: formatarNumeroBr(agregado.faixaCount[chave] || 0) + ' de ' + agregado.n, delta: '—' });
+      });
+      if (agregado.piorDivisao) {
+        linhas.push({ label: 'Maior desvio por divisão', valor: agregado.piorDivisao.chave + ' (' + (agregado.piorDivisao.media >= 0 ? '+' : '') + agregado.piorDivisao.media.toFixed(0) + '% em média)', delta: '—' });
+      }
+      if (agregado.piorFaixaExercicios) {
+        linhas.push({ label: 'Maior desvio por nº de exercícios', valor: agregado.piorFaixaExercicios.chave + ' exercícios (' + (agregado.piorFaixaExercicios.media >= 0 ? '+' : '') + agregado.piorFaixaExercicios.media.toFixed(0) + '% em média)', delta: '—' });
+      }
+      return linhas.map(function (l) {
+        return '<tr><td>' + l.label + '</td><td>' + l.valor + '</td><td style="color:var(--texto-secundario);">' + l.delta + '</td></tr>';
+      }).join('');
     }
 
     function graficoNumerosHtml(grafico, fator) {
@@ -1255,6 +1520,10 @@
       var avisoHtml = grupo.aviso ? '<div class="numeros-aviso">⚠ ' + grupo.aviso + '</div>' : '';
       var legendaHtml = grupo.legendaGrafico ? '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:6px 0 0;">' + grupo.legendaGrafico + '</p>' : '';
 
+      var agregadoTempoTreino = grupo.id === 'tempo-real' ? (_numerosDadosReaisAtuais && _numerosDadosReaisAtuais.ehReal.tempoTreino ? _numerosDadosReaisAtuais.agregadoTempoTreino : null) : null;
+      var linhasTabela = agregadoTempoTreino ? linhasReaisTempoReal(agregadoTempoTreino) : grupo.linhas.map(function (l) { return linhaTabelaNumerosHtml(l, fator, periodo); }).join('');
+      var notaExemplo = agregadoTempoTreino ? '' : (grupo.id === 'tempo-real' ? '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:0 0 10px;">Dado de EXEMPLO no mesmo formato que <code>comparativo_tempo_treino()</code> devolve -- vira real assim que a migration 036 entrar em produção.</p>' : '');
+
       destino.innerHTML =
         avisoHtml +
         '<div class="numeros-secao">' +
@@ -1262,11 +1531,12 @@
         '<div><h3 class="numeros-secao-titulo">' + grupo.nome + '</h3></div>' +
         '<button type="button" class="btn-csv-numeros" onclick="exportarCsvNumerosAtual()">Exportar CSV</button>' +
         '</div>' +
+        notaExemplo +
         '<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">' +
         '<div>' + graficoNumerosHtml(grupo.grafico, fator) + legendaHtml + '</div>' +
         '<div class="numeros-tabela-scroll" style="flex:1;min-width:240px;">' +
         '<table><tr><th>Item</th><th>Valor</th><th>vs. período anterior</th></tr>' +
-        grupo.linhas.map(function (l) { return linhaTabelaNumerosHtml(l, fator); }).join('') +
+        linhasTabela +
         '</table></div></div></div>';
     }
 
@@ -1275,11 +1545,11 @@
       var fator = fatorPeriodoNumeros(periodo);
       var grupo = GRUPOS_NUMEROS.filter(function (g) { return g.id === abaNumerosAtiva; })[0];
       if (!grupo) { return; }
-      var linhasCsv = ['Item;Valor;vs. período anterior;Aviso'];
-      linhasCsv.push('DADOS DE EXEMPLO -- nao representam numero real;;;');
+      var linhasCsv = ['Item;Valor;vs. período anterior'];
+      linhasCsv.push('DADOS DE EXEMPLO -- nao representam numero real (salvo onde a fonte ja esta ligada a producao);;');
       _numerosLinhasAtuais.forEach(function (l) {
         var valorFmt = l.texto ? l.valor : (formatarNumeroBr(l.escala ? l.valor * fator : l.valor) + (l.sufixo || ''));
-        var linha = [l.label, String(valorFmt), l.delta, ''].map(function (campo) {
+        var linha = [l.label, String(valorFmt), l.delta].map(function (campo) {
           return '"' + String(campo).replace(/"/g, '""') + '"';
         }).join(';');
         linhasCsv.push(linha);
@@ -1298,12 +1568,55 @@
 
     function recarregarPainelNumeros() {
       var periodo = document.getElementById('numeros-periodo').value;
-      return Promise.all([
-        chamarRpcOuExemplo('metricas_periodo', { p_periodo: periodo }, function () { return exemploMetricasPeriodo(periodo); }),
-        chamarRpcOuExemplo('usuarios_ativos_periodo', { p_periodo: periodo }, function () { return exemploUsuariosAtivosPeriodo(periodo); }),
-        chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, function () { return exemploDistribuicaoPagamentoAtual(); }),
-        chamarRpcOuExemplo('comparativo_tempo_treino', { p_periodo: periodo }, function () { return exemploComparativoTempoTreino(periodo); })
-      ]).then(function () {
+      var limites = calcularLimitesNumeros(periodo);
+
+      var chamadas;
+      if (!limites) {
+        // 'livre' -- sem campos de data na tela ainda (lacuna registrada no STATUS) -- fica tudo exemplo.
+        chamadas = [
+          Promise.resolve({ ehReal: false, dados: exemploMetricasPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploMetricasPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploUsuariosAtivosPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploUsuariosAtivosPeriodo() }),
+          chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, exemploDistribuicaoPagamentoAtual),
+          Promise.resolve({ ehReal: false, dados: exemploComparativoTempoTreino() })
+        ];
+      } else {
+        chamadas = [
+          chamarRpcOuExemplo('metricas_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploMetricasPeriodo),
+          chamarRpcOuExemplo('metricas_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploMetricasPeriodo),
+          chamarRpcOuExemplo('usuarios_ativos_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploUsuariosAtivosPeriodo),
+          chamarRpcOuExemplo('usuarios_ativos_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploUsuariosAtivosPeriodo),
+          chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, exemploDistribuicaoPagamentoAtual),
+          chamarRpcOuExemplo('comparativo_tempo_treino', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploComparativoTempoTreino)
+        ];
+      }
+
+      return Promise.all(chamadas).then(function (r) {
+        var metricasAtualR = r[0], metricasAnteriorR = r[1], ativosAtualR = r[2], ativosAnteriorR = r[3], distribuicaoR = r[4], tempoTreinoR = r[5];
+
+        var distribuicaoMapa = null;
+        if (distribuicaoR.dados) {
+          distribuicaoMapa = {};
+          distribuicaoR.dados.forEach(function (row) { distribuicaoMapa[row.situacao] = row.total; });
+        }
+
+        var agregadoTempoTreino = tempoTreinoR.ehReal ? agregarComparativoTempo(tempoTreinoR.dados) : null;
+
+        _numerosDadosReaisAtuais = {
+          limites: limites, limitesAnterior: limites ? { inicio: limites.inicioAnterior, fim: limites.fimAnterior } : null,
+          metricasAtual: metricasAtualR.dados, metricasAnterior: metricasAnteriorR.dados,
+          ativosAtual: ativosAtualR.dados, ativosAnterior: ativosAnteriorR.dados,
+          distribuicao: distribuicaoMapa,
+          agregadoTempoTreino: agregadoTempoTreino,
+          ehReal: {
+            metricas: !!(limites && metricasAtualR.ehReal && metricasAnteriorR.ehReal),
+            ativos: !!(limites && ativosAtualR.ehReal && ativosAnteriorR.ehReal),
+            distribuicao: !!distribuicaoR.ehReal,
+            tempoTreino: !!(limites && tempoTreinoR.ehReal)
+          }
+        };
+
         renderizarCartoesNumeros(periodo);
         renderizarAbaNumerosAtiva();
       });
