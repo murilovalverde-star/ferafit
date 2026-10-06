@@ -1,0 +1,1142 @@
+[
+  {
+    "id": "Decline Crunch",
+    "nome": "Abdominal declinado com anilha",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rope Crunch",
+    "nome": "Abdominal na polia ajoelhado com quadril alto",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Crunch",
+    "nome": "Abdominal na polia ajoelhado sentado nos calcanhares",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Floor Crunch",
+    "nome": "Abdominal tradicional no solo",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Ab Crunch Machine",
+    "nome": "Abdominal na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Standing Rope Crunch",
+    "nome": "Abdominal em pé na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Abdominal_com_rodinha_ab_wheel_rollout",
+    "nome": "Abdominal com rodinha (ab wheel rollout)",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Prancha_plank",
+    "nome": "Prancha (plank)",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Prancha_com_elevacao_de_perna",
+    "nome": "Prancha com elevação de perna",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hanging Leg Raise",
+    "nome": "Elevação de pernas suspenso",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Reverse Crunch",
+    "nome": "Abdominal reverso na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Decline Reverse Crunch",
+    "nome": "Abdominal reverso declinado",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Reverse Crunch",
+    "nome": "Abdominal reverso no solo",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flat Bench Lying Leg Raise",
+    "nome": "Elevação de pernas no banco",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hip Adductor Machine",
+    "nome": "Cadeira adutora",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Agachamento_Sumo_na_Maquina",
+    "nome": "Agachamento sumo na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Aducao_do_quadril_na_polia",
+    "nome": "Adução do quadril na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Agachamento_Sumo_com_Barra",
+    "nome": "Agachamento Terra Sumô",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_inversa_com_barra",
+    "nome": "Rosca inversa com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flexao_do_punho_com_barra",
+    "nome": "Flexão do punho com barra W",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Curvatura_reversa_do_punho_na_barra_w",
+    "nome": "Curvatura reversa do punho na barra W",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Curvatura_reversa_do_punho_com_halteres",
+    "nome": "Curvatura reversa do punho com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flexao_do_punho",
+    "nome": "Flexão do punho",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Curvatura_reversa_do_punho_na_barra_reta",
+    "nome": "Curvatura reversa do punho na barra reta",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flexao_do_punho_com_barra_reta",
+    "nome": "Flexão do punho com barra reta",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_inclinada_com_halteres_duplos",
+    "nome": "Rosca inclinada com halteres duplos",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_inclinada_com_halteres_alternados",
+    "nome": "Rosca inclinada com halteres alternados",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_direta_com_barra_fechada",
+    "nome": "Rosca direta com barra (fechada)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_na_polia_pegada_fechada",
+    "nome": "Rosca na polia (pegada fechada)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Hammer Curl",
+    "nome": "Rosca martelo na polia (corda)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hammer Curl",
+    "nome": "Rosca martelo com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_inversa_na_polia",
+    "nome": "Rosca inversa na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Preacher Curl Machine",
+    "nome": "Rosca scott na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Rosca_spider",
+    "nome": "Rosca spider",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_scott_com_barra_W",
+    "nome": "Rosca scott com barra W",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Standing Alternating Dumbbell Curl",
+    "nome": "Rosca alternada com halteres em pé",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_scott_na_maquina_Hammer",
+    "nome": "Rosca scott na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Concentration Curl",
+    "nome": "Rosca concentrada",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_scott_na_polia",
+    "nome": "Rosca scott na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_na_polia_alta_individual",
+    "nome": "Rosca na polia alta (individual)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rosca_na_polia_alta_dupla",
+    "nome": "Rosca na polia alta (dupla)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_sentado_com_rotacao_unilateral",
+    "nome": "Remada sentada com rotação unilateral",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Kneeling High Pulley Row",
+    "nome": "Remada alta ajoelhado na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Lying T-Bar Row",
+    "nome": "Remada T no aparelho",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Seated Cable Rows",
+    "nome": "Remada baixa sentado",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Remada serrote unilateral",
+    "nome": "Remada serrote unilateral",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leverage Iso Row",
+    "nome": "Remada máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Remada_Pendlay",
+    "nome": "Remada Pendlay",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Smith Machine Bent Over Row",
+    "nome": "Remada no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_inclinada_na_polia",
+    "nome": "Remada inclinada na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Bent Over Barbell Row",
+    "nome": "Remada curvada com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_inclinada_na_Barra",
+    "nome": "Remada inclinada na Barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_inclinada_no_Cross",
+    "nome": "Remada inclinada no Cross",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "One Arm Lat Pulldown",
+    "nome": "Puxada unilateral",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Underhand Cable Pulldowns",
+    "nome": "Puxada supinada",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Close-Grip Front Lat Pulldown",
+    "nome": "Puxada fechada",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Wide-Grip Lat Pulldown",
+    "nome": "Puxada frontal aberta",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "V-Bar Pulldown",
+    "nome": "Puxada com barra V",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Full Range-Of-Motion Lat Pulldown",
+    "nome": "Puxada amplitude total",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Straight-Arm Pulldown",
+    "nome": "Pulldown braço reto (barra)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rope Straight-Arm Pulldown",
+    "nome": "Pulldown braço reto (corda)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Barra fixa assistida (graviton)",
+    "nome": "Barra fixa assistida (graviton)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Barra_fixa_Puxada_na_barra_fixa_livre_sem_assistencia",
+    "nome": "Barra fixa / Puxada na barra fixa livre (sem assistência)",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Coice_na_polia",
+    "nome": "Coice na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hip Thrust Machine",
+    "nome": "Elevação pélvica na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Elevacao_pelvica_no_Smith",
+    "nome": "Elevação pélvica no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Coice_de_burro_glute_kickback",
+    "nome": "Coice de burro (glute kickback)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Ponte_de_gluteos",
+    "nome": "Ponte de glúteos",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hip Abductor Machine",
+    "nome": "Cadeira abdutora",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Abducao_de_quadril",
+    "nome": "Abdução de quadril",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Abducao_de_quadril_em_pe",
+    "nome": "Abdução de quadril em pé",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Agachamento_lateral",
+    "nome": "Agachamento lateral",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Extensao_lombar_hiperextensao_no_banco_romano",
+    "nome": "Extensão lombar / hiperextensão no banco romano",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Super_homem_com_remada",
+    "nome": "Super-homem",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Levantamento_no_rack_rack_pull",
+    "nome": "Levantamento no rack (rack pull)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Extensao_do_tronco_hiperextensao",
+    "nome": "Extensão do tronco (hiperextensão)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Russian Twist",
+    "nome": "Giro russo com anilha",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Russian Twists",
+    "nome": "Rotação de tronco na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Dumbbell Side Bend",
+    "nome": "Flexão lateral com halter",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Torcao_russa",
+    "nome": "Torção russa",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Prancha_lateral",
+    "nome": "Prancha lateral",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flexao_lateral_de_tronco_no_banco_romano_obliquos",
+    "nome": "Flexão lateral de tronco no banco romano (oblíquos)",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "One-Arm High-Pulley Cable Side Bends",
+    "nome": "Flexão lateral na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Pallof_press_na_polia_anti_rotacao",
+    "nome": "Pallof press na polia (anti-rotação)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Reverse Flyes",
+    "nome": "Crucifixo inverso com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Reverse Machine Flyes",
+    "nome": "Crucifixo inverso na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Face Pull",
+    "nome": "Face pull na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Rope Rear-Delt Rows",
+    "nome": "Remada para deltoide posterior (corda)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Seated Lateral Raise",
+    "nome": "Elevação lateral na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_para_cima_upright_row_Barra",
+    "nome": "Remada para cima (upright row) Barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Side Lateral Raise",
+    "nome": "Elevação lateral com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Elevacao_lateral_unilateral_apoiado_em_banco_inclinado",
+    "nome": "Elevação lateral unilateral apoiado em banco inclinado",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Elevação lateral na máquina",
+    "nome": "Elevação lateral na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Elevacao_lateral_na_maquina_polia",
+    "nome": "Elevação lateral na máquina polia",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Remada_para_cima_upright_row_Polia",
+    "nome": "Remada para cima (upright row) Polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Remada_para_cima_upright_row_Halteres",
+    "nome": "Remada para cima (upright row) Halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Standing Dumbbell Press",
+    "nome": "Desenvolvimento com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Smith Machine Overhead Shoulder Press",
+    "nome": "Desenvolvimento no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Arnold Dumbbell Press",
+    "nome": "Desenvolvimento Arnold",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Dumbbell Front Raise",
+    "nome": "Elevação frontal com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Front Cable Raise",
+    "nome": "Elevação frontal na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Machine Shoulder (Military) Press",
+    "nome": "Desenvolvimento na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Leverage Shoulder Press",
+    "nome": "Desenvolvimento na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Desenvolvimento_militar_com_barra_overhead_press_livre",
+    "nome": "Desenvolvimento militar com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Shoulder Press",
+    "nome": "Desenvolvimento na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rotacao_externa_de_ombro",
+    "nome": "Rotação externa de ombro",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rotacao_interna_de_ombro",
+    "nome": "Rotação interna de ombro",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rotacao_interna_de_ombro_na_Polia",
+    "nome": "Rotação interna de ombro na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Rotacao_externa_de_ombro_na_Polia",
+    "nome": "Rotação externa de ombro na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Panturrilha_no_leg_press_45",
+    "nome": "Panturrilha no leg press 45",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Panturrilha_sentado",
+    "nome": "Panturrilha sentado",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Panturrilha_em_pe_na_maquina",
+    "nome": "Panturrilha em pé na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Panturrilha_no_leg_press_Horizontal",
+    "nome": "Panturrilha no leg press Horizontal",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Panturrilha_em_pe_no_Smith",
+    "nome": "Panturrilha em pé no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Panturrilha_em_pe_na_maquina_na_polia",
+    "nome": "Panturrilha em pé na máquina na polia",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Elevacao_de_panturrilha_em_pe",
+    "nome": "Elevação de panturrilha em pé",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Barbell Incline Bench Press - Medium Grip",
+    "nome": "Supino inclinado com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Incline Dumbbell Press",
+    "nome": "Supino inclinado com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Low Cable Crossover",
+    "nome": "Crossover na polia baixa",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Incline Bench Dumbbell Fly",
+    "nome": "Crucifixo no banco inclinado com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leverage Incline Chest Press",
+    "nome": "Supino inclinado na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Smith Machine Incline Bench Press",
+    "nome": "Supino inclinado no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Incline Cable Flye",
+    "nome": "Crucifixo inclinado na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Incline Cable Chest Press",
+    "nome": "Supino inclinado na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Dumbbell Bench Press",
+    "nome": "Supino reto com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Flat Bench Cable Flyes",
+    "nome": "Crucifixo reto na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Supino_reto_com_barra_livre_sem_Smith_maquina",
+    "nome": "Supino reto com barra (livre, sem Smith/máquina)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Butterfly",
+    "nome": "Voador / Peck deck",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Leverage Chest Press",
+    "nome": "Supino reto na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Machine Bench Press",
+    "nome": "Supino reto na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Flat Bench Dumbbell Fly",
+    "nome": "Crucifixo no banco reto com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Chest Press",
+    "nome": "Supino reto na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Supino reto no Smith",
+    "nome": "Supino reto no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Push Up",
+    "nome": "Flexão de braço (push-up)",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leverage Decline Chest Press",
+    "nome": "Supino declinado na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Decline Barbell Bench Press",
+    "nome": "Supino declinado com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "crucifixo_no_banco_declinado",
+    "nome": "Crucifixo halteres no banco declinado",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cable Crossover",
+    "nome": "Crossover na polia alta",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Decline Smith Press",
+    "nome": "Supino declinado no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Dumbbell Stiff Leg Deadlift",
+    "nome": "Stiff com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Stiff_com_barra",
+    "nome": "Stiff com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Stiff_na_polia",
+    "nome": "Stiff na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Cadeira_flexora_sentado",
+    "nome": "Cadeira flexora (sentado)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Mesa_flexora_deitado",
+    "nome": "Mesa flexora (deitado)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Flexora_em_pe",
+    "nome": "Flexora em pé",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Leverage Deadlift",
+    "nome": "Levantamento terra na máquina (Hammer)",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Flexora_em_pe_na_polia",
+    "nome": "Flexora em pé na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Levantamento_terra_com_barra",
+    "nome": "Levantamento terra com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Stiff_no_Smith",
+    "nome": "Stiff no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Bom_dia_com_barra_good_morning",
+    "nome": "Bom dia com barra (good morning)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Bulgarian Split Squat",
+    "nome": "Agachamento búlgaro",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leg_press_pernas_proximas",
+    "nome": "Leg press pernas próximas",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Leg Extensions",
+    "nome": "Cadeira extensora",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Leg Press",
+    "nome": "Leg press 45",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Agachamento_bulgaro_no_Smith_afundo_com_pe_elevado_no_banco",
+    "nome": "Agachamento búlgaro no Smith (afundo com pé elevado no banco)",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leg_press_Horizontal",
+    "nome": "Leg press Horizontal",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Afundo_no_Smith",
+    "nome": "Afundo no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hack Squat",
+    "nome": "Hack machine",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Agachamento_na_maquina",
+    "nome": "Agachamento na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Smith Machine Squat",
+    "nome": "Agachamento no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Dumbbell Lunges",
+    "nome": "Afundo com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Hack_pernas_proximas",
+    "nome": "Hack pernas próximas",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Barbell Squat",
+    "nome": "Agachamento livre com barra",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Agachamento_frontal_com_barra_front_squat",
+    "nome": "Agachamento frontal com barra (front squat)",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Leg_press_90",
+    "nome": "Leg press 90",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Encolhimento_de_trapezio_com_halteres",
+    "nome": "Encolhimento de trapézio com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Encolhimento_por_tras_do_corpo_behind_the_back_shrug",
+    "nome": "Encolhimento por trás do corpo",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Elevacao_em_Y_Y_raise",
+    "nome": "Elevação em Y (Y-raise)",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Puxada_aberta_com_enfase_em_depressao_escapular",
+    "nome": "Puxada aberta com ênfase em depressão escapular",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_pulley_com_corda",
+    "nome": "Tríceps pulley com corda",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_pulley_pegada_inversa",
+    "nome": "Tríceps pulley pegada inversa",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_coice_na_polia_unilateral",
+    "nome": "Tríceps coice na polia (unilateral)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_pulley_barra_V",
+    "nome": "Tríceps pulley barra V",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_pulley_barra_reta",
+    "nome": "Tríceps pulley barra reta",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Extensao_de_triceps_pegada_pronada_cabo_baixo",
+    "nome": "Tríceps pulley barra reta com tronco inclinado",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_ajoelhado_na_polia",
+    "nome": "Tríceps ajoelhado na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_na_maquina_com_alavanca",
+    "nome": "Tríceps na máquina com alavanca",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Triceps_na_maquina",
+    "nome": "Tríceps na máquina",
+    "tipo": "misto",
+    "equipVariavel": true
+  },
+  {
+    "id": "Mergulho_em_paralelas_livre_sem_assistencia",
+    "nome": "Mergulho em paralelas livre (sem assistência)",
+    "tipo": "corpo",
+    "equipVariavel": false
+  },
+  {
+    "id": "Mergulho_na_maquina_dip",
+    "nome": "Mergulho na máquina (dip)",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_testa_com_barra_W",
+    "nome": "Tríceps testa com barra W",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "High Cable Lying Skullcrusher",
+    "nome": "Tríceps testa com barra na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_deitado_na_polia",
+    "nome": "Tríceps testa no banco reto com barra reta na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_overhead_na_polia",
+    "nome": "Tríceps testa com corda na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Lying Dumbbell Skullcrusher",
+    "nome": "Tríceps testa com halteres",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Supino_fechado_no_Smith",
+    "nome": "Supino fechado no Smith",
+    "tipo": "anilha",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_frances",
+    "nome": "Tríceps francês com halter",
+    "tipo": "halter",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_frances_com_barra_reta",
+    "nome": "Tríceps francês com barra reta na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_frances_com_corda",
+    "nome": "Tríceps francês com corda na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  },
+  {
+    "id": "Triceps_na_polia_inclinado",
+    "nome": "Tríceps francês inclinado com corda na polia",
+    "tipo": "seletor",
+    "equipVariavel": false
+  }
+]

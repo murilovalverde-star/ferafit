@@ -1241,6 +1241,7 @@
     var catalogoTreinoCompleto = null;   // lista do catalogo-exercicios.json
     var mapaSrcPorIdCatalogo = null;     // idCatalogoSite -> srcMotor
     var mapaPorSrcMotor = null;          // srcMotor -> {grupo, subgrupo, idCatalogoSite, nomeOficialSite, arquivoDeCapa}
+    var mapaEquipVariavelPorNome = null; // nome do exercicio (normalizado) -> {tipo, equipVariavel} -- D056, lista oficial da App
     var catalogoTreinoPromise = null;
 
     function urlImagemCatalogoTreino(arquivo) {
@@ -1257,6 +1258,10 @@
         fetch('assets/data/MAPA_ID_MOTOR_PARA_CATALOGO_190.json').then(function (r) {
           if (!r.ok) { throw new Error('Não consegui carregar o mapa de exercícios do motor.'); }
           return r.json();
+        }),
+        fetch('assets/data/equip_variavel_190.json').then(function (r) {
+          if (!r.ok) { throw new Error('Não consegui carregar a lista de aparelhos de carga ajustável.'); }
+          return r.json();
         })
       ]).then(function (resultados) {
         catalogoTreinoCompleto = resultados[0];
@@ -1265,6 +1270,10 @@
         resultados[1].forEach(function (m) {
           mapaSrcPorIdCatalogo[m.idCatalogoSite] = m.srcMotor;
           mapaPorSrcMotor[m.srcMotor] = m;
+        });
+        mapaEquipVariavelPorNome = {};
+        resultados[2].forEach(function (item) {
+          mapaEquipVariavelPorNome[semAcentoAparelhoCarga(item.nome)] = { tipo: item.tipo, equipVariavel: !!item.equipVariavel };
         });
         return true;
       });
@@ -1455,27 +1464,24 @@
     // Backend entrega na D122) -- fica so em localStorage, por conta
     // logada (academia OU personal, cada uma ve e edita so a propria).
     //
-    // Lista de candidatos (quais dos 190 exercicios sao maquina/polia
-    // com carga ajustavel) e PROVISORIA: pedi a lista oficial
-    // `equipVariavel` a Logica/App pelo Orquestrador (ver STATUS.md,
-    // P44) -- ate chegar, uso um criterio por palavra-chave no nome do
-    // exercicio, documentado aqui e avisado na propria tela.
+    // Lista de candidatos (quais dos 190 exercicios tem carga
+    // ajustavel de verdade): D056 (2026-10-06) trouxe a lista oficial
+    // `equipVariavel` da Logica/App (`equip_variavel_190.json`, gerada
+    // do `exercises.js` dela e carregada junto com o resto do catalogo
+    // em carregarCatalogoTreino()) -- substitui o criterio provisorio
+    // por palavra-chave que esta tela usava desde a D055. O casamento
+    // entre os dois arquivos e pelo NOME do exercicio (normalizado,
+    // sem acento/caixa), nao pelo id -- os dois lados usam sistemas de
+    // id diferentes (detalhe completo no STATUS.md, P45).
     // =========================================================
-
-    var PALAVRAS_CHAVE_APARELHO_CARGA = ['maquina', 'machine', 'smith', 'polia', 'hammer', 'cross',
-      'leg press', 'hack', 'graviton', 'pulley', 'pulldown', 'peck deck', 'voador', 'multiforca',
-      'aparelho', 'cadeira', 'mesa flexora', 'remada baixa', 'puxada'];
-    var EXCLUSOES_APARELHO_CARGA = ['sem assistencia'];
 
     function semAcentoAparelhoCarga(s) {
       return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
 
     function ehCandidatoAparelhoCarga(nome) {
-      var alvo = semAcentoAparelhoCarga(nome);
-      var inclui = PALAVRAS_CHAVE_APARELHO_CARGA.some(function (p) { return alvo.indexOf(p) !== -1; });
-      var exclui = EXCLUSOES_APARELHO_CARGA.some(function (p) { return alvo.indexOf(p) !== -1; });
-      return inclui && !exclui;
+      var info = mapaEquipVariavelPorNome ? mapaEquipVariavelPorNome[semAcentoAparelhoCarga(nome)] : null;
+      return !!(info && info.equipVariavel);
     }
 
     function chaveAparelhosCarga() {
@@ -1564,7 +1570,6 @@
       html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos alunos</button>';
       html += '</div>';
       html += '<p style="color:var(--texto-secundario);font-size:0.85rem;margin:0 0 8px;">Para cada aparelho de carga ajustável, diga se ele é de <strong>anilha</strong> (vocês encaixam os discos) ou de <strong>seletor</strong> (pino na pilha de peso) — isso ajuda o app a sugerir cargas certas para o aluno. O 1º e o último peso da pilha são opcionais, só para o seletor. Pode deixar em branco o que não souber agora.</p>';
-      html += '<p style="color:var(--ambar);font-size:0.78rem;margin:0 0 6px;">⚠ Lista provisória: enquanto a Lógica do app não confirma quais dos 190 exercícios têm carga ajustável de verdade, uso um critério próprio (palavras no nome do exercício) — pode faltar ou sobrar algum item aqui; isso é corrigido assim que a lista oficial chegar.</p>';
       html += '<p style="color:var(--texto-secundario);font-size:0.78rem;margin:0 0 16px;">Por enquanto isso fica salvo só neste navegador, nesta conta — ainda não sincroniza com a nuvem nem com o app. Quando o banco de dados estiver pronto para isso, o que você marcar aqui vai poder ser levado para lá.</p>';
 
       ordemGrupos.forEach(function (grupo) {
