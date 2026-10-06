@@ -140,7 +140,7 @@
                   </div>
                   <div class="campo">
                     <label for="ac-telefone">Telefone / WhatsApp</label>
-                    <input id="ac-telefone" type="text" placeholder="(00) 00000-0000">
+                    <input id="ac-telefone" type="text" placeholder="(00) 00000-0000" oninput="mascararTelefoneDigitado(this)">
                   </div>
                 </div>
                 <div class="campo">
@@ -274,7 +274,7 @@
                 <div class="form-grade">
                   <div class="campo">
                     <label for="pe-telefone">Telefone / WhatsApp</label>
-                    <input id="pe-telefone" type="text" placeholder="(00) 00000-0000">
+                    <input id="pe-telefone" type="text" placeholder="(00) 00000-0000" oninput="mascararTelefoneDigitado(this)">
                   </div>
                   <div class="campo">
                     <label for="pe-email">E-mail</label>
@@ -765,24 +765,25 @@
           '<div class="titulo-grupo">Identificação</div>' +
           '<div class="campo"><label for="af-nome">Nome *</label><input id="af-nome" type="text" placeholder="Nome completo"></div>' +
           '<div class="campo"><label for="af-data-nascimento">Data de nascimento</label><input id="af-data-nascimento" type="date"></div>' +
-          '<div class="campo"><label for="af-cpf">CPF</label><input id="af-cpf" type="text"></div>' +
+          '<div class="campo"><label for="af-cpf">CPF</label><input id="af-cpf" type="text" oninput="mascararCpfDigitado(this)"></div>' +
           '<div class="campo"><label for="af-rg">RG</label><input id="af-rg" type="text"></div>' +
           '<div class="campo"><label for="af-sexo">Sexo</label><select id="af-sexo"><option value="">—</option><option value="masculino">Masculino</option><option value="feminino">Feminino</option></select></div>' +
           '<div class="campo"><label for="af-email">E-mail</label><input id="af-email" type="email"></div>' +
-          '<div class="campo"><label for="af-telefone">Telefone / WhatsApp</label><input id="af-telefone" type="text" placeholder="(00) 00000-0000"></div>' +
+          '<div class="campo"><label for="af-telefone">Telefone / WhatsApp</label><input id="af-telefone" type="text" placeholder="(00) 00000-0000" oninput="mascararTelefoneDigitado(this)"></div>' +
         '</div>' +
         '<div class="cadastro-grupo">' +
           '<div class="titulo-grupo">Endereço</div>' +
-          '<div class="campo"><label for="af-end-cep">CEP</label><input id="af-end-cep" type="text"></div>' +
+          '<div class="campo"><label for="af-end-cep">CEP</label><input id="af-end-cep" type="text" oninput="aoDigitarCepFicha(this)"></div>' +
           '<div class="campo"><label for="af-end-rua">Rua</label><input id="af-end-rua" type="text"></div>' +
           '<div class="campo"><label for="af-end-numero">Número</label><input id="af-end-numero" type="text"></div>' +
           '<div class="campo"><label for="af-end-bairro">Bairro</label><input id="af-end-bairro" type="text"></div>' +
           '<div class="campo"><label for="af-end-cidade">Cidade</label><input id="af-end-cidade" type="text"></div>' +
+          '<div class="campo"><label for="af-end-uf">UF</label><input id="af-end-uf" type="text" maxlength="2" style="text-transform:uppercase;"></div>' +
         '</div>' +
         '<div class="cadastro-grupo">' +
           '<div class="titulo-grupo">Contato de emergência</div>' +
           '<div class="campo"><label for="af-emerg-nome">Nome</label><input id="af-emerg-nome" type="text"></div>' +
-          '<div class="campo"><label for="af-emerg-telefone">Telefone</label><input id="af-emerg-telefone" type="text"></div>' +
+          '<div class="campo"><label for="af-emerg-telefone">Telefone</label><input id="af-emerg-telefone" type="text" oninput="mascararTelefoneDigitado(this)"></div>' +
         '</div>' +
         '<div class="cadastro-grupo">' +
           '<div class="titulo-grupo">Observação (só você e o admin veem)</div>' +
@@ -905,12 +906,24 @@
 
     // Lê os campos do formulário e monta o objeto no formato que
     // fichas-store.js espera (colunas diretas + jsonb endereco/contrato/anamnese).
+    // Callback do CEP da ficha do aluno (D055) -- preenche rua/bairro/
+    // cidade/UF sem sobrescrever com vazio quando o ViaCEP não traz um
+    // dos campos, e sem nunca travar a digitação manual.
+    function aoDigitarCepFicha(elemento) {
+      buscarEnderecoPorCep(elemento.value, function (dados) {
+        if (dados.logradouro) { document.getElementById('af-end-rua').value = dados.logradouro; }
+        if (dados.bairro) { document.getElementById('af-end-bairro').value = dados.bairro; }
+        if (dados.localidade) { document.getElementById('af-end-cidade').value = dados.localidade; }
+        if (dados.uf) { document.getElementById('af-end-uf').value = dados.uf; }
+      });
+    }
+
     function lerFormularioAluno() {
       var v = function (id) { return document.getElementById(id).value; };
       var c = function (id) { return document.getElementById(id).checked; };
       var vazio = function (s) { return (s || '').trim() === ''; };
 
-      var endereco = { cep: v('af-end-cep'), rua: v('af-end-rua'), numero: v('af-end-numero'), bairro: v('af-end-bairro'), cidade: v('af-end-cidade') };
+      var endereco = { cep: v('af-end-cep'), rua: v('af-end-rua'), numero: v('af-end-numero'), bairro: v('af-end-bairro'), cidade: v('af-end-cidade'), uf: v('af-end-uf') };
       var contrato = { plano: v('af-ctr-plano'), formaPagamento: v('af-ctr-forma-pagamento'), dataInicio: v('af-ctr-data-inicio'), termoResponsabilidade: c('af-ctr-termo'), atestadoMedico: c('af-ctr-atestado') };
       var anamnese = {
         objetivo: v('af-an-objetivo'), nivelExperiencia: v('af-an-nivel'), frequenciaSemanalDesejada: v('af-an-frequencia'),
@@ -946,7 +959,7 @@
 
       s('af-nome', ficha.nome); s('af-data-nascimento', ficha.data_nascimento); s('af-cpf', ficha.cpf); s('af-rg', ficha.rg);
       s('af-sexo', ficha.sexo || ''); s('af-email', ficha.email); s('af-telefone', ficha.telefone);
-      s('af-end-cep', endereco.cep); s('af-end-rua', endereco.rua); s('af-end-numero', endereco.numero); s('af-end-bairro', endereco.bairro); s('af-end-cidade', endereco.cidade);
+      s('af-end-cep', endereco.cep); s('af-end-rua', endereco.rua); s('af-end-numero', endereco.numero); s('af-end-bairro', endereco.bairro); s('af-end-cidade', endereco.cidade); s('af-end-uf', endereco.uf);
       s('af-emerg-nome', ficha.contato_emergencia_nome); s('af-emerg-telefone', ficha.contato_emergencia_telefone);
       s('af-observacao', ficha.observacao);
       s('af-ctr-plano', contrato.plano); s('af-ctr-forma-pagamento', contrato.formaPagamento); s('af-ctr-data-inicio', contrato.dataInicio);
@@ -964,6 +977,30 @@
       var dados = lerFormularioAluno();
       var erroEl = document.getElementById('af-erro');
       erroEl.style.display = 'none';
+
+      if (!emailFormatoValido(dados.email)) {
+        erroEl.textContent = 'E-mail em formato inv\u00e1lido. Confira e tente novamente.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      if (!cpfValido(dados.cpf)) {
+        erroEl.textContent = 'CPF inv\u00e1lido. Confira os n\u00fameros digitados.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      if (!telefoneWhatsappValido(dados.telefone)) {
+        erroEl.textContent = 'Telefone precisa ser um WhatsApp v\u00e1lido: (DDD) 9XXXX-XXXX, com DDD brasileiro real.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      if (!telefoneWhatsappValido(dados.contato_emergencia_telefone)) {
+        erroEl.textContent = 'Telefone do contato de emerg\u00eancia precisa ser um WhatsApp v\u00e1lido: (DDD) 9XXXX-XXXX, com DDD brasileiro real.';
+        erroEl.style.display = 'block';
+        return;
+      }
 
       if (!dados.declaracao_consentimento_parceiro) {
         erroEl.textContent = 'Marque a declara\u00e7\u00e3o de que voc\u00ea tem o consentimento do aluno para registrar os dados de sa\u00fade (anamnese) -- sem isso, a ficha n\u00e3o \u00e9 salva.';
@@ -1689,6 +1726,107 @@
       document.getElementById(idContador).textContent = valor.length + '/500';
     }
 
+    // ============================================================
+    // D055 (2026-10-06) -- validacoes de telefone (so WhatsApp celular
+    // BR), CPF (digito verificador) e e-mail (formato), usadas em TODOS
+    // os formularios do site que pedem esses dados: cadastro de academia
+    // (ac-telefone), cadastro de personal (pe-telefone) e ficha do aluno
+    // (af-telefone, af-emerg-telefone, af-cpf, af-email). Mascara aplicada
+    // ao digitar (oninput); validacao de verdade so no envio, e so quando
+    // o campo nao esta vazio -- nenhum destes passa a ser obrigatorio
+    // além do que ja era antes da D055.
+    // ============================================================
+    var DDDS_VALIDOS_BR = [11,12,13,14,15,16,17,18,19,21,22,24,27,28,31,32,33,34,35,37,38,41,42,43,44,45,46,47,48,49,51,53,54,55,61,62,63,64,65,66,67,68,69,71,73,74,75,77,79,81,82,83,84,85,86,87,88,89,91,92,93,94,95,96,97,98,99];
+
+    function soDigitos(valor) {
+      return (valor || '').replace(/\D/g, '');
+    }
+
+    function mascararTelefoneDigitado(elemento) {
+      var digitos = soDigitos(elemento.value).slice(0, 11);
+      var formatado = digitos;
+      if (digitos.length > 10) {
+        formatado = '(' + digitos.slice(0, 2) + ') ' + digitos.slice(2, 7) + '-' + digitos.slice(7, 11);
+      } else if (digitos.length > 6) {
+        formatado = '(' + digitos.slice(0, 2) + ') ' + digitos.slice(2, 6) + '-' + digitos.slice(6);
+      } else if (digitos.length > 2) {
+        formatado = '(' + digitos.slice(0, 2) + ') ' + digitos.slice(2);
+      } else if (digitos.length > 0) {
+        formatado = '(' + digitos;
+      }
+      elemento.value = formatado;
+    }
+
+    // Telefone é opcional em todos os 4 formulários -- vazio passa. Quando
+    // preenchido, exige: 11 dígitos, DDD de verdade (lista oficial de DDDs
+    // brasileiros) e 3º dígito = 9 (indicador de linha móvel), pedido
+    // explícito de Murilo em D055 depois de um WhatsApp de 30 dígitos ter
+    // passado sem travar nenhuma vez.
+    function telefoneWhatsappValido(valor) {
+      var digitos = soDigitos(valor);
+      if (digitos === '') { return true; }
+      if (digitos.length !== 11) { return false; }
+      var ddd = parseInt(digitos.slice(0, 2), 10);
+      if (DDDS_VALIDOS_BR.indexOf(ddd) === -1) { return false; }
+      if (digitos.charAt(2) !== '9') { return false; }
+      return true;
+    }
+
+    function mascararCpfDigitado(elemento) {
+      var digitos = soDigitos(elemento.value).slice(0, 11);
+      var formatado = digitos;
+      if (digitos.length > 9) {
+        formatado = digitos.slice(0, 3) + '.' + digitos.slice(3, 6) + '.' + digitos.slice(6, 9) + '-' + digitos.slice(9, 11);
+      } else if (digitos.length > 6) {
+        formatado = digitos.slice(0, 3) + '.' + digitos.slice(3, 6) + '.' + digitos.slice(6);
+      } else if (digitos.length > 3) {
+        formatado = digitos.slice(0, 3) + '.' + digitos.slice(3);
+      }
+      elemento.value = formatado;
+    }
+
+    // CPF é opcional no formulário (não tem *) -- vazio passa. Quando
+    // preenchido, exige 11 dígitos, rejeita sequências de dígito repetido
+    // (ex.: 00000000000, que passa na conta mas nunca é um CPF real) e
+    // confere os dois dígitos verificadores pelo algoritmo oficial.
+    function cpfValido(valor) {
+      var digitos = soDigitos(valor);
+      if (digitos === '') { return true; }
+      if (digitos.length !== 11) { return false; }
+      if (/^(\d)\1{10}$/.test(digitos)) { return false; }
+      function calcularDigitoCpf(base) {
+        var soma = 0, peso = base.length + 1;
+        for (var i = 0; i < base.length; i++) { soma += parseInt(base.charAt(i), 10) * (peso - i); }
+        var resto = soma % 11;
+        return (resto < 2) ? 0 : (11 - resto);
+      }
+      var d1 = calcularDigitoCpf(digitos.slice(0, 9));
+      var d2 = calcularDigitoCpf(digitos.slice(0, 9) + String(d1));
+      return (digitos.charAt(9) === String(d1)) && (digitos.charAt(10) === String(d2));
+    }
+
+    // E-mail é opcional nos formulários em que aparece sem * -- vazio
+    // passa. Validação é só de formato (não verifica se o endereço existe
+    // de verdade), como pedido na D055.
+    function emailFormatoValido(valor) {
+      var texto = (valor || '').trim();
+      if (texto === '') { return true; }
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto);
+    }
+
+    // ViaCEP (D055, parte 2) -- busca endereço ao digitar 8 dígitos no CEP
+    // da ficha do aluno. Preenche rua/bairro/cidade/UF mas nunca bloqueia:
+    // qualquer falha (CEP inexistente, rede fora) é silenciosa, e os campos
+    // continuam editáveis manualmente depois do preenchimento automático.
+    function buscarEnderecoPorCep(valorCampo, aoEncontrar) {
+      var digitos = soDigitos(valorCampo);
+      if (digitos.length !== 8) { return; }
+      fetch('https://viacep.com.br/ws/' + digitos + '/json/')
+        .then(function (resposta) { return resposta.json(); })
+        .then(function (dados) { if (dados && !dados.erro) { aoEncontrar(dados); } })
+        .catch(function () { /* falha silenciosa -- nunca trava quem quer digitar manualmente */ });
+    }
+
     // ParceirosStore, camada trocável — assets/js/parceiros-store.js), com
     // aprovação e senha, igual ao personal (SPEC_parceiro_auth_e_fotos_001.md,
     // seção 2.1). Continua sem falar com o Supabase.
@@ -1707,6 +1845,11 @@
 
       if (!nome || !email || !senha) {
         erro.textContent = 'Preencha ao menos nome da academia, e-mail e senha.';
+        erro.style.display = 'block';
+        return;
+      }
+      if (!telefoneWhatsappValido(document.getElementById('ac-telefone').value)) {
+        erro.textContent = 'Telefone precisa ser um WhatsApp v\u00e1lido: (DDD) 9XXXX-XXXX, com DDD brasileiro real.';
         erro.style.display = 'block';
         return;
       }
@@ -1772,6 +1915,12 @@
         return;
       }
       document.getElementById('pe-galeria-erro').style.display = 'none';
+
+      if (!telefoneWhatsappValido(document.getElementById('pe-telefone').value)) {
+        erroSenha.textContent = 'Telefone precisa ser um WhatsApp v\u00e1lido: (DDD) 9XXXX-XXXX, com DDD brasileiro real.';
+        erroSenha.style.display = 'block';
+        return;
+      }
 
       var arquivoFoto = document.getElementById('pe-foto').files;
 
