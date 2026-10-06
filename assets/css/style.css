@@ -2295,3 +2295,148 @@ footer.site-footer a:hover {
     padding: 20px;
   }
 }
+
+
+/* ======================================================================
+   D059 (2026-10-06) -- Painel de Numeros no admin, opcao B (abas).
+   D059 -- Painel de Numeros (admin)
+   So regras NOVAS abaixo -- nao editei .admin-tabs/.admin-painel-conteudo
+   (D006) pra nao arriscar quebrar as abas Academia/Personal que ja
+   usam essas classes; so ACRESCENTEI overflow-x e no-wrap nos botoes,
+   que nao muda nada visualmente quando ja cabem na tela (caso de hoje).
+   ====================================================================== */
+
+.admin-tabs {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+}
+
+.admin-tabs button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.numeros-kpi {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--raio);
+  padding: 14px 18px;
+  min-width: 148px;
+}
+
+.numeros-kpi .rotulo {
+  font-size: 0.7rem;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.numeros-kpi .valor {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.numeros-kpi .delta {
+  font-size: 0.74rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.numeros-kpi .delta.up { color: #48c774; }
+.numeros-kpi .delta.down { color: #e2543f; }
+
+.periodo-select-numeros {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  color: var(--texto);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  margin-left: 8px;
+}
+
+.numeros-secao {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--raio);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.numeros-secao-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.numeros-secao-titulo {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.btn-csv-numeros {
+  background: none;
+  border: 1px solid var(--card-border);
+  color: var(--texto-secundario);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.numeros-tabela-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.numeros-tabela-scroll table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.numeros-tabela-scroll th {
+  text-align: left;
+  color: var(--texto-secundario);
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+
+.numeros-tabela-scroll td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+
+.numeros-tabela-scroll tr:last-child td { border-bottom: none; }
+
+.numeros-aviso {
+  background: rgba(255, 178, 56, 0.1);
+  border: 1px solid rgba(255, 178, 56, 0.3);
+  color: var(--ambar);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 640px) {
+  .numeros-kpi { min-width: 128px; padding: 12px 14px; }
+}

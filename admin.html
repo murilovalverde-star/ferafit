@@ -72,6 +72,48 @@
       </div>
     </section>
 
+    <!-- MODULO 0 -- NUMEROS (D058 proposta visual + D059 escolha da opcao B e implementacao, 2026-10-06) -->
+    <section class="admin-modulo" id="modulo-numeros">
+      <div class="container">
+        <span class="status-modulo depende">Tela pronta -- dado real depende da Backend (migration 036, D124)</span>
+        <h2>Números<span class="tag-exemplo">dados de exemplo</span></h2>
+        <p style="color:var(--texto-secundario);max-width:680px;margin:0 0 10px;">
+          Painel de métricas do produto, filtrável por período e sempre comparado ao período
+          anterior equivalente (▲/▼). Enquanto a migration 036 (Backend, D124) não estiver no ar,
+          todo número aqui é <span class="tag-exemplo">exemplo</span> -- o código já chama, como
+          admin logado, <code>metricas_periodo()</code>, <code>usuarios_ativos_periodo()</code>,
+          <code>distribuicao_pagamento_atual()</code> e <code>comparativo_tempo_treino()</code> por
+          RPC, e cai no dado de exemplo sempre que a função ainda não existir no banco (ver
+          <code>chamarRpcOuExemplo()</code> no script desta seção). O mapeamento exato de campos só
+          será ligado quando a Backend fechar o formato de retorno dessas funções -- hoje elas ainda
+          estão em revisão, então não dá pra afirmar o formato final.
+        </p>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+          <span style="font-size:0.82rem;font-weight:700;color:var(--texto-secundario);">
+            Período
+            <select id="numeros-periodo" class="periodo-select-numeros" onchange="recarregarPainelNumeros()">
+              <option value="dia">Dia</option>
+              <option value="semana">Semana</option>
+              <option value="mes" selected>Mês</option>
+              <option value="bimestre">Bimestre</option>
+              <option value="trimestre">Trimestre</option>
+              <option value="semestre">Semestre</option>
+              <option value="ano">Ano</option>
+              <option value="livre">Intervalo livre</option>
+            </select>
+          </span>
+          <span style="font-size:0.74rem;color:var(--texto-secundario);">vs. período anterior equivalente</span>
+        </div>
+
+        <div id="numeros-cartoes" style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 20px;"></div>
+
+        <div class="admin-tabs" id="numeros-abas"></div>
+
+        <div id="numeros-conteudo"></div>
+      </div>
+    </section>
+
     <!-- MÓDULO 1 — CATÁLOGO DE EXERCÍCIOS -->
     <section class="admin-modulo">
       <div class="container">
@@ -423,6 +465,7 @@
           renderFaixas();
           renderPendentesParceiros();
           renderAtivosParceiros();
+          inicializarPainelNumeros();
           inicializarFeedbackBeta();
         })
         .catch(function (e) {
@@ -889,6 +932,386 @@
         });
         containerLista.innerHTML = htmlLista;
       });
+    }
+  </script>
+  <script>
+    // ===========================================================
+    // D058/D059 (2026-10-06) -- Painel de Numeros, opcao B (abas por
+    // grupo), escolhida por Murilo. 9 abas: Usuarios, Treino, Tempo
+    // escolhido x real (nova, pedido do adendo de Murilo), Cardio,
+    // Anuncios, Medalhas e Tour, Funil, Parceiros, Feedback do Beta.
+    // Campanhas e roupinhas saem por decisao de Murilo (depois do
+    // Beta 1). Funil comeca em "cadastrou" (so usuario logado, sem
+    // instalacao anonima).
+    //
+    // DADOS: tudo EXEMPLO. O codigo ja chama, como admin logado (usa o
+    // mesmo clienteAdmin da sessao), as 4 funcoes da Backend previstas
+    // na migration 036 -- metricas_periodo(), usuarios_ativos_periodo(),
+    // distribuicao_pagamento_atual() e comparativo_tempo_treino() -- via
+    // chamarRpcOuExemplo() abaixo. Essa migration ainda esta em revisao
+    // (D059 do Orquestrador), ou seja, nem o formato final do retorno
+    // esta fechado -- por isso o resultado de hoje (funcao inexistente)
+    // so fica registrado no console e o painel continua mostrando o
+    // dado de exemplo estatico. Quando a Backend publicar a 036, o
+    // ajuste fica isolado dentro das 4 funcoes "exemploXxx()" -- o
+    // resto (abas, cartoes, tabela, grafico, CSV, rolagem no celular)
+    // nao muda.
+    //
+    // ESCALA POR PERIODO: cada linha marcada com escala:true tem um
+    // valor-base (equivalente a 1 mes) multiplicado pelo fator do
+    // periodo escolhido -- so pra dar uma nocao de grandeza; taxas e
+    // medias (ex.: duracao media, % de meta) nao escalam, ja que nao
+    // crescem com o tamanho do periodo. O delta (vs. periodo anterior)
+    // e um numero de exemplo fixo por linha, nao calculado de verdade.
+    // ===========================================================
+
+    var abaNumerosAtiva = 'usuarios';
+    var _numerosLinhasAtuais = []; // pra exportar CSV da aba visivel
+
+    function fatorPeriodoNumeros(periodo) {
+      var fatores = { dia: 0.035, semana: 0.25, mes: 1, bimestre: 2, trimestre: 3, semestre: 6, ano: 12, livre: 1.5 };
+      return fatores[periodo] || 1;
+    }
+
+    function rotuloPeriodoNumeros(periodo) {
+      var rotulos = { dia: 'dia', semana: 'semana', mes: 'mês', bimestre: 'bimestre', trimestre: 'trimestre', semestre: 'semestre', ano: 'ano', livre: 'intervalo livre' };
+      return rotulos[periodo] || periodo;
+    }
+
+    function formatarNumeroBr(n) {
+      return Math.round(n).toLocaleString('pt-BR');
+    }
+
+    function svgBarrasNumeros(valores, cor, fator, escalaGrafico) {
+      var larg = 240, alt = 86;
+      var vals = valores.map(function (v) { return escalaGrafico ? v * fator : v; });
+      var n = vals.length;
+      var vmax = Math.max.apply(null, vals) || 1;
+      var bw = larg / (n * 1.6);
+      var gap = bw * 0.6;
+      var x = gap;
+      var partes = [];
+      vals.forEach(function (v) {
+        var h = (v / vmax) * (alt - 10);
+        var y = alt - h;
+        partes.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="' + cor + '" opacity="0.9"></rect>');
+        x += bw + gap;
+      });
+      return '<svg width="' + larg + '" height="' + alt + '" viewBox="0 0 ' + larg + ' ' + alt + '" role="img" aria-label="gráfico de exemplo">' + partes.join('') + '</svg>';
+    }
+
+    function svgLinhaNumeros(valores, cor) {
+      var larg = 240, alt = 86;
+      var n = valores.length;
+      var vmax = Math.max.apply(null, valores);
+      var vmin = Math.min.apply(null, valores);
+      var pontos = valores.map(function (v, i) {
+        var x = (i / (n - 1)) * (larg - 10) + 5;
+        var y = alt - 8 - ((v - vmin) / Math.max(1, (vmax - vmin))) * (alt - 20);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      return '<svg width="' + larg + '" height="' + alt + '" viewBox="0 0 ' + larg + ' ' + alt + '" role="img" aria-label="gráfico de exemplo">' +
+        '<polyline points="' + pontos + '" fill="none" stroke="' + cor + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>' +
+        '</svg>';
+    }
+
+    function svgDuasLinhasNumeros(valoresA, valoresB, corA, corB) {
+      var larg = 240, alt = 86;
+      var todos = valoresA.concat(valoresB);
+      var vmax = Math.max.apply(null, todos);
+      var vmin = Math.min.apply(null, todos);
+      function pts(valores) {
+        var n = valores.length;
+        return valores.map(function (v, i) {
+          var x = (i / (n - 1)) * (larg - 10) + 5;
+          var y = alt - 8 - ((v - vmin) / Math.max(1, (vmax - vmin))) * (alt - 20);
+          return x.toFixed(1) + ',' + y.toFixed(1);
+        }).join(' ');
+      }
+      return '<svg width="' + larg + '" height="' + alt + '" viewBox="0 0 ' + larg + ' ' + alt + '" role="img" aria-label="gráfico de exemplo">' +
+        '<polyline points="' + pts(valoresA) + '" fill="none" stroke="' + corA + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>' +
+        '<polyline points="' + pts(valoresB) + '" fill="none" stroke="' + corB + '" stroke-width="3" stroke-dasharray="4,3" stroke-linecap="round" stroke-linejoin="round"></polyline>' +
+        '</svg>';
+    }
+
+    // ---------------------------------------------------------
+    // Stub das 4 funcoes da Backend (migration 036, D124/D059).
+    // Chama por RPC, como admin logado (mesmo clienteAdmin da sessao,
+    // que ja passou por sou_admin() no login) -- quem nao for admin
+    // recebe erro de permissao da propria funcao, nunca deste codigo.
+    // Hoje a funcao nao existe ainda -> cai no exemplo, so registrando
+    // no console (nunca mostra erro pro usuario, isso e esperado).
+    // ---------------------------------------------------------
+    function chamarRpcOuExemplo(nomeFuncao, params, montarExemplo) {
+      if (typeof clienteAdmin === 'undefined' || !clienteAdmin || typeof clienteAdmin.rpc !== 'function') {
+        return Promise.resolve(montarExemplo());
+      }
+      return clienteAdmin.rpc(nomeFuncao, params || {})
+        .then(function (resultado) {
+          if (!resultado || resultado.error || resultado.data == null) {
+            console.info('[Números] ' + nomeFuncao + '() ainda não está disponível (migration 036) -- usando dado de exemplo.');
+            return montarExemplo();
+          }
+          // Formato final do retorno ainda nao fechado pela Backend (D059: "ainda em
+          // revisao") -- quando fechar, o mapeamento de resultado.data pros cartoes/
+          // abas entra aqui, sem mudar o resto do arquivo.
+          return montarExemplo();
+        })
+        .catch(function () {
+          console.info('[Números] ' + nomeFuncao + '() falhou -- usando dado de exemplo.');
+          return montarExemplo();
+        });
+    }
+
+    function exemploMetricasPeriodo(periodo) { return { periodo: periodo, exemplo: true }; }
+    function exemploUsuariosAtivosPeriodo(periodo) { return { periodo: periodo, exemplo: true }; }
+    function exemploDistribuicaoPagamentoAtual() { return { exemplo: true }; }
+    function exemploComparativoTempoTreino(periodo) { return { periodo: periodo, exemplo: true }; }
+
+    // ---------------------------------------------------------
+    // Os 5 cartoes do topo (iguais aos da proposta visual da D058).
+    // ---------------------------------------------------------
+    var CARTOES_NUMEROS = [
+      { rotulo: 'Ativos no período', valorBase: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
+      { rotulo: 'Treinos concluídos', valorBase: 18902, escala: true, sufixo: '', delta: '+7%', direcao: 'up' },
+      { rotulo: 'Duração média', valorBase: 47, escala: false, sufixo: ' min', delta: '-3%', direcao: 'down' },
+      { rotulo: 'Retenção 2ª semana', valorBase: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up' },
+      { rotulo: 'Tempo médio de anúncio', valorBase: 38, escala: false, sufixo: ' s', delta: '-6%', direcao: 'down' }
+    ];
+
+    // ---------------------------------------------------------
+    // As 9 abas. Cada linha da tabela: {label, valor (numero-base ou
+    // texto), escala (true = multiplica pelo fator do periodo),
+    // sufixo, delta (texto pronto, ja formatado), texto (true = linha
+    // so de texto, sem numero/delta).
+    // ---------------------------------------------------------
+    var GRUPOS_NUMEROS = [
+      {
+        id: 'usuarios', nome: 'Usuários', cor: 'var(--laranja)',
+        grafico: { tipo: 'barras', valores: [120, 180, 140, 210, 260, 230, 300], escala: true },
+        linhas: [
+          { label: 'Cadastros novos', valor: 1240, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
+          { label: 'Ativos no período (≥ 1 treino)', valor: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
+          { label: 'Grátis', valor: 2102, escala: true, sufixo: '', delta: '+4%', direcao: 'up' },
+          { label: 'PRO', valor: 980, escala: true, sufixo: '', delta: '+18%', direcao: 'up' },
+          { label: 'Patrocinado (parceiro)', valor: 166, escala: true, sufixo: '', delta: '+22%', direcao: 'up' },
+          { label: 'Retenção 2ª semana', valor: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up' },
+          { label: 'Retenção 2º mês', valor: 44, escala: false, sufixo: '%', delta: '+2 p.p.', direcao: 'up' }
+        ]
+      },
+      {
+        id: 'treino', nome: 'Treino', cor: 'var(--ambar)',
+        grafico: { tipo: 'linha', valores: [38, 41, 44, 43, 47, 46, 49], escala: false },
+        linhas: [
+          { label: 'Divisão ABC (mais usada)', valor: 1204, escala: true, sufixo: ' usuários', delta: '+6%', direcao: 'up' },
+          { label: 'Divisão AB', valor: 842, escala: true, sufixo: ' usuários', delta: '-2%', direcao: 'down' },
+          { label: 'Divisão ABCDE', valor: 390, escala: true, sufixo: ' usuários', delta: '+11%', direcao: 'up' },
+          { label: 'Full Body', valor: 512, escala: true, sufixo: ' usuários', delta: '+4%', direcao: 'up' },
+          { label: 'Frequência escolhida (média)', valor: '4,2x/semana', texto: true, delta: '+0,1', direcao: 'up' },
+          { label: 'Frequência real (média)', valor: '3,6x/semana', texto: true, delta: '-0,2', direcao: 'down' },
+          { label: 'Duração média do treino', valor: '47 min', texto: true, delta: '-3%', direcao: 'down' },
+          { label: 'Treinos abandonados no meio', valor: 212, escala: true, sufixo: '', delta: '+5%', direcao: 'down' },
+          { label: 'Exercício mais feito', valor: 'Supino reto (exemplo)', texto: true, delta: '—', direcao: '' },
+          { label: 'Evolução média de carga no período', valor: '+3,8%', texto: true, delta: '—', direcao: '' }
+        ]
+      },
+      {
+        id: 'tempo-real', nome: 'Tempo escolhido x real', cor: 'var(--laranja)',
+        aviso: 'Pendência da Backend: <code>treino_sessoes</code> hoje só guarda a duração real (<code>duracao_segundos</code>), não o tempo escolhido na Home (40/50/60/70/80 min) -- falta criar essa coluna ou evento (pedido no adendo de Murilo da D058). Até isso existir, os números desta aba são só exemplo, inclusive a forma de calcular a distribuição.',
+        grafico: { tipo: 'duas-linhas', valoresA: [60, 58, 55, 50, 52, 48, 50], valoresB: [55, 54, 50, 46, 49, 44, 47], corA: 'var(--texto-secundario)', corB: 'var(--laranja)' },
+        legendaGrafico: 'Linha cinza: tempo escolhido na Home · Linha laranja: duração real',
+        linhas: [
+          { label: 'Tempo médio escolhido (Home)', valor: '58 min', texto: true, delta: '—', direcao: '' },
+          { label: 'Tempo médio real (duração ativa)', valor: '51 min', texto: true, delta: '-3%', direcao: 'down' },
+          { label: 'Diferença média', valor: '-7 min (-12%)', texto: true, delta: '—', direcao: '' },
+          { label: 'Treinos muito abaixo do escolhido (< 70%)', valor: 412, escala: true, sufixo: '', delta: '+6%', direcao: 'down' },
+          { label: 'Treinos perto do escolhido (70% a 110%)', valor: 2608, escala: true, sufixo: '', delta: '+10%', direcao: 'up' },
+          { label: 'Treinos acima do escolhido (> 110%)', valor: 228, escala: true, sufixo: '', delta: '-4%', direcao: 'up' },
+          { label: 'Maior desvio por divisão', valor: 'ABCDE (-18% em média)', texto: true, delta: '—', direcao: '' },
+          { label: 'Maior desvio por nº de exercícios', valor: '9+ exercícios (-15% em média)', texto: true, delta: '—', direcao: '' }
+        ]
+      },
+      {
+        id: 'cardio', nome: 'Cardio', cor: 'var(--ambar)',
+        grafico: { tipo: 'barras', valores: [60, 75, 50, 90, 82, 95, 70], escala: false, cor: 'var(--ambar)' },
+        linhas: [
+          { label: 'Minutos de cardio por semana (média)', valor: '74 min', texto: true, delta: '+8%', direcao: 'up' },
+          { label: '% que bate a meta semanal', valor: '58%', texto: true, delta: '+5 p.p.', direcao: 'up' },
+          { label: 'Usuários que fazem cardio no período', valor: 2340, escala: true, sufixo: '', delta: '+9%', direcao: 'up' }
+        ]
+      },
+      {
+        id: 'anuncios', nome: 'Anúncios', cor: 'var(--vermelho)',
+        grafico: { tipo: 'barras', valores: [12, 18, 9, 22, 16, 20, 14], escala: false, cor: 'var(--vermelho)' },
+        linhas: [
+          { label: 'Anúncio do Google exibido', valor: 8420, escala: true, sufixo: '', delta: '+14%', direcao: 'up' },
+          { label: 'Anúncio da casa exibido', valor: 3190, escala: true, sufixo: '', delta: '+6%', direcao: 'up' },
+          { label: 'Sem anúncio (nada exibido)', valor: 1780, escala: true, sufixo: '', delta: '-9%', direcao: 'down' },
+          { label: 'Tempo médio de exposição', valor: '38 s', texto: true, delta: '-6%', direcao: 'down' },
+          { label: '% que aceitou anúncio personalizado (consent_ads_v2)', valor: '47%', texto: true, delta: '+3 p.p.', direcao: 'up' }
+        ]
+      },
+      {
+        id: 'medalhas-tour', nome: 'Medalhas e Tour', cor: 'var(--verde)',
+        aviso: 'Campanhas e roupinhas (mascote) ficam de fora deste painel por decisão de Murilo -- voltam depois do Beta 1.',
+        grafico: { tipo: 'barras', valores: [3, 4, 4, 5, 6, 6, 7], escala: true, cor: 'var(--verde)' },
+        linhas: [
+          { label: 'Medalhas ganhas no período', valor: 612, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
+          { label: 'Tour concluído', valor: 1840, escala: true, sufixo: '', delta: '+7%', direcao: 'up' },
+          { label: 'Tour pulado', valor: 290, escala: true, sufixo: '', delta: '-11%', direcao: 'up' },
+          { label: 'Tour abandonado no meio (passo médio)', valor: 'passo 3 de 5', texto: true, delta: '—', direcao: '' }
+        ]
+      },
+      {
+        id: 'funil', nome: 'Funil', cor: 'var(--laranja)',
+        aviso: 'Só usuário logado -- o funil começa em "cadastrou", sem instalação anônima (decisão da D059).',
+        grafico: { tipo: 'barras', valores: [820, 610, 480, 310], escala: true },
+        linhas: [
+          { label: 'Cadastrou', valor: 820, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
+          { label: 'Concluiu o Tour', valor: 610, escala: true, sufixo: '', delta: '+5%', direcao: 'up' },
+          { label: 'Fez o 1º treino', valor: 480, escala: true, sufixo: '', delta: '+3%', direcao: 'up' },
+          { label: 'Treinou na 2ª semana', valor: 310, escala: true, sufixo: '', delta: '-2%', direcao: 'down' },
+          { label: 'Conversão cadastro → 2ª semana', valor: '37,8%', texto: true, delta: '+1,2 p.p.', direcao: 'up' }
+        ]
+      },
+      {
+        id: 'parceiros', nome: 'Parceiros', cor: 'var(--laranja)',
+        grafico: { tipo: 'barras', valores: [40, 55, 48, 62, 58, 70, 66], escala: true },
+        linhas: [
+          { label: 'Academias ativas', valor: 38, escala: true, sufixo: '', delta: '+5%', direcao: 'up' },
+          { label: 'Personais ativos', valor: 94, escala: true, sufixo: '', delta: '+12%', direcao: 'up' },
+          { label: 'Alunos vinculados', valor: 1860, escala: true, sufixo: '', delta: '+9%', direcao: 'up' },
+          { label: 'Alunos patrocinados', valor: 310, escala: true, sufixo: '', delta: '+22%', direcao: 'up' }
+        ]
+      },
+      {
+        id: 'feedback-beta', nome: 'Feedback do Beta', cor: 'var(--ambar)',
+        aviso: 'Visão de tendência por período. A lista operacional completa (canal, pontos, tela, versão) continua no módulo "Feedback do Beta" mais abaixo, com dado real da <code>beta_feedback</code> quando o login de admin for reconhecido (D092 da Backend).',
+        grafico: { tipo: 'barras', valores: [8, 12, 6, 15, 10, 18, 13], escala: true, cor: 'var(--ambar)' },
+        linhas: [
+          { label: 'Feedback recebido no período', valor: 142, escala: true, sufixo: '', delta: '+15%', direcao: 'up' },
+          { label: 'Reação positiva', valor: 96, escala: true, sufixo: '', delta: '+18%', direcao: 'up' },
+          { label: 'Reação negativa', valor: 24, escala: true, sufixo: '', delta: '-6%', direcao: 'down' },
+          { label: 'Categoria mais citada', valor: 'Treino (exemplo)', texto: true, delta: '—', direcao: '' }
+        ]
+      }
+    ];
+
+    function construirAbasNumerosUmaVez() {
+      var container = document.getElementById('numeros-abas');
+      if (!container || container.children.length > 0) { return; }
+      container.innerHTML = GRUPOS_NUMEROS.map(function (grupo, i) {
+        return '<button type="button" class="' + (grupo.id === abaNumerosAtiva ? 'ativa' : '') +
+          '" onclick="mostrarAbaNumeros(\'' + grupo.id + '\')">' + grupo.nome + '</button>';
+      }).join('');
+    }
+
+    function mostrarAbaNumeros(id) {
+      abaNumerosAtiva = id;
+      var botoes = document.querySelectorAll('#numeros-abas button');
+      botoes.forEach(function (b) {
+        b.classList.toggle('ativa', b.textContent === (GRUPOS_NUMEROS.filter(function (g) { return g.id === id; })[0] || {}).nome);
+      });
+      renderizarAbaNumerosAtiva();
+    }
+
+    function renderizarCartoesNumeros(periodo) {
+      var fator = fatorPeriodoNumeros(periodo);
+      var container = document.getElementById('numeros-cartoes');
+      if (!container) { return; }
+      container.innerHTML = CARTOES_NUMEROS.map(function (c) {
+        var valor = c.escala ? formatarNumeroBr(c.valorBase * fator) : c.valorBase;
+        return '<div class="numeros-kpi">' +
+          '<div class="rotulo">' + c.rotulo + '</div>' +
+          '<div class="valor">' + valor + c.sufixo + '</div>' +
+          '<div class="delta ' + c.direcao + '">' + c.delta + ' vs. ' + rotuloPeriodoNumeros(periodo) + ' anterior</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function linhaTabelaNumerosHtml(linha, fator) {
+      var valorFmt = linha.texto ? linha.valor : (formatarNumeroBr(linha.escala ? linha.valor * fator : linha.valor) + (linha.sufixo || ''));
+      var deltaClasse = linha.direcao === 'up' ? 'color:var(--verde);' : (linha.direcao === 'down' ? 'color:var(--vermelho);' : 'color:var(--texto-secundario);');
+      return '<tr><td>' + linha.label + '</td><td>' + valorFmt + '</td><td style="' + deltaClasse + '">' + linha.delta + '</td></tr>';
+    }
+
+    function graficoNumerosHtml(grafico, fator) {
+      if (!grafico) { return ''; }
+      if (grafico.tipo === 'barras') { return svgBarrasNumeros(grafico.valores, grafico.cor || 'var(--laranja)', fator, grafico.escala); }
+      if (grafico.tipo === 'linha') { return svgLinhaNumeros(grafico.valores, grafico.cor || 'var(--ambar)'); }
+      if (grafico.tipo === 'duas-linhas') { return svgDuasLinhasNumeros(grafico.valoresA, grafico.valoresB, grafico.corA, grafico.corB); }
+      return '';
+    }
+
+    function renderizarAbaNumerosAtiva() {
+      var periodo = document.getElementById('numeros-periodo').value;
+      var fator = fatorPeriodoNumeros(periodo);
+      var grupo = GRUPOS_NUMEROS.filter(function (g) { return g.id === abaNumerosAtiva; })[0];
+      var destino = document.getElementById('numeros-conteudo');
+      if (!grupo || !destino) { return; }
+
+      _numerosLinhasAtuais = grupo.linhas;
+
+      var avisoHtml = grupo.aviso ? '<div class="numeros-aviso">⚠ ' + grupo.aviso + '</div>' : '';
+      var legendaHtml = grupo.legendaGrafico ? '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:6px 0 0;">' + grupo.legendaGrafico + '</p>' : '';
+
+      destino.innerHTML =
+        avisoHtml +
+        '<div class="numeros-secao">' +
+        '<div class="numeros-secao-header">' +
+        '<div><h3 class="numeros-secao-titulo">' + grupo.nome + '</h3></div>' +
+        '<button type="button" class="btn-csv-numeros" onclick="exportarCsvNumerosAtual()">Exportar CSV</button>' +
+        '</div>' +
+        '<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">' +
+        '<div>' + graficoNumerosHtml(grupo.grafico, fator) + legendaHtml + '</div>' +
+        '<div class="numeros-tabela-scroll" style="flex:1;min-width:240px;">' +
+        '<table><tr><th>Item</th><th>Valor</th><th>vs. período anterior</th></tr>' +
+        grupo.linhas.map(function (l) { return linhaTabelaNumerosHtml(l, fator); }).join('') +
+        '</table></div></div></div>';
+    }
+
+    function exportarCsvNumerosAtual() {
+      var periodo = document.getElementById('numeros-periodo').value;
+      var fator = fatorPeriodoNumeros(periodo);
+      var grupo = GRUPOS_NUMEROS.filter(function (g) { return g.id === abaNumerosAtiva; })[0];
+      if (!grupo) { return; }
+      var linhasCsv = ['Item;Valor;vs. período anterior;Aviso'];
+      linhasCsv.push('DADOS DE EXEMPLO -- nao representam numero real;;;');
+      _numerosLinhasAtuais.forEach(function (l) {
+        var valorFmt = l.texto ? l.valor : (formatarNumeroBr(l.escala ? l.valor * fator : l.valor) + (l.sufixo || ''));
+        var linha = [l.label, String(valorFmt), l.delta, ''].map(function (campo) {
+          return '"' + String(campo).replace(/"/g, '""') + '"';
+        }).join(';');
+        linhasCsv.push(linha);
+      });
+      var csv = linhasCsv.join('\r\n');
+      var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'numeros_' + grupo.id + '_' + periodo + '_exemplo.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function recarregarPainelNumeros() {
+      var periodo = document.getElementById('numeros-periodo').value;
+      return Promise.all([
+        chamarRpcOuExemplo('metricas_periodo', { p_periodo: periodo }, function () { return exemploMetricasPeriodo(periodo); }),
+        chamarRpcOuExemplo('usuarios_ativos_periodo', { p_periodo: periodo }, function () { return exemploUsuariosAtivosPeriodo(periodo); }),
+        chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, function () { return exemploDistribuicaoPagamentoAtual(); }),
+        chamarRpcOuExemplo('comparativo_tempo_treino', { p_periodo: periodo }, function () { return exemploComparativoTempoTreino(periodo); })
+      ]).then(function () {
+        renderizarCartoesNumeros(periodo);
+        renderizarAbaNumerosAtiva();
+      });
+    }
+
+    function inicializarPainelNumeros() {
+      construirAbasNumerosUmaVez();
+      return recarregarPainelNumeros();
     }
   </script>
 </body>
