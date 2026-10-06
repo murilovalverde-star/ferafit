@@ -348,6 +348,7 @@
               <h1 style="font-size:1.2rem;font-weight:800;margin:0;">Meus alunos</h1>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
+                <button type="button" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Aparelhos de carga</button>
                 <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
               </div>
             </div>
@@ -373,6 +374,8 @@
               </div>
               <div id="treino-base-form-view" style="display:none;"></div>
             </div>
+
+            <div id="aparelhos-carga-view" style="display:none;"></div>
           </div>
 
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
@@ -662,6 +665,8 @@
       document.getElementById('aluno-detalhe-view').style.display = 'none';
       var treinosBaseView = document.getElementById('treinos-base-view');
       if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
+      var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       limparTreinoFormResidual();
     }
 
@@ -901,6 +906,10 @@
       view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Novo aluno</h2>' + templateFormAluno();
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var treinosBaseView = document.getElementById('treinos-base-view');
+      if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
+      var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       view.style.display = 'block';
     }
 
@@ -1039,6 +1048,10 @@
       alunoAbertoId = fichaId;
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
+      var treinosBaseViewD = document.getElementById('treinos-base-view');
+      if (treinosBaseViewD) { treinosBaseViewD.style.display = 'none'; }
+      var aparelhosCargaViewD = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaViewD) { aparelhosCargaViewD.style.display = 'none'; }
       var view = document.getElementById('aluno-detalhe-view');
       view.style.display = 'block';
       view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
@@ -1420,11 +1433,194 @@
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       document.getElementById('treinos-base-view').style.display = 'block';
       document.getElementById('treino-base-form-view').style.display = 'none';
       document.getElementById('treinos-base-lista-view').style.display = 'block';
       limparTreinoFormResidual();
       carregarTreinosBase();
+    }
+
+    // =========================================================
+    // D055 (2026-10-06), parte 1 -- "Aparelhos de carga" (item 6.10).
+    // Pergunta, por exercicio de maquina/polia, se a carga e por
+    // ANILHA (a academia/personal encaixa os discos) ou por SELETOR
+    // (pino na pilha de peso) -- com 1o/ultimo peso da pilha opcionais
+    // quando for seletor. Visivel para Academia E Personal (decisao de
+    // Murilo: "informa os dois, e o APK do usuario puxa de quem estiver
+    // patrocinando" -- o caso de aluno vinculado aos dois fica com ele,
+    // nao decido isso aqui). NAO grava no Supabase -- a demanda e
+    // explicita ("ate la nada em producao", tabela ainda nao existe,
+    // Backend entrega na D122) -- fica so em localStorage, por conta
+    // logada (academia OU personal, cada uma ve e edita so a propria).
+    //
+    // Lista de candidatos (quais dos 190 exercicios sao maquina/polia
+    // com carga ajustavel) e PROVISORIA: pedi a lista oficial
+    // `equipVariavel` a Logica/App pelo Orquestrador (ver STATUS.md,
+    // P44) -- ate chegar, uso um criterio por palavra-chave no nome do
+    // exercicio, documentado aqui e avisado na propria tela.
+    // =========================================================
+
+    var PALAVRAS_CHAVE_APARELHO_CARGA = ['maquina', 'machine', 'smith', 'polia', 'hammer', 'cross',
+      'leg press', 'hack', 'graviton', 'pulley', 'pulldown', 'peck deck', 'voador', 'multiforca',
+      'aparelho', 'cadeira', 'mesa flexora', 'remada baixa', 'puxada'];
+    var EXCLUSOES_APARELHO_CARGA = ['sem assistencia'];
+
+    function semAcentoAparelhoCarga(s) {
+      return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function ehCandidatoAparelhoCarga(nome) {
+      var alvo = semAcentoAparelhoCarga(nome);
+      var inclui = PALAVRAS_CHAVE_APARELHO_CARGA.some(function (p) { return alvo.indexOf(p) !== -1; });
+      var exclui = EXCLUSOES_APARELHO_CARGA.some(function (p) { return alvo.indexOf(p) !== -1; });
+      return inclui && !exclui;
+    }
+
+    function chaveAparelhosCarga() {
+      return parceiroAtual ? ('aparelhosCarga_' + parceiroAtual.tipo + '_' + parceiroAtual.id) : null;
+    }
+
+    function carregarAparelhosCargaSalvos() {
+      var chave = chaveAparelhosCarga();
+      if (!chave) { return {}; }
+      try {
+        return JSON.parse(localStorage.getItem(chave) || '{}') || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function gravarAparelhosCargaSalvos(tudo) {
+      var chave = chaveAparelhosCarga();
+      if (!chave) { return; }
+      try {
+        localStorage.setItem(chave, JSON.stringify(tudo));
+      } catch (e) { /* localStorage indisponivel (modo privado etc.) -- ignora, nunca trava a tela */ }
+    }
+
+    function mostrarAparelhosCarga() {
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      document.getElementById('treinos-base-view').style.display = 'none';
+      limparTreinoFormResidual();
+      var view = document.getElementById('aparelhos-carga-view');
+      view.style.display = 'block';
+      view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      carregarCatalogoTreino().then(function () {
+        renderAparelhosCarga();
+      }).catch(function (erro) {
+        view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function linhaAparelhoCarga(ex, dadosSalvos, ultimaDaLinha) {
+      var tipo = dadosSalvos.tipo_carga || '';
+      var ativaAnilha = tipo === 'anilha'
+        ? 'background:var(--gradiente);color:#1a0f00;'
+        : 'background:transparent;color:var(--texto-secundario);';
+      var ativaSeletor = tipo === 'seletor'
+        ? 'background:var(--gradiente);color:#1a0f00;'
+        : 'background:transparent;color:var(--texto-secundario);';
+      var mostraPilha = tipo === 'seletor';
+      var primeiro = (dadosSalvos.primeiro_tijolo_kg != null) ? dadosSalvos.primeiro_tijolo_kg : '';
+      var ultimo = (dadosSalvos.ultimo_tijolo_kg != null) ? dadosSalvos.ultimo_tijolo_kg : '';
+      var borda = ultimaDaLinha ? '' : 'border-bottom:1px solid var(--card-border);';
+
+      var html = '<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;flex-wrap:wrap;' + borda + '">';
+      html += '<div style="flex:1;min-width:160px;"><span style="font-size:0.86rem;font-weight:700;display:block;">' + escaparHtmlAluno(ex.nome) + '</span><span style="font-size:0.72rem;color:var(--texto-secundario);">' + escaparHtmlAluno(ex.subgrupo || '') + '</span></div>';
+      html += '<div style="display:flex;border:1px solid var(--card-border);border-radius:999px;overflow:hidden;font-size:0.74rem;font-weight:700;flex-shrink:0;">';
+      html += '<button type="button" onclick="definirTipoCargaAparelho(\'' + ex.id + '\',\'anilha\')" style="border:none;padding:7px 14px;cursor:pointer;font-family:inherit;' + ativaAnilha + '">Anilha</button>';
+      html += '<button type="button" onclick="definirTipoCargaAparelho(\'' + ex.id + '\',\'seletor\')" style="border:none;padding:7px 14px;cursor:pointer;font-family:inherit;' + ativaSeletor + '">Seletor</button>';
+      html += '</div>';
+      if (mostraPilha) {
+        html += '<div style="display:flex;gap:8px;width:200px;flex-shrink:0;">';
+        html += '<div style="flex:1;"><label style="display:block;font-size:0.64rem;color:var(--texto-secundario);margin-bottom:3px;">1º peso (kg)</label><input type="number" min="0" step="0.5" id="ac-primeiro-' + ex.id + '" value="' + primeiro + '" placeholder="opcional" oninput="salvarPilhaAparelhoCarga(\'' + ex.id + '\')" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:8px;color:var(--texto);font-size:0.78rem;padding:6px 8px;font-family:inherit;"></div>';
+        html += '<div style="flex:1;"><label style="display:block;font-size:0.64rem;color:var(--texto-secundario);margin-bottom:3px;">Último peso (kg)</label><input type="number" min="0" step="0.5" id="ac-ultimo-' + ex.id + '" value="' + ultimo + '" placeholder="opcional" oninput="salvarPilhaAparelhoCarga(\'' + ex.id + '\')" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:8px;color:var(--texto);font-size:0.78rem;padding:6px 8px;font-family:inherit;"></div>';
+        html += '</div>';
+      } else {
+        html += '<div style="width:200px;flex-shrink:0;"></div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function renderAparelhosCarga() {
+      var salvos = carregarAparelhosCargaSalvos();
+      var candidatos = (catalogoTreinoCompleto || []).filter(function (ex) { return ehCandidatoAparelhoCarga(ex.nome); });
+
+      var porGrupo = {};
+      var ordemGrupos = [];
+      candidatos.forEach(function (ex) {
+        if (!porGrupo[ex.grupo]) { porGrupo[ex.grupo] = []; ordemGrupos.push(ex.grupo); }
+        porGrupo[ex.grupo].push(ex);
+      });
+
+      var html = '';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">';
+      html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0;">Aparelhos de carga</h2>';
+      html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos alunos</button>';
+      html += '</div>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.85rem;margin:0 0 8px;">Para cada aparelho de carga ajustável, diga se ele é de <strong>anilha</strong> (vocês encaixam os discos) ou de <strong>seletor</strong> (pino na pilha de peso) — isso ajuda o app a sugerir cargas certas para o aluno. O 1º e o último peso da pilha são opcionais, só para o seletor. Pode deixar em branco o que não souber agora.</p>';
+      html += '<p style="color:var(--ambar);font-size:0.78rem;margin:0 0 6px;">⚠ Lista provisória: enquanto a Lógica do app não confirma quais dos 190 exercícios têm carga ajustável de verdade, uso um critério próprio (palavras no nome do exercício) — pode faltar ou sobrar algum item aqui; isso é corrigido assim que a lista oficial chegar.</p>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.78rem;margin:0 0 16px;">Por enquanto isso fica salvo só neste navegador, nesta conta — ainda não sincroniza com a nuvem nem com o app. Quando o banco de dados estiver pronto para isso, o que você marcar aqui vai poder ser levado para lá.</p>';
+
+      ordemGrupos.forEach(function (grupo) {
+        html += '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--texto-secundario);font-weight:800;margin:18px 0 8px;">' + escaparHtmlAluno(grupo) + '</div>';
+        html += '<div style="border:1px solid var(--card-border);border-radius:16px;overflow:hidden;">';
+        porGrupo[grupo].forEach(function (ex, idx) {
+          html += linhaAparelhoCarga(ex, salvos[ex.id] || {}, idx === porGrupo[grupo].length - 1);
+        });
+        html += '</div>';
+      });
+
+      if (!ordemGrupos.length) {
+        html += '<p style="color:var(--texto-secundario);">Nenhum aparelho candidato encontrado no catálogo.</p>';
+      }
+
+      document.getElementById('aparelhos-carga-view').innerHTML = html;
+    }
+
+    function definirTipoCargaAparelho(exId, tipo) {
+      var salvos = carregarAparelhosCargaSalvos();
+      var atual = salvos[exId] || {};
+      var novoTipo = (atual.tipo_carga === tipo) ? '' : tipo; // clicar nela de novo desmarca
+
+      if (!novoTipo) {
+        delete salvos[exId];
+      } else {
+        var exInfo = null;
+        (catalogoTreinoCompleto || []).some(function (e) { if (e.id === exId) { exInfo = e; return true; } return false; });
+        var srcMotor = (mapaSrcPorIdCatalogo && exInfo) ? (mapaSrcPorIdCatalogo[exId] || null) : null;
+        salvos[exId] = {
+          tipo_carga: novoTipo,
+          primeiro_tijolo_kg: (novoTipo === 'seletor' && atual.primeiro_tijolo_kg != null) ? atual.primeiro_tijolo_kg : null,
+          ultimo_tijolo_kg: (novoTipo === 'seletor' && atual.ultimo_tijolo_kg != null) ? atual.ultimo_tijolo_kg : null,
+          src_motor: srcMotor,
+          atualizado_em: new Date().toISOString()
+        };
+      }
+      gravarAparelhosCargaSalvos(salvos);
+      renderAparelhosCarga();
+    }
+
+    function salvarPilhaAparelhoCarga(exId) {
+      var salvos = carregarAparelhosCargaSalvos();
+      var atual = salvos[exId];
+      if (!atual || atual.tipo_carga !== 'seletor') { return; }
+      var campoPrimeiro = document.getElementById('ac-primeiro-' + exId);
+      var campoUltimo = document.getElementById('ac-ultimo-' + exId);
+      var primeiro = (campoPrimeiro && campoPrimeiro.value !== '') ? parseFloat(campoPrimeiro.value) : NaN;
+      var ultimo = (campoUltimo && campoUltimo.value !== '') ? parseFloat(campoUltimo.value) : NaN;
+      atual.primeiro_tijolo_kg = isNaN(primeiro) ? null : primeiro;
+      atual.ultimo_tijolo_kg = isNaN(ultimo) ? null : ultimo;
+      atual.atualizado_em = new Date().toISOString();
+      salvos[exId] = atual;
+      gravarAparelhosCargaSalvos(salvos);
+      // nao chama renderAparelhosCarga() aqui de proposito -- re-render perderia o foco/cursor
+      // do campo enquanto a pessoa ainda esta digitando o peso.
     }
 
     function carregarTreinosBase() {
