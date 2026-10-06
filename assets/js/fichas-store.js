@@ -107,8 +107,22 @@
     "endereco", "contato_emergencia_nome", "contato_emergencia_telefone",
     "observacao", "contrato", "anamnese", "testes_fisicos",
     "tem_foto_inicial", "profissao", "redes_sociais", "preferencia_horario",
-    "dias_treino"
+    "dias_treino",
+    // D052/D106/A27 (migration 029, Caminho A) -- declaração do parceiro de
+    // que tem o consentimento do aluno para a anamnese. NUNCA incluir
+    // "data_declaracao" aqui -- é gravada pelo próprio banco (gatilho
+    // registra_declaracao_consentimento()), nunca pelo cliente.
+    "declaracao_consentimento_parceiro", "versao_termo_parceiro"
   ];
+
+  // Versão vigente do Termo do Parceiro (A27 da Jurídica) -- único lugar
+  // que decide esse valor; criarFicha()/atualizarFicha() sempre mandam
+  // este valor, nunca o que vier (ou não vier) da tela, pelo mesmo motivo
+  // que a Site nunca confia no cliente para a data da declaração.
+  var VERSAO_TERMO_PARCEIRO_ATUAL = "termo_parceiro_v1";
+
+  var MENSAGEM_CONSENTIMENTO_OBRIGATORIO =
+    "Marque a declaração de que você tem o consentimento do aluno para registrar os dados de saúde (anamnese) -- sem isso, a ficha não é salva (exigência do banco, migration 029).";
 
   function montarCorpoFicha(dados) {
     dados = dados || {};
@@ -198,11 +212,21 @@
     if (!nome) {
       return Promise.reject(new Error("Informe o nome do aluno."));
     }
+    if (!dados || dados.declaracao_consentimento_parceiro !== true) {
+      return Promise.reject(new Error(MENSAGEM_CONSENTIMENTO_OBRIGATORIO));
+    }
     return usuarioAtual().then(function (uid) {
       var corpo = montarCorpoFicha(dados);
       corpo.nome = nome;
       corpo[coluna] = parceiro.id;
       corpo.criado_por = uid;
+      // D052 (migration 029, Caminho A): toda gravação precisa das duas
+      // colunas -- já validamos declaracao_consentimento_parceiro acima;
+      // versao_termo_parceiro é sempre a constante desta camada, nunca o
+      // que veio de "dados". data_declaracao nunca é mandada -- o banco
+      // grava sozinho (gatilho).
+      corpo.declaracao_consentimento_parceiro = true;
+      corpo.versao_termo_parceiro = VERSAO_TERMO_PARCEIRO_ATUAL;
       return cliente.from("fichas_aluno_parceiro").insert(corpo).select("id").single()
         .then(function (resultado) {
           if (resultado.error) {
@@ -215,14 +239,28 @@
 
   // --- Atualização parcial (campos ausentes não são tocados) ---
   FichasStoreSupabase.atualizarFicha = function (fichaId, camposParciais) {
-    var cliente = clienteSupabase();
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    // D052 (migration 029, Caminho A): toda edição desta tela precisa
+    // reafirmar a declaração -- a própria migration re-carimba
+    // data_declaracao a cada UPDATE, então não dá pra editar "só o
+    // telefone" sem marcar a caixa de novo. Isto roda sempre, mesmo
+    // antes de montar o corpo, porque esta função só é chamada por
+    // salvarFormularioAluno() (parceiro.html), que sempre lê o estado
+    // atual da caixa.
+    if (!camposParciais || camposParciais.declaracao_consentimento_parceiro !== true) {
+      return Promise.reject(new Error(MENSAGEM_CONSENTIMENTO_OBRIGATORIO));
+    }
     var corpo = montarCorpoFicha(camposParciais);
     if (corpo.nome !== undefined && !corpo.nome.trim()) {
       return Promise.reject(new Error("O nome do aluno não pode ficar vazio."));
     }
-    if (Object.keys(corpo).length === 0) {
-      return Promise.resolve({ id: fichaId });
-    }
+    corpo.declaracao_consentimento_parceiro = true;
+    corpo.versao_termo_parceiro = VERSAO_TERMO_PARCEIRO_ATUAL;
     return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
       .then(function (resultado) {
         if (resultado.error) {

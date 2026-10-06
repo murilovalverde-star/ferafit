@@ -530,6 +530,7 @@
     </div>
   </div>
 
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
   <script src="assets/js/fichas-store.js"></script>
@@ -820,6 +821,10 @@
           '<div class="campo"><label for="af-preferencia-horario">Preferência de horário</label><input id="af-preferencia-horario" type="text"></div>' +
         '</div>' +
         templateDiasTreino() +
+        '<div class="cadastro-grupo">' +
+          '<div class="titulo-grupo">Consentimento</div>' +
+          '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:0.85rem;"><input id="af-consentimento" type="checkbox"> Declaro que tenho o consentimento do aluno para registrar estes dados de sa\u00fade (anamnese).</label>' +
+        '</div>' +
         '<p id="af-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 14px;"></p>' +
         '<div style="display:flex;gap:10px;">' +
           '<button type="button" class="botao-primario" id="af-botao-salvar" style="width:auto;padding:10px 20px;border:none;cursor:pointer;font-family:inherit;" onclick="salvarFormularioAluno()">Salvar</button>' +
@@ -927,7 +932,8 @@
         testes_fisicos: v('af-testes-fisicos'),
         tem_foto_inicial: c('af-tem-foto'),
         profissao: v('af-profissao'), redes_sociais: v('af-redes'), preferencia_horario: v('af-preferencia-horario'),
-        dias_treino: lerDiasTreinoFormulario()
+        dias_treino: lerDiasTreinoFormulario(),
+        declaracao_consentimento_parceiro: c('af-consentimento')
       };
     }
 
@@ -958,6 +964,13 @@
       var dados = lerFormularioAluno();
       var erroEl = document.getElementById('af-erro');
       erroEl.style.display = 'none';
+
+      if (!dados.declaracao_consentimento_parceiro) {
+        erroEl.textContent = 'Marque a declara\u00e7\u00e3o de que voc\u00ea tem o consentimento do aluno para registrar os dados de sa\u00fade (anamnese) -- sem isso, a ficha n\u00e3o \u00e9 salva.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
       var botao = document.getElementById('af-botao-salvar');
       botao.disabled = true;
       botao.textContent = 'Salvando…';
