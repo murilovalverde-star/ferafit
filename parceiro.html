@@ -348,7 +348,7 @@
               <h1 style="font-size:1.2rem;font-weight:800;margin:0;">Meus alunos</h1>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
-                <button type="button" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Aparelhos de carga</button>
+                <button type="button" id="btn-aparelhos-carga" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;display:none;">Aparelhos de carga</button>
                 <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
               </div>
             </div>
@@ -674,6 +674,10 @@
       parceiroAtual = { tipo: conta.tipo, id: conta.id };
       document.getElementById('meus-alunos-real').style.display = 'block';
       document.getElementById('alunos-busca').value = '';
+      // D057 (2026-10-06): "Aparelhos de carga" passa a ser so da Academia --
+      // decisao de Murilo de tirar essa opcao do Personal.
+      var btnAparelhosCarga = document.getElementById('btn-aparelhos-carga');
+      if (btnAparelhosCarga) { btnAparelhosCarga.style.display = (conta.tipo === 'academia') ? '' : 'none'; }
       carregarListaAlunos(1);
     }
 
@@ -1456,13 +1460,20 @@
     // Pergunta, por exercicio de maquina/polia, se a carga e por
     // ANILHA (a academia/personal encaixa os discos) ou por SELETOR
     // (pino na pilha de peso) -- com 1o/ultimo peso da pilha opcionais
-    // quando for seletor. Visivel para Academia E Personal (decisao de
-    // Murilo: "informa os dois, e o APK do usuario puxa de quem estiver
-    // patrocinando" -- o caso de aluno vinculado aos dois fica com ele,
-    // nao decido isso aqui). NAO grava no Supabase -- a demanda e
+    // quando for seletor. NAO grava no Supabase -- a demanda e
     // explicita ("ate la nada em producao", tabela ainda nao existe,
     // Backend entrega na D122) -- fica so em localStorage, por conta
-    // logada (academia OU personal, cada uma ve e edita so a propria).
+    // logada.
+    //
+    // D057 (2026-10-06): a tela passou a ser SO DA ACADEMIA -- decisao
+    // de Murilo ("quero retirar do Personal essa opcao; se o usuario
+    // tiver apenas o patrocinio do Personal, fica a cargo do usuario
+    // informar quando tiver contato com o exercicio"). O botao no
+    // cabecalho so aparece para Academia (renderMeusAlunos()), e as
+    // tres funcoes abaixo que leem/escrevem dado (mostrarAparelhosCarga,
+    // definirTipoCargaAparelho, salvarPilhaAparelhoCarga) tambem
+    // conferem o tipo da conta, em defesa -- nunca gravam nem abrem a
+    // tela pra conta de Personal, mesmo se chamadas por outro caminho.
     //
     // Lista de candidatos (quais dos 190 exercicios tem carga
     // ajustavel de verdade): D056 (2026-10-06) trouxe a lista oficial
@@ -1507,6 +1518,7 @@
     }
 
     function mostrarAparelhosCarga() {
+      if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
@@ -1589,6 +1601,7 @@
     }
 
     function definirTipoCargaAparelho(exId, tipo) {
+      if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
       var salvos = carregarAparelhosCargaSalvos();
       var atual = salvos[exId] || {};
       var novoTipo = (atual.tipo_carga === tipo) ? '' : tipo; // clicar nela de novo desmarca
@@ -1612,6 +1625,7 @@
     }
 
     function salvarPilhaAparelhoCarga(exId) {
+      if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
       var salvos = carregarAparelhosCargaSalvos();
       var atual = salvos[exId];
       if (!atual || atual.tipo_carga !== 'seletor') { return; }
