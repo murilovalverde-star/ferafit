@@ -538,6 +538,7 @@
   <script src="assets/js/parceiros-store.js"></script>
   <script src="assets/js/fichas-store.js"></script>
   <script src="assets/js/treinos-store.js"></script>
+  <script src="assets/js/carga-config-store.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -1458,12 +1459,9 @@
     // =========================================================
     // D055 (2026-10-06), parte 1 -- "Aparelhos de carga" (item 6.10).
     // Pergunta, por exercicio de maquina/polia, se a carga e por
-    // ANILHA (a academia/personal encaixa os discos) ou por SELETOR
-    // (pino na pilha de peso) -- com 1o/ultimo peso da pilha opcionais
-    // quando for seletor. NAO grava no Supabase -- a demanda e
-    // explicita ("ate la nada em producao", tabela ainda nao existe,
-    // Backend entrega na D122) -- fica so em localStorage, por conta
-    // logada.
+    // ANILHA (a academia encaixa os discos) ou por SELETOR (pino na
+    // pilha de peso) -- com 1o/ultimo peso da pilha opcionais quando
+    // for seletor.
     //
     // D057 (2026-10-06): a tela passou a ser SO DA ACADEMIA -- decisao
     // de Murilo ("quero retirar do Personal essa opcao; se o usuario
@@ -1484,10 +1482,26 @@
     // entre os dois arquivos e pelo NOME do exercicio (normalizado,
     // sem acento/caixa), nao pelo id -- os dois lados usam sistemas de
     // id diferentes (detalhe completo no STATUS.md, P45).
+    //
+    // D062 (2026-10-07): gravacao de verdade. A tela trocou o
+    // `localStorage` pela tabela real `academia_config_carga_exercicio`
+    // (migration 034, esquema lido so-leitura no arquivo
+    // `034_config_carga_por_exercicio_do_parceiro.sql` da Backend,
+    // apontado pelo Orquestrador) -- ver `assets/js/carga-config-store.js`
+    // para o CRUD. A chave real da tabela e (academia_id, exercicio_src)
+    // -- `exercicio_src` e o id do MOTOR do app (`mapaSrcPorIdCatalogo`),
+    // nunca o id do catalogo do site (`ex.id`, usado so para render e
+    // pros botoes da tela). `aparelhosCargaSalvosPorSrc` e o cache em
+    // memoria (carregado ao abrir a tela) usado so pra nao precisar
+    // reler o banco a cada clique -- cada gravacao/remocao de verdade
+    // ainda vai pro Supabase antes de atualizar esse cache.
     // =========================================================
 
+    var aparelhosCargaSalvosPorSrc = {}; // exercicioSrc (motor) -> linha real da tabela
+    var salvarPilhaAparelhoCargaTimeouts = {}; // exId -> timeout, debounce de 1o/ultimo peso
+
     function semAcentoAparelhoCarga(s) {
-      return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     }
 
     function ehCandidatoAparelhoCarga(nome) {
@@ -1495,26 +1509,11 @@
       return !!(info && info.equipVariavel);
     }
 
-    function chaveAparelhosCarga() {
-      return parceiroAtual ? ('aparelhosCarga_' + parceiroAtual.tipo + '_' + parceiroAtual.id) : null;
-    }
-
-    function carregarAparelhosCargaSalvos() {
-      var chave = chaveAparelhosCarga();
-      if (!chave) { return {}; }
-      try {
-        return JSON.parse(localStorage.getItem(chave) || '{}') || {};
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function gravarAparelhosCargaSalvos(tudo) {
-      var chave = chaveAparelhosCarga();
-      if (!chave) { return; }
-      try {
-        localStorage.setItem(chave, JSON.stringify(tudo));
-      } catch (e) { /* localStorage indisponivel (modo privado etc.) -- ignora, nunca trava a tela */ }
+    function mostrarErroAparelhosCarga(erro) {
+      var el = document.getElementById('aparelhos-carga-erro-salvar');
+      if (!el) { return; }
+      el.textContent = mensagemSeguraErro(erro);
+      el.style.display = 'block';
     }
 
     function mostrarAparelhosCarga() {
@@ -1527,7 +1526,14 @@
       var view = document.getElementById('aparelhos-carga-view');
       view.style.display = 'block';
       view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
-      carregarCatalogoTreino().then(function () {
+      Promise.all([
+        carregarCatalogoTreino(),
+        CargaConfigStore.listarMinhasConfigs(parceiroAtual.id)
+      ]).then(function (resultados) {
+        aparelhosCargaSalvosPorSrc = {};
+        (resultados[1] || []).forEach(function (linha) {
+          aparelhosCargaSalvosPorSrc[linha.exercicio_src] = linha;
+        });
         renderAparelhosCarga();
       }).catch(function (erro) {
         view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
@@ -1543,8 +1549,8 @@
         ? 'background:var(--gradiente);color:#1a0f00;'
         : 'background:transparent;color:var(--texto-secundario);';
       var mostraPilha = tipo === 'seletor';
-      var primeiro = (dadosSalvos.primeiro_tijolo_kg != null) ? dadosSalvos.primeiro_tijolo_kg : '';
-      var ultimo = (dadosSalvos.ultimo_tijolo_kg != null) ? dadosSalvos.ultimo_tijolo_kg : '';
+      var primeiro = (dadosSalvos.primeiro_peso != null) ? dadosSalvos.primeiro_peso : '';
+      var ultimo = (dadosSalvos.ultimo_peso != null) ? dadosSalvos.ultimo_peso : '';
       var borda = ultimaDaLinha ? '' : 'border-bottom:1px solid var(--card-border);';
 
       var html = '<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;flex-wrap:wrap;' + borda + '">';
@@ -1566,7 +1572,6 @@
     }
 
     function renderAparelhosCarga() {
-      var salvos = carregarAparelhosCargaSalvos();
       var candidatos = (catalogoTreinoCompleto || []).filter(function (ex) { return ehCandidatoAparelhoCarga(ex.nome); });
 
       var porGrupo = {};
@@ -1582,13 +1587,16 @@
       html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos alunos</button>';
       html += '</div>';
       html += '<p style="color:var(--texto-secundario);font-size:0.85rem;margin:0 0 8px;">Para cada aparelho de carga ajustável, diga se ele é de <strong>anilha</strong> (vocês encaixam os discos) ou de <strong>seletor</strong> (pino na pilha de peso) — isso ajuda o app a sugerir cargas certas para o aluno. O 1º e o último peso da pilha são opcionais, só para o seletor. Pode deixar em branco o que não souber agora.</p>';
-      html += '<p style="color:var(--texto-secundario);font-size:0.78rem;margin:0 0 16px;">Por enquanto isso fica salvo só neste navegador, nesta conta — ainda não sincroniza com a nuvem nem com o app. Quando o banco de dados estiver pronto para isso, o que você marcar aqui vai poder ser levado para lá.</p>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.78rem;margin:0 0 8px;">Isso já é gravado de verdade na conta da sua academia — cada escolha salva sozinha, sem precisar de um botão "Salvar" separado.</p>';
+      html += '<p id="aparelhos-carga-erro-salvar" style="color:#c0392b;font-size:0.78rem;margin:0 0 16px;display:none;"></p>';
 
       ordemGrupos.forEach(function (grupo) {
         html += '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--texto-secundario);font-weight:800;margin:18px 0 8px;">' + escaparHtmlAluno(grupo) + '</div>';
         html += '<div style="border:1px solid var(--card-border);border-radius:16px;overflow:hidden;">';
         porGrupo[grupo].forEach(function (ex, idx) {
-          html += linhaAparelhoCarga(ex, salvos[ex.id] || {}, idx === porGrupo[grupo].length - 1);
+          var src = mapaSrcPorIdCatalogo ? mapaSrcPorIdCatalogo[ex.id] : null;
+          var dadosSalvos = (src && aparelhosCargaSalvosPorSrc[src]) || {};
+          html += linhaAparelhoCarga(ex, dadosSalvos, idx === porGrupo[grupo].length - 1);
         });
         html += '</div>';
       });
@@ -1602,44 +1610,64 @@
 
     function definirTipoCargaAparelho(exId, tipo) {
       if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
-      var salvos = carregarAparelhosCargaSalvos();
-      var atual = salvos[exId] || {};
+      var exInfo = null;
+      (catalogoTreinoCompleto || []).some(function (e) { if (e.id === exId) { exInfo = e; return true; } return false; });
+      var srcMotor = (mapaSrcPorIdCatalogo && exInfo) ? (mapaSrcPorIdCatalogo[exId] || null) : null;
+      if (!srcMotor) {
+        mostrarErroAparelhosCarga(new Error('Este exercício não tem correspondência no motor do app -- não é possível gravar.'));
+        return;
+      }
+      var atual = aparelhosCargaSalvosPorSrc[srcMotor] || {};
       var novoTipo = (atual.tipo_carga === tipo) ? '' : tipo; // clicar nela de novo desmarca
 
+      var promessa;
       if (!novoTipo) {
-        delete salvos[exId];
+        promessa = CargaConfigStore.removerConfig(parceiroAtual.id, srcMotor).then(function () {
+          delete aparelhosCargaSalvosPorSrc[srcMotor];
+        });
       } else {
-        var exInfo = null;
-        (catalogoTreinoCompleto || []).some(function (e) { if (e.id === exId) { exInfo = e; return true; } return false; });
-        var srcMotor = (mapaSrcPorIdCatalogo && exInfo) ? (mapaSrcPorIdCatalogo[exId] || null) : null;
-        salvos[exId] = {
-          tipo_carga: novoTipo,
-          primeiro_tijolo_kg: (novoTipo === 'seletor' && atual.primeiro_tijolo_kg != null) ? atual.primeiro_tijolo_kg : null,
-          ultimo_tijolo_kg: (novoTipo === 'seletor' && atual.ultimo_tijolo_kg != null) ? atual.ultimo_tijolo_kg : null,
-          src_motor: srcMotor,
-          atualizado_em: new Date().toISOString()
-        };
+        var primeiroAtual = (novoTipo === 'seletor') ? atual.primeiro_peso : null;
+        var ultimoAtual = (novoTipo === 'seletor') ? atual.ultimo_peso : null;
+        promessa = CargaConfigStore.salvarConfig(parceiroAtual.id, srcMotor, novoTipo, primeiroAtual, ultimoAtual).then(function (linha) {
+          aparelhosCargaSalvosPorSrc[srcMotor] = linha;
+        });
       }
-      gravarAparelhosCargaSalvos(salvos);
-      renderAparelhosCarga();
+      promessa.then(function () {
+        renderAparelhosCarga();
+      }).catch(function (erro) {
+        mostrarErroAparelhosCarga(erro);
+      });
     }
 
     function salvarPilhaAparelhoCarga(exId) {
       if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
-      var salvos = carregarAparelhosCargaSalvos();
-      var atual = salvos[exId];
-      if (!atual || atual.tipo_carga !== 'seletor') { return; }
-      var campoPrimeiro = document.getElementById('ac-primeiro-' + exId);
-      var campoUltimo = document.getElementById('ac-ultimo-' + exId);
-      var primeiro = (campoPrimeiro && campoPrimeiro.value !== '') ? parseFloat(campoPrimeiro.value) : NaN;
-      var ultimo = (campoUltimo && campoUltimo.value !== '') ? parseFloat(campoUltimo.value) : NaN;
-      atual.primeiro_tijolo_kg = isNaN(primeiro) ? null : primeiro;
-      atual.ultimo_tijolo_kg = isNaN(ultimo) ? null : ultimo;
-      atual.atualizado_em = new Date().toISOString();
-      salvos[exId] = atual;
-      gravarAparelhosCargaSalvos(salvos);
-      // nao chama renderAparelhosCarga() aqui de proposito -- re-render perderia o foco/cursor
-      // do campo enquanto a pessoa ainda esta digitando o peso.
+      if (salvarPilhaAparelhoCargaTimeouts[exId]) {
+        clearTimeout(salvarPilhaAparelhoCargaTimeouts[exId]);
+      }
+      // debounce de 600ms -- evita um UPSERT por tecla digitada; nao
+      // chama renderAparelhosCarga() depois de salvar, de proposito,
+      // pra nunca perder o foco/cursor do campo enquanto a pessoa
+      // ainda esta digitando o peso.
+      salvarPilhaAparelhoCargaTimeouts[exId] = setTimeout(function () {
+        delete salvarPilhaAparelhoCargaTimeouts[exId];
+        var exInfo = null;
+        (catalogoTreinoCompleto || []).some(function (e) { if (e.id === exId) { exInfo = e; return true; } return false; });
+        var srcMotor = (mapaSrcPorIdCatalogo && exInfo) ? (mapaSrcPorIdCatalogo[exId] || null) : null;
+        if (!srcMotor) { return; }
+        var atual = aparelhosCargaSalvosPorSrc[srcMotor];
+        if (!atual || atual.tipo_carga !== 'seletor') { return; }
+        var campoPrimeiro = document.getElementById('ac-primeiro-' + exId);
+        var campoUltimo = document.getElementById('ac-ultimo-' + exId);
+        var primeiro = (campoPrimeiro && campoPrimeiro.value !== '') ? parseFloat(campoPrimeiro.value) : NaN;
+        var ultimo = (campoUltimo && campoUltimo.value !== '') ? parseFloat(campoUltimo.value) : NaN;
+        var primeiroFinal = isNaN(primeiro) ? null : primeiro;
+        var ultimoFinal = isNaN(ultimo) ? null : ultimo;
+        CargaConfigStore.salvarConfig(parceiroAtual.id, srcMotor, 'seletor', primeiroFinal, ultimoFinal).then(function (linha) {
+          aparelhosCargaSalvosPorSrc[srcMotor] = linha;
+        }).catch(function (erro) {
+          mostrarErroAparelhosCarga(erro);
+        });
+      }, 600);
     }
 
     function carregarTreinosBase() {
