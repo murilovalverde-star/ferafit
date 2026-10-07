@@ -110,6 +110,16 @@
           <span style="font-size:0.74rem;color:var(--texto-secundario);">vs. período anterior equivalente</span>
         </div>
 
+        <div id="numeros-livre-datas" class="numeros-livre-datas">
+          <label>De
+            <input type="date" id="numeros-livre-inicio" onchange="recarregarPainelNumeros()">
+          </label>
+          <label>até
+            <input type="date" id="numeros-livre-fim" onchange="recarregarPainelNumeros()">
+          </label>
+          <span id="numeros-livre-aviso" class="numeros-livre-aviso"></span>
+        </div>
+
         <div id="numeros-cartoes" style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 20px;"></div>
 
         <div class="admin-tabs" id="numeros-abas"></div>
@@ -985,17 +995,19 @@
     }
 
     // ---------------------------------------------------------
-    // D060 -- limites de data (periodo atual + periodo anterior
+    // D060/D061 -- limites de data (periodo atual + periodo anterior
     // equivalente), mesma logica de public.periodo_bounds() na 036
     // (date_trunc por semana ISO -- segunda a domingo -- mes,
     // bimestre, trimestre, semestre, ano), calculada aqui porque é o
     // próprio painel que compara (a função no banco só soma um
-    // intervalo por vez). "livre" devolve null -- esta tela ainda não
-    // tem campos de data para o usuário escolher um intervalo, então
-    // fica em exemplo até esse seletor existir (lacuna registrada no
-    // STATUS).
+    // intervalo por vez). "livre" (D061) usa as duas datas escolhidas
+    // pelo usuário (livreInicio/livreFim, "YYYY-MM-DD") -- o período
+    // anterior equivalente é a mesma duração em dias, imediatamente
+    // antes do início escolhido. Sem as duas datas (ainda não
+    // escolhidas, ou fim antes do início), devolve null, e a tela cai
+    // no dado de exemplo, como sempre.
     // ---------------------------------------------------------
-    function calcularLimitesNumeros(periodo, agora) {
+    function calcularLimitesNumeros(periodo, agora, livreInicio, livreFim) {
       agora = agora || new Date();
       var ano = agora.getUTCFullYear();
       var mes = agora.getUTCMonth();
@@ -1040,7 +1052,17 @@
         var fimAnt = ymd(ano - 1, 11, 31);
         return { inicio: fmt(ini), fim: fmt(fim), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
       }
-      return null; // 'livre' -- sem seletor de datas ainda
+      if (periodo === 'livre') {
+        if (!livreInicio || !livreFim) { return null; } // datas ainda nao escolhidas
+        var iniD = new Date(livreInicio + 'T00:00:00Z');
+        var fimD = new Date(livreFim + 'T00:00:00Z');
+        if (isNaN(iniD.getTime()) || isNaN(fimD.getTime()) || fimD.getTime() < iniD.getTime()) { return null; } // fim antes do inicio, ou data invalida
+        var duracaoDias = Math.round((fimD.getTime() - iniD.getTime()) / 86400000) + 1;
+        var fimAnt = new Date(iniD.getTime() - 86400000);
+        var iniAnt = new Date(fimAnt.getTime() - (duracaoDias - 1) * 86400000);
+        return { inicio: fmt(iniD), fim: fmt(fimD), inicioAnterior: fmt(iniAnt), fimAnterior: fmt(fimAnt) };
+      }
+      return null;
     }
 
     function deltaPercentualNumeros(atual, anterior) {
@@ -1566,13 +1588,48 @@
       URL.revokeObjectURL(url);
     }
 
+    // ---------------------------------------------------------
+    // D061 -- mostra/esconde os dois campos de data do "Intervalo
+    // livre" (só existem quando o período escolhido é "livre"), e
+    // pré-preenche com os últimos 30 dias na primeira vez que o
+    // usuário escolhe "livre" (sem isso, a tela ficaria vazia até ele
+    // digitar as duas datas). Devolve {inicio, fim} (strings
+    // "YYYY-MM-DD", ou null se o período não for "livre") para
+    // calcularLimitesNumeros().
+    // ---------------------------------------------------------
+    function prepararDatasLivreNumeros(periodo) {
+      var divLivre = document.getElementById('numeros-livre-datas');
+      var inputIni = document.getElementById('numeros-livre-inicio');
+      var inputFim = document.getElementById('numeros-livre-fim');
+      var aviso = document.getElementById('numeros-livre-aviso');
+      if (!divLivre || !inputIni || !inputFim) { return null; }
+
+      divLivre.classList.toggle('visivel', periodo === 'livre');
+      if (periodo !== 'livre') { if (aviso) { aviso.textContent = ''; } return null; }
+
+      if (!inputIni.value && !inputFim.value) {
+        var hoje = new Date();
+        var iniDefault = new Date(hoje.getTime() - 29 * 86400000);
+        inputFim.value = hoje.toISOString().slice(0, 10);
+        inputIni.value = iniDefault.toISOString().slice(0, 10);
+      }
+
+      var inicio = inputIni.value || null;
+      var fim = inputFim.value || null;
+      if (aviso) {
+        aviso.textContent = (inicio && fim && fim >= inicio) ? '' : 'Escolha início e fim (fim não pode ser antes do início) para ver o intervalo real.';
+      }
+      return { inicio: inicio, fim: fim };
+    }
+
     function recarregarPainelNumeros() {
       var periodo = document.getElementById('numeros-periodo').value;
-      var limites = calcularLimitesNumeros(periodo);
+      var datasLivre = prepararDatasLivreNumeros(periodo);
+      var limites = calcularLimitesNumeros(periodo, null, datasLivre && datasLivre.inicio, datasLivre && datasLivre.fim);
 
       var chamadas;
       if (!limites) {
-        // 'livre' -- sem campos de data na tela ainda (lacuna registrada no STATUS) -- fica tudo exemplo.
+        // sem funcao real aplicavel (periodo != 'livre' nunca cai aqui; 'livre' sem as duas datas escolhidas ainda) -- fica tudo exemplo.
         chamadas = [
           Promise.resolve({ ehReal: false, dados: exemploMetricasPeriodo() }),
           Promise.resolve({ ehReal: false, dados: exemploMetricasPeriodo() }),

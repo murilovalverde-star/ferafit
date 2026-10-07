@@ -2440,3 +2440,36 @@ footer.site-footer a:hover {
 @media (max-width: 640px) {
   .numeros-kpi { min-width: 128px; padding: 12px 14px; }
 }
+
+/* D061 -- seletor de datas do "Intervalo livre" (painel de Numeros) */
+.numeros-livre-datas {
+  display: none;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 6px;
+  font-size: 0.74rem;
+  color: var(--texto-secundario);
+}
+
+.numeros-livre-datas.visivel { display: flex; }
+
+.numeros-livre-datas input[type="date"] {
+  margin-left: 4px;
+  max-width: 140px;
+  background: var(--card);
+  color: var(--texto);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 0.74rem;
+}
+
+.numeros-livre-aviso {
+  color: var(--ambar);
+}
+
+@media (max-width: 640px) {
+  .numeros-livre-datas input[type="date"] { max-width: 118px; }
+}
