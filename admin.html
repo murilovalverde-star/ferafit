@@ -979,6 +979,28 @@
     var abaNumerosAtiva = 'usuarios';
     var _numerosLinhasAtuais = []; // pra exportar CSV da aba visivel
     var _numerosDadosReaisAtuais = null; // resultado da ultima recarregarPainelNumeros()
+    var _mapaNomePorSrcMotorNumeros = null;
+    var _mapaNomePorSrcMotorNumerosPromise = null;
+
+    // ---------------------------------------------------------
+    // D063 -- nome amigavel do exercicio pra linha "Exercicio mais
+    // feito" (exercicios_mais_feitos_periodo devolve exercicio_src,
+    // texto livre do motor -- comentario da propria 037 pede pro
+    // Site mapear com o catalogo, igual parceiro.html ja faz com
+    // mapaPorSrcMotor). So precisa do mapa, nao do catalogo inteiro.
+    // ---------------------------------------------------------
+    function carregarMapaNomesExerciciosNumeros() {
+      if (_mapaNomePorSrcMotorNumerosPromise) { return _mapaNomePorSrcMotorNumerosPromise; }
+      _mapaNomePorSrcMotorNumerosPromise = fetch('assets/data/MAPA_ID_MOTOR_PARA_CATALOGO_190.json')
+        .then(function (r) { if (!r.ok) { throw new Error('mapa'); } return r.json(); })
+        .then(function (lista) {
+          _mapaNomePorSrcMotorNumeros = {};
+          lista.forEach(function (m) { _mapaNomePorSrcMotorNumeros[m.srcMotor] = m.nomeOficialSite; });
+          return _mapaNomePorSrcMotorNumeros;
+        })
+        .catch(function () { _mapaNomePorSrcMotorNumeros = {}; return _mapaNomePorSrcMotorNumeros; });
+      return _mapaNomePorSrcMotorNumerosPromise;
+    }
 
     function fatorPeriodoNumeros(periodo) {
       var fatores = { dia: 0.035, semana: 0.25, mes: 1, bimestre: 2, trimestre: 3, semestre: 6, ano: 12, livre: 1.5 };
@@ -992,6 +1014,27 @@
 
     function formatarNumeroBr(n) {
       return Math.round(n).toLocaleString('pt-BR');
+    }
+
+    function normalizarTextoNumeros(s) {
+      return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    // ---------------------------------------------------------
+    // D063 -- anuncios_por_fonte_periodo() devolve "fonte" como
+    // texto livre do app (comentario da 037: "admob/casa/nenhum,
+    // texto livre do app"). Nao consegui confirmar com o App os
+    // valores exatos que o evento manda -- por isso agrupo de forma
+    // tolerante (contem "admob"/"google" -> google; contem "casa"
+    // -> casa; qualquer outra coisa, incluindo "nenhum"/
+    // "nao_informada", cai em sem_anuncio). Ponto para confirmar com
+    // o App, registrado no STATUS.
+    // ---------------------------------------------------------
+    function classificarFonteAnuncio(fonteBruta) {
+      var f = normalizarTextoNumeros(fonteBruta);
+      if (f.indexOf('admob') !== -1 || f.indexOf('google') !== -1) { return 'google'; }
+      if (f.indexOf('casa') !== -1) { return 'casa'; }
+      return 'sem_anuncio';
     }
 
     // ---------------------------------------------------------
@@ -1193,13 +1236,70 @@
         var pct = (diferenca / escolhido) * 100;
         var faixa = pct < -20 ? 'muito_abaixo' : (pct > 20 ? 'acima' : 'perto');
         linhas.push({
-          sessao_id: i, aluno_id: 'exemplo-' + i, tempo_escolhido_min: escolhido,
+          sessao_id: i, tempo_escolhido_min: escolhido,
           duracao_real_min: Math.round(real * 10) / 10, diferenca_min: Math.round(diferenca * 10) / 10,
           diferenca_pct: Math.round(pct * 10) / 10, faixa: faixa,
           num_exercicios: 5 + (i % 7), divisao: divisoes[i % divisoes.length]
         });
       }
       return linhas;
+    }
+
+    // D063 -- exemplos no formato exato das 13 funcoes novas da
+    // migration 037 (fase2/sql/037_lacunas_painel_numeros_e_seguranca_d054.sql).
+    function exemploRetencaoCohortPeriodo() {
+      return { cohort_total: 420, retidos_semana2: 256, pct_retidos_semana2: 61, retidos_mes2: 185, pct_retidos_mes2: 44 };
+    }
+    function exemploDivisaoPeriodo() {
+      return [
+        { divisao: 'ABC', total: 1204 }, { divisao: 'AB', total: 842 },
+        { divisao: 'ABCDE', total: 390 }, { divisao: 'Full Body', total: 512 }
+      ];
+    }
+    function exemploFrequenciaEscolhidaXReal() {
+      return { usuarios_considerados: 2840, media_frequencia_escolhida: 4.2, media_frequencia_real_semanal: 3.6 };
+    }
+    function exemploExerciciosMaisFeitos() {
+      return [
+        { exercicio_src: 'Supino reto (exemplo)', total_series: 980, total_sessoes_distintas: 310 },
+        { exercicio_src: 'Agachamento (exemplo)', total_series: 860, total_sessoes_distintas: 290 }
+      ];
+    }
+    function exemploProgressaoMediaCarga() {
+      return { pares_aluno_exercicio: 640, carga_media_inicio_kg: 42.5, carga_media_fim_kg: 44.1, progressao_media_pct: 3.8 };
+    }
+    function exemploMetaCardioPeriodo() {
+      return { usuarios_com_meta_definida: 1900, usuarios_fizeram_cardio: 2340, usuarios_bateram_meta: 1102, pct_bateram_meta: 58 };
+    }
+    function exemploAnunciosPorFontePeriodo() {
+      return [
+        { fonte: 'admob', exibicoes: 8420, segundos_total: 8420 * 38 },
+        { fonte: 'casa', exibicoes: 3190, segundos_total: 3190 * 32 },
+        { fonte: 'nenhum', exibicoes: 1780, segundos_total: 0 }
+      ];
+    }
+    function exemploPctConsentimentoAds() {
+      return { usuarios_com_registro: 2600, usuarios_aceitaram: 1222, pct_aceitaram: 47 };
+    }
+    function exemploMedalhasPeriodo() {
+      return [{ medalha: 'exemplo-1', total: 380 }, { medalha: 'exemplo-2', total: 232 }];
+    }
+    function exemploTourPeriodo() {
+      return { concluiram: 1840, pularam: 290, pct_concluiram: 86.4 };
+    }
+    function exemploFunilAtivacaoPeriodo() {
+      return { cadastrados: 820, concluiram_tour: 610, fizeram_primeiro_treino: 480, treinaram_segunda_semana: 310 };
+    }
+    function exemploDistribuicaoPagamentoSerie() {
+      var linhas2 = [];
+      var hoje = new Date();
+      for (var j = 6; j >= 0; j--) {
+        var dia = new Date(hoje.getTime() - j * 86400000).toISOString().slice(0, 10);
+        linhas2.push({ dia: dia, situacao: 'gratis', total: 2000 + j * 10 });
+        linhas2.push({ dia: dia, situacao: 'pro', total: 900 + j * 5 });
+        linhas2.push({ dia: dia, situacao: 'patrocinado', total: 160 + j });
+      }
+      return linhas2;
     }
 
     // ---------------------------------------------------------
@@ -1260,7 +1360,7 @@
       { rotulo: 'Ativos no período', valorBase: 3248, escala: true, sufixo: '', delta: '+12%', direcao: 'up', fonte: 'usuarios_ativos_periodo' },
       { rotulo: 'Treinos concluídos', valorBase: 18902, escala: true, sufixo: '', delta: '+7%', direcao: 'up', fonte: 'metricas_periodo', campo: 'treinos_concluidos' },
       { rotulo: 'Duração média', valorBase: 47, escala: false, sufixo: ' min', delta: '-3%', direcao: 'down', fonte: 'metricas_periodo', campo: 'duracao_media' },
-      { rotulo: 'Retenção 2ª semana', valorBase: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: null },
+      { rotulo: 'Retenção 2ª semana', valorBase: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: 'retencao_cohort_periodo', campo: 'pct_retidos_semana2' },
       { rotulo: 'Tempo médio de anúncio', valorBase: 38, escala: false, sufixo: ' s', delta: '-6%', direcao: 'down', fonte: 'metricas_periodo', campo: 'tempo_medio_anuncio', aproximado: true }
     ];
 
@@ -1274,6 +1374,7 @@
     var GRUPOS_NUMEROS = [
       {
         id: 'usuarios', nome: 'Usuários', cor: 'var(--laranja)',
+        aviso: 'Retenção de 2ª semana/2º mês conta cadastros do próprio período -- cadastros muito recentes ainda não tiveram tempo de "voltar" e puxam a taxa para baixo (característica de retencao_cohort_periodo, não é bug). Para a retenção de 2º mês ficar estável, escolha períodos com pelo menos 60 dias de distância de hoje.',
         grafico: { tipo: 'barras', valores: [120, 180, 140, 210, 260, 230, 300], escala: true },
         linhas: [
           { label: 'Cadastros novos', valor: 1240, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cadastros_novos' },
@@ -1281,24 +1382,24 @@
           { label: 'Grátis', valor: 2102, escala: true, sufixo: '', delta: '+4%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'gratis', semComparacao: true },
           { label: 'PRO', valor: 980, escala: true, sufixo: '', delta: '+18%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'pro', semComparacao: true },
           { label: 'Patrocinado (parceiro)', valor: 166, escala: true, sufixo: '', delta: '+22%', direcao: 'up', fonte: 'distribuicao_pagamento_atual', campo: 'patrocinado', semComparacao: true },
-          { label: 'Retenção 2ª semana', valor: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: null },
-          { label: 'Retenção 2º mês', valor: 44, escala: false, sufixo: '%', delta: '+2 p.p.', direcao: 'up', fonte: null }
+          { label: 'Retenção 2ª semana', valor: 61, escala: false, sufixo: '%', delta: '+4 p.p.', direcao: 'up', fonte: 'retencao_cohort_periodo', campo: 'pct_retidos_semana2' },
+          { label: 'Retenção 2º mês', valor: 44, escala: false, sufixo: '%', delta: '+2 p.p.', direcao: 'up', fonte: 'retencao_cohort_periodo', campo: 'pct_retidos_mes2' }
         ]
       },
       {
         id: 'treino', nome: 'Treino', cor: 'var(--ambar)',
         grafico: { tipo: 'linha', valores: [38, 41, 44, 43, 47, 46, 49], escala: false },
         linhas: [
-          { label: 'Divisão ABC (mais usada)', valor: 1204, escala: true, sufixo: ' usuários', delta: '+6%', direcao: 'up', fonte: null },
-          { label: 'Divisão AB', valor: 842, escala: true, sufixo: ' usuários', delta: '-2%', direcao: 'down', fonte: null },
-          { label: 'Divisão ABCDE', valor: 390, escala: true, sufixo: ' usuários', delta: '+11%', direcao: 'up', fonte: null },
-          { label: 'Full Body', valor: 512, escala: true, sufixo: ' usuários', delta: '+4%', direcao: 'up', fonte: null },
-          { label: 'Frequência escolhida (média)', valor: '4,2x/semana', texto: true, delta: '+0,1', direcao: 'up', fonte: null },
-          { label: 'Frequência real (média)', valor: '3,6x/semana', texto: true, delta: '-0,2', direcao: 'down', fonte: null },
+          { label: 'Divisão ABC (mais usada)', valor: 1204, escala: true, sufixo: ' usuários', delta: '+6%', direcao: 'up', fonte: 'usuarios_distintos_por_divisao_periodo', campo: 'ABC' },
+          { label: 'Divisão AB', valor: 842, escala: true, sufixo: ' usuários', delta: '-2%', direcao: 'down', fonte: 'usuarios_distintos_por_divisao_periodo', campo: 'AB' },
+          { label: 'Divisão ABCDE', valor: 390, escala: true, sufixo: ' usuários', delta: '+11%', direcao: 'up', fonte: 'usuarios_distintos_por_divisao_periodo', campo: 'ABCDE' },
+          { label: 'Full Body', valor: 512, escala: true, sufixo: ' usuários', delta: '+4%', direcao: 'up', fonte: 'usuarios_distintos_por_divisao_periodo', campo: 'Full Body' },
+          { label: 'Frequência escolhida (média)', valor: '4,2x/semana', texto: true, delta: '+0,1', direcao: 'up', fonte: 'frequencia_escolhida_x_real_periodo', campo: 'media_frequencia_escolhida', casasDecimais: 1, sufixo: 'x/semana' },
+          { label: 'Frequência real (média)', valor: '3,6x/semana', texto: true, delta: '-0,2', direcao: 'down', fonte: 'frequencia_escolhida_x_real_periodo', campo: 'media_frequencia_real_semanal', casasDecimais: 1, sufixo: 'x/semana' },
           { label: 'Duração média do treino', valor: '47 min', texto: true, delta: '-3%', direcao: 'down', fonte: 'metricas_periodo', campo: 'duracao_media' },
           { label: 'Treinos abandonados no meio', valor: 212, escala: true, sufixo: '', delta: '+5%', direcao: 'down', fonte: 'metricas_periodo', campo: 'treinos_abandonados' },
-          { label: 'Exercício mais feito', valor: 'Supino reto (exemplo)', texto: true, delta: '—', direcao: '', fonte: null },
-          { label: 'Evolução média de carga no período', valor: '+3,8%', texto: true, delta: '—', direcao: '', fonte: null }
+          { label: 'Exercício mais feito', valor: 'Supino reto (exemplo)', texto: true, delta: '—', direcao: '', fonte: 'exercicios_mais_feitos_periodo', semComparacaoMsg: 'ranking do período, sem comparação' },
+          { label: 'Evolução média de carga no período', valor: '+3,8%', texto: true, delta: '—', direcao: '', fonte: 'progressao_media_carga_periodo', campo: 'progressao_media_pct', casasDecimais: 1, sufixo: '%', comSinal: true, semComparacaoMsg: 'já compara início x fim do próprio período' }
         ]
       },
       {
@@ -1321,19 +1422,19 @@
         grafico: { tipo: 'barras', valores: [60, 75, 50, 90, 82, 95, 70], escala: false, cor: 'var(--ambar)' },
         linhas: [
           { label: 'Minutos de cardio por semana (média)', valor: '74 min', texto: true, delta: '+8%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cardio_media_semanal', aproximado: true },
-          { label: '% que bate a meta semanal', valor: '58%', texto: true, delta: '+5 p.p.', direcao: 'up', fonte: null },
-          { label: 'Usuários que fazem cardio no período', valor: 2340, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: null }
+          { label: '% que bate a meta semanal', valor: '58%', texto: true, delta: '+5 p.p.', direcao: 'up', fonte: 'meta_cardio_periodo', campo: 'pct_bateram_meta', casasDecimais: 0, sufixo: '%' },
+          { label: 'Usuários que fazem cardio no período', valor: 2340, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'meta_cardio_periodo', campo: 'usuarios_fizeram_cardio' }
         ]
       },
       {
         id: 'anuncios', nome: 'Anúncios', cor: 'var(--vermelho)',
         grafico: { tipo: 'barras', valores: [12, 18, 9, 22, 16, 20, 14], escala: false, cor: 'var(--vermelho)' },
         linhas: [
-          { label: 'Anúncio do Google exibido', valor: 8420, escala: true, sufixo: '', delta: '+14%', direcao: 'up', fonte: null },
-          { label: 'Anúncio da casa exibido', valor: 3190, escala: true, sufixo: '', delta: '+6%', direcao: 'up', fonte: null },
-          { label: 'Sem anúncio (nada exibido)', valor: 1780, escala: true, sufixo: '', delta: '-9%', direcao: 'down', fonte: null },
+          { label: 'Anúncio do Google exibido', valor: 8420, escala: true, sufixo: '', delta: '+14%', direcao: 'up', fonte: 'anuncios_por_fonte_periodo', campo: 'google', aproximado: true },
+          { label: 'Anúncio da casa exibido', valor: 3190, escala: true, sufixo: '', delta: '+6%', direcao: 'up', fonte: 'anuncios_por_fonte_periodo', campo: 'casa', aproximado: true },
+          { label: 'Sem anúncio (nada exibido)', valor: 1780, escala: true, sufixo: '', delta: '-9%', direcao: 'down', fonte: 'anuncios_por_fonte_periodo', campo: 'sem_anuncio', aproximado: true },
           { label: 'Tempo médio de exposição', valor: '38 s', texto: true, delta: '-6%', direcao: 'down', fonte: 'metricas_periodo', campo: 'tempo_medio_anuncio', aproximado: true },
-          { label: '% que aceitou anúncio personalizado (consent_ads_v2)', valor: '47%', texto: true, delta: '+3 p.p.', direcao: 'up', fonte: null }
+          { label: '% que aceitou anúncio personalizado (consent_ads_v2)', valor: '47%', texto: true, delta: '+3 p.p.', direcao: 'up', fonte: 'pct_consentimento_ads_personalizados', casasDecimais: 0, sufixo: '%' }
         ]
       },
       {
@@ -1341,22 +1442,22 @@
         aviso: 'Campanhas e roupinhas (mascote) ficam de fora deste painel por decisão de Murilo -- voltam depois do Beta 1.',
         grafico: { tipo: 'barras', valores: [3, 4, 4, 5, 6, 6, 7], escala: true, cor: 'var(--verde)' },
         linhas: [
-          { label: 'Medalhas ganhas no período', valor: 612, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: null },
-          { label: 'Tour concluído', valor: 1840, escala: true, sufixo: '', delta: '+7%', direcao: 'up', fonte: null },
-          { label: 'Tour pulado', valor: 290, escala: true, sufixo: '', delta: '-11%', direcao: 'up', fonte: null },
+          { label: 'Medalhas ganhas no período', valor: 612, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'medalhas_periodo' },
+          { label: 'Tour concluído', valor: 1840, escala: true, sufixo: '', delta: '+7%', direcao: 'up', fonte: 'tour_periodo', campo: 'concluiram' },
+          { label: 'Tour pulado', valor: 290, escala: true, sufixo: '', delta: '-11%', direcao: 'up', fonte: 'tour_periodo', campo: 'pularam' },
           { label: 'Tour abandonado no meio (passo médio)', valor: 'passo 3 de 5', texto: true, delta: '—', direcao: '', fonte: null }
         ]
       },
       {
         id: 'funil', nome: 'Funil', cor: 'var(--laranja)',
-        aviso: 'Só usuário logado -- o funil começa em "cadastrou", sem instalação anônima (decisão da D059).',
+        aviso: 'Só usuário logado -- o funil começa em "cadastrou", sem instalação anônima (decisão da D059). Cohorts muito recentes ainda não tiveram tempo de completar as últimas etapas -- isso puxa os números para baixo artificialmente (característica de funil_ativacao_periodo, não é bug).',
         grafico: { tipo: 'barras', valores: [820, 610, 480, 310], escala: true },
         linhas: [
-          { label: 'Cadastrou', valor: 820, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'metricas_periodo', campo: 'cadastros_novos' },
-          { label: 'Concluiu o Tour', valor: 610, escala: true, sufixo: '', delta: '+5%', direcao: 'up', fonte: null },
-          { label: 'Fez o 1º treino', valor: 480, escala: true, sufixo: '', delta: '+3%', direcao: 'up', fonte: null },
-          { label: 'Treinou na 2ª semana', valor: 310, escala: true, sufixo: '', delta: '-2%', direcao: 'down', fonte: null },
-          { label: 'Conversão cadastro → 2ª semana', valor: '37,8%', texto: true, delta: '+1,2 p.p.', direcao: 'up', fonte: null }
+          { label: 'Cadastrou', valor: 820, escala: true, sufixo: '', delta: '+9%', direcao: 'up', fonte: 'funil_ativacao_periodo', campo: 'cadastrados' },
+          { label: 'Concluiu o Tour', valor: 610, escala: true, sufixo: '', delta: '+5%', direcao: 'up', fonte: 'funil_ativacao_periodo', campo: 'concluiram_tour' },
+          { label: 'Fez o 1º treino', valor: 480, escala: true, sufixo: '', delta: '+3%', direcao: 'up', fonte: 'funil_ativacao_periodo', campo: 'fizeram_primeiro_treino' },
+          { label: 'Treinou na 2ª semana', valor: 310, escala: true, sufixo: '', delta: '-2%', direcao: 'down', fonte: 'funil_ativacao_periodo', campo: 'treinaram_segunda_semana' },
+          { label: 'Conversão cadastro → 2ª semana', valor: '37,8%', texto: true, delta: '+1,2 p.p.', direcao: 'up', fonte: 'funil_ativacao_periodo', campo: 'conversao_2a_semana', casasDecimais: 1, sufixo: '%' }
         ]
       },
       {
@@ -1411,6 +1512,23 @@
       var d = _numerosDadosReaisAtuais;
       if (!d || !item.fonte) { return null; }
 
+      function totalDivisaoNumeros(lista, nomeDivisao) {
+        var buscaDiv = normalizarTextoNumeros(nomeDivisao);
+        var achado = null;
+        (lista || []).some(function (r) { if (normalizarTextoNumeros(r.divisao) === buscaDiv) { achado = r.total; return true; } return false; });
+        return achado || 0;
+      }
+      function totalFonteAnuncioNumeros(lista, bucket) {
+        var soma = 0;
+        (lista || []).forEach(function (r) { if (classificarFonteAnuncio(r.fonte) === bucket) { soma += r.exibicoes; } });
+        return soma;
+      }
+      function somaMedalhasNumeros(lista) {
+        var s = 0;
+        (lista || []).forEach(function (r) { s += r.total; });
+        return s;
+      }
+
       if (item.fonte === 'metricas_periodo') {
         if (!d.ehReal.metricas) { return null; }
         var atual = d.metricasAtual, anterior = d.metricasAnterior;
@@ -1447,6 +1565,69 @@
         return { agregado: d.agregadoTempoTreino };
       }
 
+      if (item.fonte === 'retencao_cohort_periodo') {
+        if (!d.ehReal.retencao) { return null; }
+        return { valor: d.retencaoAtual[item.campo], valorAnterior: d.retencaoAnterior[item.campo] };
+      }
+
+      if (item.fonte === 'usuarios_distintos_por_divisao_periodo') {
+        if (!d.ehReal.divisao) { return null; }
+        return { valor: totalDivisaoNumeros(d.divisaoAtual, item.campo), valorAnterior: totalDivisaoNumeros(d.divisaoAnterior, item.campo) };
+      }
+
+      if (item.fonte === 'frequencia_escolhida_x_real_periodo') {
+        if (!d.ehReal.frequencia || !d.frequenciaAtual.usuarios_considerados) { return null; }
+        return { valor: d.frequenciaAtual[item.campo], valorAnterior: d.frequenciaAnterior[item.campo] };
+      }
+
+      if (item.fonte === 'exercicios_mais_feitos_periodo') {
+        if (!d.ehReal.exercicios || !d.exerciciosAtual || !d.exerciciosAtual.length) { return null; }
+        var topEx = d.exerciciosAtual[0];
+        var nomeEx = (_mapaNomePorSrcMotorNumeros && _mapaNomePorSrcMotorNumeros[topEx.exercicio_src]) || topEx.exercicio_src;
+        return { valor: nomeEx, valorAnterior: null, semComparacao: true };
+      }
+
+      if (item.fonte === 'progressao_media_carga_periodo') {
+        if (!d.ehReal.progressao || !d.progressaoAtual || !d.progressaoAtual.pares_aluno_exercicio || d.progressaoAtual.progressao_media_pct == null) { return null; }
+        return { valor: d.progressaoAtual.progressao_media_pct, valorAnterior: null, semComparacao: true };
+      }
+
+      if (item.fonte === 'meta_cardio_periodo') {
+        if (!d.ehReal.cardioMeta) { return null; }
+        return { valor: d.cardioMetaAtual[item.campo], valorAnterior: d.cardioMetaAnterior[item.campo] };
+      }
+
+      if (item.fonte === 'anuncios_por_fonte_periodo') {
+        if (!d.ehReal.anunciosFonte) { return null; }
+        return { valor: totalFonteAnuncioNumeros(d.anunciosFonteAtual, item.campo), valorAnterior: totalFonteAnuncioNumeros(d.anunciosFonteAnterior, item.campo) };
+      }
+
+      if (item.fonte === 'pct_consentimento_ads_personalizados') {
+        if (!d.ehReal.consentimentoAds || !d.consentimentoAds || !d.consentimentoAds.usuarios_com_registro) { return null; }
+        return { valor: d.consentimentoAds.pct_aceitaram, valorAnterior: null, semComparacao: true };
+      }
+
+      if (item.fonte === 'medalhas_periodo') {
+        if (!d.ehReal.medalhas) { return null; }
+        return { valor: somaMedalhasNumeros(d.medalhasAtual), valorAnterior: somaMedalhasNumeros(d.medalhasAnterior) };
+      }
+
+      if (item.fonte === 'tour_periodo') {
+        if (!d.ehReal.tour) { return null; }
+        return { valor: d.tourAtual[item.campo], valorAnterior: d.tourAnterior[item.campo] };
+      }
+
+      if (item.fonte === 'funil_ativacao_periodo') {
+        if (!d.ehReal.funil) { return null; }
+        if (item.campo === 'conversao_2a_semana') {
+          if (!d.funilAtual.cadastrados) { return null; }
+          var convAtualFunil = d.funilAtual.treinaram_segunda_semana / d.funilAtual.cadastrados * 100;
+          var convAnteriorFunil = d.funilAnterior.cadastrados ? (d.funilAnterior.treinaram_segunda_semana / d.funilAnterior.cadastrados * 100) : null;
+          return { valor: convAtualFunil, valorAnterior: convAnteriorFunil };
+        }
+        return { valor: d.funilAtual[item.campo], valorAnterior: d.funilAnterior[item.campo] };
+      }
+
       return null;
     }
 
@@ -1478,14 +1659,23 @@
       }).join('');
     }
 
-    function linhaTabelaNumerosHtml(linha, fator, periodo) {
+    function objetoLinhaNumeros(linha, fator, periodo) {
       var real = linha.fonte && linha.fonte !== 'comparativo_tempo_treino' ? lerValorReal(linha) : null;
       var valorFmt, deltaTexto, deltaDirecao;
       if (real) {
-        var valorNum = linha.texto ? real.valor : Math.round(real.valor);
-        valorFmt = linha.texto ? (typeof real.valor === 'number' ? real.valor.toFixed(0) + (linha.sufixo || '') : real.valor) : (formatarNumeroBr(real.valor) + (linha.sufixo || ''));
+        if (linha.texto) {
+          if (typeof real.valor === 'number') {
+            var casas = linha.casasDecimais != null ? linha.casasDecimais : 0;
+            var sinal = (linha.comSinal && real.valor >= 0) ? '+' : '';
+            valorFmt = sinal + real.valor.toFixed(casas) + (linha.sufixo || '');
+          } else {
+            valorFmt = real.valor;
+          }
+        } else {
+          valorFmt = formatarNumeroBr(real.valor) + (linha.sufixo || '');
+        }
         if (real.semComparacao) {
-          deltaTexto = '— (hoje, sem período)'; deltaDirecao = '';
+          deltaTexto = '— (' + (linha.semComparacaoMsg || 'hoje, sem período') + ')'; deltaDirecao = '';
         } else {
           var d = deltaPercentualNumeros(real.valor, real.valorAnterior);
           deltaTexto = d.texto; deltaDirecao = d.direcao;
@@ -1494,32 +1684,52 @@
         valorFmt = linha.texto ? linha.valor : (formatarNumeroBr(linha.escala ? linha.valor * fator : linha.valor) + (linha.sufixo || ''));
         deltaTexto = linha.delta; deltaDirecao = linha.direcao;
       }
-      var tagFonte = linha.fonte ? '' : ' <span style="color:var(--texto-secundario);font-size:0.68rem;">· sem dado real</span>';
-      var deltaClasse = deltaDirecao === 'up' ? 'color:var(--verde);' : (deltaDirecao === 'down' ? 'color:var(--vermelho);' : 'color:var(--texto-secundario);');
-      return '<tr><td>' + linha.label + tagFonte + '</td><td>' + valorFmt + '</td><td style="' + deltaClasse + '">' + deltaTexto + '</td></tr>';
+      return { label: linha.label, valorFmt: valorFmt, deltaTexto: deltaTexto, deltaDirecao: deltaDirecao, temFonte: !!linha.fonte, aproximado: !!linha.aproximado, ehReal: !!real };
+    }
+
+    function linhaTabelaNumerosHtml(linha, fator, periodo) {
+      var o = objetoLinhaNumeros(linha, fator, periodo);
+      var tagFonte = o.temFonte ? (o.aproximado ? ' <span title="Aproximado -- a função não tem exatamente este número pronto, ver STATUS." style="cursor:help;">≈</span>' : '') : ' <span style="color:var(--texto-secundario);font-size:0.68rem;">· sem dado real</span>';
+      var deltaClasse = o.deltaDirecao === 'up' ? 'color:var(--verde);' : (o.deltaDirecao === 'down' ? 'color:var(--vermelho);' : 'color:var(--texto-secundario);');
+      return '<tr><td>' + o.label + tagFonte + '</td><td>' + o.valorFmt + '</td><td style="' + deltaClasse + '">' + o.deltaTexto + '</td></tr>';
     }
 
     // Linhas especiais da aba "Tempo escolhido x real" quando o dado
     // real (agregado de comparativo_tempo_treino) existir.
-    function linhasReaisTempoReal(agregado) {
+    function objetosLinhasRealTempoReal(agregado) {
       var faixaRotulo = { muito_abaixo: 'Treinos muito abaixo do escolhido (< 80%)', perto: 'Treinos perto do escolhido (80% a 120%)', acima: 'Treinos acima do escolhido (> 120%)' };
       var linhas = [
-        { label: 'Tempo médio escolhido (Home)', valor: agregado.medioEscolhido.toFixed(0) + ' min', delta: '—' },
-        { label: 'Tempo médio real (duração ativa)', valor: agregado.medioReal.toFixed(0) + ' min', delta: '—' },
-        { label: 'Diferença média', valor: agregado.medioDif.toFixed(1) + ' min (' + (agregado.medioDifPct >= 0 ? '+' : '') + agregado.medioDifPct.toFixed(0) + '%)', delta: '—' }
+        { label: 'Tempo médio escolhido (Home)', valorFmt: agregado.medioEscolhido.toFixed(0) + ' min', deltaTexto: '—', deltaDirecao: '' },
+        { label: 'Tempo médio real (duração ativa)', valorFmt: agregado.medioReal.toFixed(0) + ' min', deltaTexto: '—', deltaDirecao: '' },
+        { label: 'Diferença média', valorFmt: agregado.medioDif.toFixed(1) + ' min (' + (agregado.medioDifPct >= 0 ? '+' : '') + agregado.medioDifPct.toFixed(0) + '%)', deltaTexto: '—', deltaDirecao: '' }
       ];
       ['muito_abaixo', 'perto', 'acima'].forEach(function (chave) {
-        linhas.push({ label: faixaRotulo[chave], valor: formatarNumeroBr(agregado.faixaCount[chave] || 0) + ' de ' + agregado.n, delta: '—' });
+        linhas.push({ label: faixaRotulo[chave], valorFmt: formatarNumeroBr(agregado.faixaCount[chave] || 0) + ' de ' + agregado.n, deltaTexto: '—', deltaDirecao: '' });
       });
       if (agregado.piorDivisao) {
-        linhas.push({ label: 'Maior desvio por divisão', valor: agregado.piorDivisao.chave + ' (' + (agregado.piorDivisao.media >= 0 ? '+' : '') + agregado.piorDivisao.media.toFixed(0) + '% em média)', delta: '—' });
+        linhas.push({ label: 'Maior desvio por divisão', valorFmt: agregado.piorDivisao.chave + ' (' + (agregado.piorDivisao.media >= 0 ? '+' : '') + agregado.piorDivisao.media.toFixed(0) + '% em média)', deltaTexto: '—', deltaDirecao: '' });
       }
       if (agregado.piorFaixaExercicios) {
-        linhas.push({ label: 'Maior desvio por nº de exercícios', valor: agregado.piorFaixaExercicios.chave + ' exercícios (' + (agregado.piorFaixaExercicios.media >= 0 ? '+' : '') + agregado.piorFaixaExercicios.media.toFixed(0) + '% em média)', delta: '—' });
+        linhas.push({ label: 'Maior desvio por nº de exercícios', valorFmt: agregado.piorFaixaExercicios.chave + ' exercícios (' + (agregado.piorFaixaExercicios.media >= 0 ? '+' : '') + agregado.piorFaixaExercicios.media.toFixed(0) + '% em média)', deltaTexto: '—', deltaDirecao: '' });
       }
-      return linhas.map(function (l) {
-        return '<tr><td>' + l.label + '</td><td>' + l.valor + '</td><td style="color:var(--texto-secundario);">' + l.delta + '</td></tr>';
+      return linhas;
+    }
+
+    function linhasReaisTempoReal(agregado) {
+      return objetosLinhasRealTempoReal(agregado).map(function (l) {
+        return '<tr><td>' + l.label + '</td><td>' + l.valorFmt + '</td><td style="color:var(--texto-secundario);">' + l.deltaTexto + '</td></tr>';
       }).join('');
+    }
+
+    function construirSerieDiariaTotais(serie) {
+      var porDia = {};
+      var dias = [];
+      (serie || []).forEach(function (r) {
+        if (porDia[r.dia] === undefined) { porDia[r.dia] = 0; dias.push(r.dia); }
+        porDia[r.dia] += r.total;
+      });
+      dias.sort();
+      return dias.map(function (dia) { return porDia[dia]; });
     }
 
     function graficoNumerosHtml(grafico, fator) {
@@ -1544,7 +1754,17 @@
 
       var agregadoTempoTreino = grupo.id === 'tempo-real' ? (_numerosDadosReaisAtuais && _numerosDadosReaisAtuais.ehReal.tempoTreino ? _numerosDadosReaisAtuais.agregadoTempoTreino : null) : null;
       var linhasTabela = agregadoTempoTreino ? linhasReaisTempoReal(agregadoTempoTreino) : grupo.linhas.map(function (l) { return linhaTabelaNumerosHtml(l, fator, periodo); }).join('');
-      var notaExemplo = agregadoTempoTreino ? '' : (grupo.id === 'tempo-real' ? '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:0 0 10px;">Dado de EXEMPLO no mesmo formato que <code>comparativo_tempo_treino()</code> devolve -- vira real assim que a migration 036 entrar em produção.</p>' : '');
+      var notaExemplo = agregadoTempoTreino ? '' : (grupo.id === 'tempo-real' ? '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:0 0 10px;">Dado de EXEMPLO no mesmo formato que <code>comparativo_tempo_treino()</code> devolve -- vira real assim que as migrations 036/037 entrarem em produção.</p>' : '');
+
+      var graficoParaRender = grupo.grafico;
+      var legendaHtmlFinal = legendaHtml;
+      if (grupo.id === 'usuarios' && _numerosDadosReaisAtuais && _numerosDadosReaisAtuais.ehReal.serieDistribuicao) {
+        var totaisDiariosNumeros = construirSerieDiariaTotais(_numerosDadosReaisAtuais.serieDistribuicaoPagamento);
+        if (totaisDiariosNumeros.length > 1) {
+          graficoParaRender = { tipo: 'barras', valores: totaisDiariosNumeros, escala: false, cor: 'var(--laranja)' };
+          legendaHtmlFinal = '<p style="color:var(--texto-secundario);font-size:0.72rem;margin:6px 0 0;">Usuários (grátis+PRO+patrocinado) por dia, real -- distribuicao_pagamento_serie().</p>';
+        }
+      }
 
       destino.innerHTML =
         avisoHtml +
@@ -1555,7 +1775,7 @@
         '</div>' +
         notaExemplo +
         '<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">' +
-        '<div>' + graficoNumerosHtml(grupo.grafico, fator) + legendaHtml + '</div>' +
+        '<div>' + graficoNumerosHtml(graficoParaRender, fator) + legendaHtmlFinal + '</div>' +
         '<div class="numeros-tabela-scroll" style="flex:1;min-width:240px;">' +
         '<table><tr><th>Item</th><th>Valor</th><th>vs. período anterior</th></tr>' +
         linhasTabela +
@@ -1567,11 +1787,17 @@
       var fator = fatorPeriodoNumeros(periodo);
       var grupo = GRUPOS_NUMEROS.filter(function (g) { return g.id === abaNumerosAtiva; })[0];
       if (!grupo) { return; }
+
+      var agregadoTempoTreino = grupo.id === 'tempo-real' ? (_numerosDadosReaisAtuais && _numerosDadosReaisAtuais.ehReal.tempoTreino ? _numerosDadosReaisAtuais.agregadoTempoTreino : null) : null;
+      var objetosCsv = agregadoTempoTreino ? objetosLinhasRealTempoReal(agregadoTempoTreino) : grupo.linhas.map(function (l) { return objetoLinhaNumeros(l, fator, periodo); });
+      var algumRealCsv = agregadoTempoTreino ? true : objetosCsv.some(function (o) { return o.ehReal; });
+
       var linhasCsv = ['Item;Valor;vs. período anterior'];
-      linhasCsv.push('DADOS DE EXEMPLO -- nao representam numero real (salvo onde a fonte ja esta ligada a producao);;');
-      _numerosLinhasAtuais.forEach(function (l) {
-        var valorFmt = l.texto ? l.valor : (formatarNumeroBr(l.escala ? l.valor * fator : l.valor) + (l.sufixo || ''));
-        var linha = [l.label, String(valorFmt), l.delta].map(function (campo) {
+      linhasCsv.push((algumRealCsv
+        ? 'Linhas com dado real ja vem da funcao em producao; as demais ainda sao EXEMPLO (ver coluna Item: "sem dado real" = exemplo)'
+        : 'DADOS DE EXEMPLO -- nenhuma funcao deste grupo esta em producao ainda') + ';;');
+      objetosCsv.forEach(function (o) {
+        var linha = [o.label, String(o.valorFmt), o.deltaTexto].map(function (campo) {
           return '"' + String(campo).replace(/"/g, '""') + '"';
         }).join(';');
         linhasCsv.push(linha);
@@ -1581,7 +1807,7 @@
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
-      a.download = 'numeros_' + grupo.id + '_' + periodo + '_exemplo.csv';
+      a.download = 'numeros_' + grupo.id + '_' + periodo + (algumRealCsv ? '' : '_exemplo') + '.csv';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1626,6 +1852,8 @@
       var periodo = document.getElementById('numeros-periodo').value;
       var datasLivre = prepararDatasLivreNumeros(periodo);
       var limites = calcularLimitesNumeros(periodo, null, datasLivre && datasLivre.inicio, datasLivre && datasLivre.fim);
+      var duracaoDiasAtual = limites ? (Math.round((new Date(limites.fim) - new Date(limites.inicio)) / 86400000) + 1) : 0;
+      var podeChamarSerie = !!(limites && duracaoDiasAtual <= 366);
 
       var chamadas;
       if (!limites) {
@@ -1636,7 +1864,27 @@
           Promise.resolve({ ehReal: false, dados: exemploUsuariosAtivosPeriodo() }),
           Promise.resolve({ ehReal: false, dados: exemploUsuariosAtivosPeriodo() }),
           chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, exemploDistribuicaoPagamentoAtual),
-          Promise.resolve({ ehReal: false, dados: exemploComparativoTempoTreino() })
+          Promise.resolve({ ehReal: false, dados: exemploComparativoTempoTreino() }),
+          Promise.resolve({ ehReal: false, dados: exemploRetencaoCohortPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploRetencaoCohortPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploDivisaoPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploDivisaoPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploFrequenciaEscolhidaXReal() }),
+          Promise.resolve({ ehReal: false, dados: exemploFrequenciaEscolhidaXReal() }),
+          Promise.resolve({ ehReal: false, dados: exemploProgressaoMediaCarga() }),
+          Promise.resolve({ ehReal: false, dados: exemploMetaCardioPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploMetaCardioPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploAnunciosPorFontePeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploAnunciosPorFontePeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploPctConsentimentoAds() }),
+          Promise.resolve({ ehReal: false, dados: exemploMedalhasPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploMedalhasPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploTourPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploTourPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploFunilAtivacaoPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploFunilAtivacaoPeriodo() }),
+          Promise.resolve({ ehReal: false, dados: exemploExerciciosMaisFeitos() }),
+          Promise.resolve({ ehReal: false, dados: exemploDistribuicaoPagamentoSerie() })
         ];
       } else {
         chamadas = [
@@ -1645,12 +1893,44 @@
           chamarRpcOuExemplo('usuarios_ativos_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploUsuariosAtivosPeriodo),
           chamarRpcOuExemplo('usuarios_ativos_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploUsuariosAtivosPeriodo),
           chamarRpcOuExemplo('distribuicao_pagamento_atual', {}, exemploDistribuicaoPagamentoAtual),
-          chamarRpcOuExemplo('comparativo_tempo_treino', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploComparativoTempoTreino)
+          chamarRpcOuExemplo('comparativo_tempo_treino', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploComparativoTempoTreino),
+          chamarRpcOuExemplo('retencao_cohort_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploRetencaoCohortPeriodo),
+          chamarRpcOuExemplo('retencao_cohort_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploRetencaoCohortPeriodo),
+          chamarRpcOuExemplo('usuarios_distintos_por_divisao_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploDivisaoPeriodo),
+          chamarRpcOuExemplo('usuarios_distintos_por_divisao_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploDivisaoPeriodo),
+          chamarRpcOuExemplo('frequencia_escolhida_x_real_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploFrequenciaEscolhidaXReal),
+          chamarRpcOuExemplo('frequencia_escolhida_x_real_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploFrequenciaEscolhidaXReal),
+          chamarRpcOuExemplo('progressao_media_carga_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploProgressaoMediaCarga),
+          chamarRpcOuExemplo('meta_cardio_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploMetaCardioPeriodo),
+          chamarRpcOuExemplo('meta_cardio_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploMetaCardioPeriodo),
+          chamarRpcOuExemplo('anuncios_por_fonte_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploAnunciosPorFontePeriodo),
+          chamarRpcOuExemplo('anuncios_por_fonte_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploAnunciosPorFontePeriodo),
+          chamarRpcOuExemplo('pct_consentimento_ads_personalizados', { p_data_corte: limites.fim }, exemploPctConsentimentoAds),
+          chamarRpcOuExemplo('medalhas_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploMedalhasPeriodo),
+          chamarRpcOuExemplo('medalhas_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploMedalhasPeriodo),
+          chamarRpcOuExemplo('tour_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploTourPeriodo),
+          chamarRpcOuExemplo('tour_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploTourPeriodo),
+          chamarRpcOuExemplo('funil_ativacao_periodo', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploFunilAtivacaoPeriodo),
+          chamarRpcOuExemplo('funil_ativacao_periodo', { p_inicio: limites.inicioAnterior, p_fim: limites.fimAnterior }, exemploFunilAtivacaoPeriodo),
+          chamarRpcOuExemplo('exercicios_mais_feitos_periodo', { p_inicio: limites.inicio, p_fim: limites.fim, p_limite: 5 }, exemploExerciciosMaisFeitos),
+          (podeChamarSerie ? chamarRpcOuExemplo('distribuicao_pagamento_serie', { p_inicio: limites.inicio, p_fim: limites.fim }, exemploDistribuicaoPagamentoSerie) : Promise.resolve({ ehReal: false, dados: null }))
         ];
       }
 
       return Promise.all(chamadas).then(function (r) {
         var metricasAtualR = r[0], metricasAnteriorR = r[1], ativosAtualR = r[2], ativosAnteriorR = r[3], distribuicaoR = r[4], tempoTreinoR = r[5];
+        var retencaoAtualR = r[6], retencaoAnteriorR = r[7];
+        var divisaoAtualR = r[8], divisaoAnteriorR = r[9];
+        var frequenciaAtualR = r[10], frequenciaAnteriorR = r[11];
+        var progressaoAtualR = r[12];
+        var cardioMetaAtualR = r[13], cardioMetaAnteriorR = r[14];
+        var anunciosFonteAtualR = r[15], anunciosFonteAnteriorR = r[16];
+        var consentimentoAdsR = r[17];
+        var medalhasAtualR = r[18], medalhasAnteriorR = r[19];
+        var tourAtualR = r[20], tourAnteriorR = r[21];
+        var funilAtualR = r[22], funilAnteriorR = r[23];
+        var exerciciosAtualR = r[24];
+        var serieR = r[25];
 
         var distribuicaoMapa = null;
         if (distribuicaoR.dados) {
@@ -1666,11 +1946,35 @@
           ativosAtual: ativosAtualR.dados, ativosAnterior: ativosAnteriorR.dados,
           distribuicao: distribuicaoMapa,
           agregadoTempoTreino: agregadoTempoTreino,
+          retencaoAtual: retencaoAtualR.dados, retencaoAnterior: retencaoAnteriorR.dados,
+          divisaoAtual: divisaoAtualR.dados, divisaoAnterior: divisaoAnteriorR.dados,
+          frequenciaAtual: frequenciaAtualR.dados, frequenciaAnterior: frequenciaAnteriorR.dados,
+          progressaoAtual: progressaoAtualR.dados,
+          cardioMetaAtual: cardioMetaAtualR.dados, cardioMetaAnterior: cardioMetaAnteriorR.dados,
+          anunciosFonteAtual: anunciosFonteAtualR.dados, anunciosFonteAnterior: anunciosFonteAnteriorR.dados,
+          consentimentoAds: consentimentoAdsR.dados,
+          medalhasAtual: medalhasAtualR.dados, medalhasAnterior: medalhasAnteriorR.dados,
+          tourAtual: tourAtualR.dados, tourAnterior: tourAnteriorR.dados,
+          funilAtual: funilAtualR.dados, funilAnterior: funilAnteriorR.dados,
+          exerciciosAtual: exerciciosAtualR.dados,
+          serieDistribuicaoPagamento: serieR.dados,
           ehReal: {
             metricas: !!(limites && metricasAtualR.ehReal && metricasAnteriorR.ehReal),
             ativos: !!(limites && ativosAtualR.ehReal && ativosAnteriorR.ehReal),
             distribuicao: !!distribuicaoR.ehReal,
-            tempoTreino: !!(limites && tempoTreinoR.ehReal)
+            tempoTreino: !!(limites && tempoTreinoR.ehReal),
+            retencao: !!(limites && retencaoAtualR.ehReal && retencaoAnteriorR.ehReal),
+            divisao: !!(limites && divisaoAtualR.ehReal && divisaoAnteriorR.ehReal),
+            frequencia: !!(limites && frequenciaAtualR.ehReal && frequenciaAnteriorR.ehReal),
+            progressao: !!(limites && progressaoAtualR.ehReal),
+            cardioMeta: !!(limites && cardioMetaAtualR.ehReal && cardioMetaAnteriorR.ehReal),
+            anunciosFonte: !!(limites && anunciosFonteAtualR.ehReal && anunciosFonteAnteriorR.ehReal),
+            consentimentoAds: !!(limites && consentimentoAdsR.ehReal),
+            medalhas: !!(limites && medalhasAtualR.ehReal && medalhasAnteriorR.ehReal),
+            tour: !!(limites && tourAtualR.ehReal && tourAnteriorR.ehReal),
+            funil: !!(limites && funilAtualR.ehReal && funilAnteriorR.ehReal),
+            exercicios: !!(limites && exerciciosAtualR.ehReal),
+            serieDistribuicao: !!(limites && podeChamarSerie && serieR.ehReal)
           }
         };
 
@@ -1681,6 +1985,9 @@
 
     function inicializarPainelNumeros() {
       construirAbasNumerosUmaVez();
+      carregarMapaNomesExerciciosNumeros().then(function () {
+        if (abaNumerosAtiva === 'treino') { renderizarAbaNumerosAtiva(); }
+      });
       return recarregarPainelNumeros();
     }
   </script>
