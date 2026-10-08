@@ -1402,7 +1402,12 @@
       var html = '';
       exerciciosEmEdicao.forEach(function (item, indice) {
         var ex = exercicioCatalogoDoSrc(item.src);
+        // P53 -- mesma miniatura (Opcao 2, 56px->40px aqui por ser lista
+        // mais densa) do catalogo ao lado, pra nao perder a foto so
+        // porque o exercicio entrou na lista de escolhidos.
+        var miniatura = ex ? '<img src="' + urlImagemCatalogoTreino(ex.arquivo) + '" alt="" loading="lazy" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;">' : '';
         html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--card-border);">';
+        html += miniatura;
         html += '<span style="flex:1 1 180px;font-weight:600;">' + escaparHtmlAluno(nomeDoExercicioEmEdicao(ex)) + '</span>';
         html += '<label style="font-size:0.75rem;color:var(--texto-secundario);">Séries <input type="number" min="1" value="' + item.series + '" style="width:54px;" onchange="atualizarPrescricaoEmEdicao(' + indice + ',\'series\',this.value)"></label>';
         html += '<label style="font-size:0.75rem;color:var(--texto-secundario);">Reps <input type="number" min="1" value="' + item.repeticoes + '" style="width:54px;" onchange="atualizarPrescricaoEmEdicao(' + indice + ',\'repeticoes\',this.value)"></label>';
@@ -1540,7 +1545,7 @@
       });
     }
 
-    function linhaAparelhoCarga(ex, dadosSalvos, ultimaDaLinha) {
+    function linhaAparelhoCarga(ex, dadosSalvos) {
       var tipo = dadosSalvos.tipo_carga || '';
       var ativaAnilha = tipo === 'anilha'
         ? 'background:var(--gradiente);color:#1a0f00;'
@@ -1551,9 +1556,12 @@
       var mostraPilha = tipo === 'seletor';
       var primeiro = (dadosSalvos.primeiro_peso != null) ? dadosSalvos.primeiro_peso : '';
       var ultimo = (dadosSalvos.ultimo_peso != null) ? dadosSalvos.ultimo_peso : '';
-      var borda = ultimaDaLinha ? '' : 'border-bottom:1px solid var(--card-border);';
 
-      var html = '<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;flex-wrap:wrap;' + borda + '">';
+      // P53 -- miniatura (Opcao 2 escolhida por Murilo: 56px, em cartao
+      // por linha) para quem monta a lista reconhecer o aparelho pela
+      // foto, nao so pelo nome.
+      var html = '<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;flex-wrap:wrap;background:var(--card);border:1px solid var(--card-border);border-radius:14px;margin-bottom:8px;">';
+      html += '<img src="' + urlImagemCatalogoTreino(ex.arquivo) + '" alt="" loading="lazy" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">';
       html += '<div style="flex:1;min-width:160px;"><span style="font-size:0.86rem;font-weight:700;display:block;">' + escaparHtmlAluno(ex.nome) + '</span><span style="font-size:0.72rem;color:var(--texto-secundario);">' + escaparHtmlAluno(ex.subgrupo || '') + '</span></div>';
       html += '<div style="display:flex;border:1px solid var(--card-border);border-radius:999px;overflow:hidden;font-size:0.74rem;font-weight:700;flex-shrink:0;">';
       html += '<button type="button" onclick="definirTipoCargaAparelho(\'' + ex.id + '\',\'anilha\')" style="border:none;padding:7px 14px;cursor:pointer;font-family:inherit;' + ativaAnilha + '">Anilha</button>';
@@ -1592,13 +1600,11 @@
 
       ordemGrupos.forEach(function (grupo) {
         html += '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--texto-secundario);font-weight:800;margin:18px 0 8px;">' + escaparHtmlAluno(grupo) + '</div>';
-        html += '<div style="border:1px solid var(--card-border);border-radius:16px;overflow:hidden;">';
-        porGrupo[grupo].forEach(function (ex, idx) {
+        porGrupo[grupo].forEach(function (ex) {
           var src = mapaSrcPorIdCatalogo ? mapaSrcPorIdCatalogo[ex.id] : null;
           var dadosSalvos = (src && aparelhosCargaSalvosPorSrc[src]) || {};
-          html += linhaAparelhoCarga(ex, dadosSalvos, idx === porGrupo[grupo].length - 1);
+          html += linhaAparelhoCarga(ex, dadosSalvos);
         });
-        html += '</div>';
       });
 
       if (!ordemGrupos.length) {
@@ -1815,9 +1821,12 @@
         exercicios.length + (exercicios.length === 1 ? ' exercício' : ' exercícios') + '</p>';
       exercicios.forEach(function (item) {
         var ex = exercicioCatalogoDoSrc(item.src);
-        html += '<p style="margin:0 0 4px;font-size:0.85rem;color:var(--texto);">' +
-          escaparHtmlAluno(nomeDoExercicioEmEdicao(ex)) + ' — ' +
-          escaparHtmlAluno(item.series + 'x' + item.repeticoes + ', descanso ' + item.descanso + 's') + '</p>';
+        // P53 -- miniatura pequena (28px, linha de texto corrido) pra
+        // quem olha o resumo do treino aplicado reconhecer o exercicio.
+        var miniatura = ex ? '<img src="' + urlImagemCatalogoTreino(ex.arquivo) + '" alt="" loading="lazy" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;vertical-align:middle;margin-right:8px;">' : '';
+        html += '<p style="margin:0 0 6px;font-size:0.85rem;color:var(--texto);display:flex;align-items:center;">' +
+          miniatura + '<span>' + escaparHtmlAluno(nomeDoExercicioEmEdicao(ex)) + ' — ' +
+          escaparHtmlAluno(item.series + 'x' + item.repeticoes + ', descanso ' + item.descanso + 's') + '</span></p>';
       });
       container.innerHTML = html;
     }
