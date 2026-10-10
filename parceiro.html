@@ -349,6 +349,7 @@
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
                 <button type="button" id="btn-aparelhos-carga" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;display:none;">Aparelhos de carga</button>
+                <button type="button" onclick="abrirVincularAluno()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Vincular aluno</button>
                 <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
               </div>
             </div>
@@ -376,6 +377,31 @@
             </div>
 
             <div id="aparelhos-carga-view" style="display:none;"></div>
+
+            <!-- D067 -- vincular aluno pelo codigo (QR ou digitado, Caminhos
+                 2 e 3), com convite por WhatsApp (Caminho 1) para quem ainda
+                 nao tem conta. Leitura de QR pela camera ficou fora desta
+                 rodada (item 3 da D067 autoriza isso se for complicado) --
+                 ver STATUS. -->
+            <div id="vincular-aluno-view" style="display:none;">
+              <button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>
+              <h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Vincular aluno</h2>
+              <p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 18px;">O aluno gera um código de 8 letras no app (QR ou texto), válido por 15 minutos. Digite aqui o que ele mostrou -- depois disso, é o aluno quem confirma, no aparelho dele.</p>
+
+              <div class="campo" style="max-width:320px;">
+                <label for="va-codigo">Código do aluno</label>
+                <input id="va-codigo" type="text" maxlength="9" autocomplete="off" placeholder="Ex.: 7K3RWXQ8" style="text-transform:uppercase;letter-spacing:0.08em;">
+              </div>
+              <button type="button" class="botao-primario" id="va-botao-enviar" onclick="enviarSolicitacaoVinculo()" style="width:auto;padding:10px 22px;border:none;cursor:pointer;font-family:inherit;margin:4px 0 6px;">Vincular</button>
+              <p id="va-mensagem" style="display:none;font-size:0.85rem;margin:8px 0 0;"></p>
+
+              <div style="margin-top:28px;padding-top:22px;border-top:1px solid var(--card-border);">
+                <h3 style="font-size:0.92rem;font-weight:800;margin:0 0 6px;">Aluno sem conta ainda?</h3>
+                <p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 14px;">Gere um link de convite e mande por WhatsApp. Vale por 48 horas; a pessoa confirma o vínculo ao terminar o cadastro no app.</p>
+                <button type="button" onclick="convidarPorWhatsapp()" id="va-botao-whatsapp" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Convidar por WhatsApp</button>
+                <p id="va-whatsapp-mensagem" style="display:none;font-size:0.85rem;margin:10px 0 0;"></p>
+              </div>
+            </div>
           </div>
 
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
@@ -539,6 +565,7 @@
   <script src="assets/js/fichas-store.js"></script>
   <script src="assets/js/treinos-store.js"></script>
   <script src="assets/js/carga-config-store.js"></script>
+  <script src="assets/js/vinculo-convite-store.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -668,6 +695,8 @@
       if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
       var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
+      var vincularAlunoView = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
       limparTreinoFormResidual();
     }
 
@@ -915,6 +944,8 @@
       if (treinosBaseView) { treinosBaseView.style.display = 'none'; }
       var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
+      var vincularAlunoView = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
       view.style.display = 'block';
     }
 
@@ -1057,6 +1088,8 @@
       if (treinosBaseViewD) { treinosBaseViewD.style.display = 'none'; }
       var aparelhosCargaViewD = document.getElementById('aparelhos-carga-view');
       if (aparelhosCargaViewD) { aparelhosCargaViewD.style.display = 'none'; }
+      var vincularAlunoViewD = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoViewD) { vincularAlunoViewD.style.display = 'none'; }
       var view = document.getElementById('aluno-detalhe-view');
       view.style.display = 'block';
       view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
@@ -1454,6 +1487,8 @@
       document.getElementById('aluno-detalhe-view').style.display = 'none';
       var aparelhosCargaView = document.getElementById('aparelhos-carga-view');
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
+      var vincularAlunoView = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
       document.getElementById('treinos-base-view').style.display = 'block';
       document.getElementById('treino-base-form-view').style.display = 'none';
       document.getElementById('treinos-base-lista-view').style.display = 'block';
@@ -1527,6 +1562,8 @@
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
       document.getElementById('treinos-base-view').style.display = 'none';
+      var vincularAlunoView = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
       limparTreinoFormResidual();
       var view = document.getElementById('aparelhos-carga-view');
       view.style.display = 'block';
@@ -1542,6 +1579,95 @@
         renderAparelhosCarga();
       }).catch(function (erro) {
         view.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    // =========================================================
+    // D067 (2026-10-09) -- parceiro vincula o aluno pelo codigo (QR
+    // ou digitado), ou convida por WhatsApp quem ainda nao tem conta.
+    // Le a VinculoConviteStore (assets/js/vinculo-convite-store.js),
+    // que chama solicitar_vinculo_por_codigo / gerar_convite_whatsapp
+    // (migration 021, confirmada no ar pela Backend). Leitura de QR
+    // pela camera ficou fora desta rodada -- ver STATUS.
+    // =========================================================
+    function abrirVincularAluno() {
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var treinosBaseViewV = document.getElementById('treinos-base-view');
+      if (treinosBaseViewV) { treinosBaseViewV.style.display = 'none'; }
+      var aparelhosCargaViewV = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaViewV) { aparelhosCargaViewV.style.display = 'none'; }
+      document.getElementById('va-codigo').value = '';
+      var msg = document.getElementById('va-mensagem');
+      msg.style.display = 'none';
+      msg.textContent = '';
+      var msgWpp = document.getElementById('va-whatsapp-mensagem');
+      msgWpp.style.display = 'none';
+      msgWpp.textContent = '';
+      document.getElementById('vincular-aluno-view').style.display = 'block';
+    }
+
+    function enviarSolicitacaoVinculo() {
+      var campo = document.getElementById('va-codigo');
+      var codigo = VinculoConviteStore.normalizarCodigo(campo.value);
+      var msg = document.getElementById('va-mensagem');
+      var botao = document.getElementById('va-botao-enviar');
+      var textoOriginal = botao.textContent;
+      botao.disabled = true;
+      botao.textContent = 'Enviando…';
+      msg.style.display = 'none';
+      VinculoConviteStore.solicitarPorCodigo(codigo).then(function (status) {
+        if (status === 'ok') {
+          msg.style.color = 'var(--ambar)';
+          msg.textContent = 'Pedido enviado. Agora o aluno confirma no app.';
+          msg.style.display = 'block';
+          campo.value = '';
+        } else if (status === 'muitas_tentativas') {
+          msg.style.color = '#ff6a6a';
+          msg.textContent = 'Muitas tentativas seguidas com esse código -- aguarde alguns minutos e tente de novo.';
+          msg.style.display = 'block';
+        } else {
+          // 'convite_invalido' -- cobre codigo errado, vencido (15 min) ou
+          // ja usado; a funcao do banco usa essa mensagem generica de
+          // proposito, pra nao dar dica pra quem esta tentando adivinhar.
+          msg.style.color = '#ff6a6a';
+          msg.textContent = 'Código inválido, vencido ou já usado -- confira com o aluno e tente de novo.';
+          msg.style.display = 'block';
+        }
+      }).catch(function (erro) {
+        msg.style.color = '#ff6a6a';
+        msg.innerHTML = mensagemSeguraErro(erro);
+        msg.style.display = 'block';
+      }).then(function () {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
+      });
+    }
+
+    function convidarPorWhatsapp() {
+      var botao = document.getElementById('va-botao-whatsapp');
+      var msgWpp = document.getElementById('va-whatsapp-mensagem');
+      var textoOriginal = botao.textContent;
+      botao.disabled = true;
+      botao.textContent = 'Gerando…';
+      msgWpp.style.display = 'none';
+      VinculoConviteStore.gerarConviteWhatsapp().then(function (convite) {
+        var codigo = convite && convite.codigo;
+        var link = 'ferafit://convite/' + codigo;
+        var texto = 'Vamos treinar juntos pelo Fera Fit! Entra nesse link pra confirmar: ' + link;
+        var urlWhatsapp = 'https://wa.me/?text=' + encodeURIComponent(texto);
+        window.open(urlWhatsapp, '_blank');
+        msgWpp.style.color = 'var(--ambar)';
+        msgWpp.textContent = 'Link gerado (válido por 48 horas) -- escolha o contato no WhatsApp que abriu.';
+        msgWpp.style.display = 'block';
+      }).catch(function (erro) {
+        msgWpp.style.color = '#ff6a6a';
+        msgWpp.innerHTML = mensagemSeguraErro(erro);
+        msgWpp.style.display = 'block';
+      }).then(function () {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
       });
     }
 
