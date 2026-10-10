@@ -343,6 +343,27 @@
         <!-- TELA PÓS-LOGIN — DEMANDA 032 (2026-09-25): áreas funcionais de teste (Academia/Personal), dados fictícios em localStorage. Ver STATUS.md (D032). -->
         <div id="area-logada" style="display:none;">
 
+          <!-- D071 (2026-10-10) -- aceite retroativo do Termo do Parceiro
+               (migration 043 da Backend, D144 dela, item 2). Mostrada no lugar
+               de minha-conta-real/meus-alunos-real quando a conta logada tem
+               aceiteTermoParceiroVersao NULL (cadastro anterior a esta
+               migration) -- ver entrarParceiro() e mostrarAceiteRetroativo().
+               Decisao de produto (D071 pede pra propor a mais simples que
+               cumpra o Termo): trava o acesso ao resto da conta até aceitar,
+               mesmo espirito do "sem aceite, sem cadastro" da D069 Parte 3 --
+               sinalizado no STATUS.md para Murilo/Jurídica confirmarem. -->
+          <div class="parceiro-box" id="aceite-termo-parceiro-retroativo-view" style="display:none;max-width:480px;margin:0 auto 24px;text-align:left;">
+            <h1 style="font-size:1.15rem;font-weight:800;margin:0 0 10px;">Falta um passo</h1>
+            <p style="color:var(--texto-secundario);font-size:0.88rem;margin:0 0 16px;">O Termo do Parceiro foi atualizado desde o seu cadastro. Para continuar usando sua conta, é necessário aceitá-lo.</p>
+            <label style="display:flex;align-items:flex-start;gap:8px;margin:0 0 6px;font-size:0.85rem;color:var(--texto-secundario);cursor:pointer;">
+              <input id="aceite-retroativo-checkbox" type="checkbox" style="margin-top:3px;flex-shrink:0;">
+              <span>Li e aceito o <a href="termo-parceiro.html" target="_blank" rel="noopener">Termo do Parceiro Fera Fit</a> e a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+            </label>
+            <p id="aceite-retroativo-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 14px;"></p>
+            <button type="button" class="botao-primario" id="aceite-retroativo-botao" onclick="confirmarAceiteRetroativo()" style="width:auto;padding:10px 22px;border:none;cursor:pointer;font-family:inherit;margin:6px 0 0;">Aceitar e continuar</button>
+            <button type="button" onclick="sairDaMinhaConta()" style="background:none;border:none;color:var(--texto-secundario);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:0.82rem;margin:14px 0 0;display:block;">Sair</button>
+          </div>
+
           <!-- D045, item 1/6.3 (2026-10-01): tela real pós-login, perfil lido
                do Supabase pelo próprio dono (RLS). Alunos/Montar treino abaixo
                (escolha-modo/painel-conta) continuam só demonstração até os
@@ -624,6 +645,13 @@
         document.getElementById('area-logada').style.display = 'block';
         document.getElementById('escolha-modo').style.display = 'none';
         document.getElementById('painel-conta').style.display = 'none';
+        // D071 (2026-10-10) -- aceite retroativo: conta cadastrada antes da
+        // migration 043 tem aceiteTermoParceiroVersao NULL. Trava aqui, antes de
+        // mostrar qualquer coisa da conta real -- ver mostrarAceiteRetroativo().
+        if (!conta.aceiteTermoParceiroVersao) {
+          mostrarAceiteRetroativo(conta);
+          return;
+        }
         renderMinhaContaReal(conta);
         renderMeusAlunos(conta);
       }).catch(function (erroLogin) {
@@ -684,12 +712,65 @@
       ParceirosStore.sairDaConta().then(function () {
         document.getElementById('area-logada').style.display = 'none';
         document.getElementById('minha-conta-real').style.display = 'none';
+        var aceiteRetroativoViewSair = document.getElementById('aceite-termo-parceiro-retroativo-view');
+        if (aceiteRetroativoViewSair) { aceiteRetroativoViewSair.style.display = 'none'; }
+        contaPendenteAceiteRetroativo = null;
         esconderMeusAlunos();
         document.getElementById('parceiro-hero-pitch').style.display = '';
         document.getElementById('caixa-parceiro').style.display = '';
         mostrarLoginParceiro();
         document.getElementById('email-parceiro').value = '';
         document.getElementById('senha-parceiro').value = '';
+      });
+    }
+
+    // D071 (2026-10-10) -- mostra a tela de aceite retroativo no lugar da
+    // conta/alunos, ate a pessoa aceitar. Guarda `conta` pra retomar depois,
+    // sem precisar reconsultar minhaConta().
+    function mostrarAceiteRetroativo(conta) {
+      contaPendenteAceiteRetroativo = conta;
+      document.getElementById('minha-conta-real').style.display = 'none';
+      esconderMeusAlunos();
+      var checkbox = document.getElementById('aceite-retroativo-checkbox');
+      if (checkbox) { checkbox.checked = false; }
+      var erroEl = document.getElementById('aceite-retroativo-erro');
+      if (erroEl) { erroEl.style.display = 'none'; }
+      document.getElementById('aceite-termo-parceiro-retroativo-view').style.display = 'block';
+    }
+
+    // D071 -- chama registrar_aceite_termo_parceiro() (migration 043). So
+    // libera o resto da conta depois de confirmado -- se a funcao ainda nao
+    // existir no banco, o erro amigavel do ParceirosStore aparece aqui, sem
+    // deixar a pessoa seguir sem ter aceitado de verdade.
+    function confirmarAceiteRetroativo() {
+      var checkbox = document.getElementById('aceite-retroativo-checkbox');
+      var erroEl = document.getElementById('aceite-retroativo-erro');
+      if (erroEl) { erroEl.style.display = 'none'; }
+      if (!checkbox || !checkbox.checked) {
+        if (erroEl) {
+          erroEl.textContent = 'É necessário marcar a caixa para continuar.';
+          erroEl.style.display = 'block';
+        }
+        return;
+      }
+      var botao = document.getElementById('aceite-retroativo-botao');
+      if (botao) { botao.disabled = true; }
+      ParceirosStore.registrarAceiteTermoParceiro(TERMO_PARCEIRO_VERSAO_ATUAL).then(function () {
+        var conta = contaPendenteAceiteRetroativo;
+        contaPendenteAceiteRetroativo = null;
+        document.getElementById('aceite-termo-parceiro-retroativo-view').style.display = 'none';
+        if (conta) {
+          conta.aceiteTermoParceiroVersao = TERMO_PARCEIRO_VERSAO_ATUAL;
+          renderMinhaContaReal(conta);
+          renderMeusAlunos(conta);
+        }
+      }).catch(function (erro) {
+        if (erroEl) {
+          erroEl.textContent = (erro && erro.message) || 'Não deu para registrar o aceite agora. Tenta de novo em instantes.';
+          erroEl.style.display = 'block';
+        }
+      }).then(function () {
+        if (botao) { botao.disabled = false; }
       });
     }
 
@@ -703,6 +784,11 @@
     // =========================================================
 
     var parceiroAtual = null; // {tipo, id} -- setado em renderMeusAlunos()
+    // D071 (2026-10-10) -- mesma versao usada na caixa de aceite do cadastro
+    // novo (D069 Parte 3) e no aceite retroativo (abaixo). Um unico lugar pra
+    // trocar quando existir uma v2 do Termo -- nao decidido nesta rodada.
+    var TERMO_PARCEIRO_VERSAO_ATUAL = 'termo_parceiro_v1';
+    var contaPendenteAceiteRetroativo = null; // D071 -- guardada entre mostrarAceiteRetroativo() e confirmarAceiteRetroativo()
     var alunosPaginaAtual = 1;
     var ALUNOS_POR_PAGINA = 10;
     var ultimosAlunosVinculados = []; // D069 Parte 1 -- cache da ultima leitura de vw_aluno_para_parceiro, pra abrir o detalhe sem reconsultar
@@ -2436,12 +2522,11 @@
       erro.style.display = 'none';
 
       // D069 Parte 3 (2026-10-10) -- "sem aceite, sem cadastro" (texto literal da demanda).
-      // So trava no cliente (UX) -- nao existe hoje coluna no banco pra gravar esse aceite
-      // ( a Juridica recomendou aceite_termo_parceiro_versao/_em em personais/academias, D063
-      // dela, mas nenhuma migration criou essas colunas ainda -- ver STATUS.md, entrada desta
-      // rodada). Quando a Backend criar essa migration, este bloco passa a tambem enviar o
-      // aceite pro ParceirosStore.cadastrarAcademia (nunca inventar o nome do parametro aqui
-      // sem o contrato dela).
+      // D071 (2026-10-10): a migration 043 da Backend ja existe (so arquivo) -- o aceite
+      // marcado aqui agora e enviado pro ParceirosStore.cadastrarAcademia (ver abaixo), que
+      // repassa pra Edge Function signup-academia, que grava de verdade. Enquanto a 043 nao
+      // estiver em producao, o gatilho do banco ainda nao existe -- o cadastro continua
+      // funcionando normalmente (campo extra ignorado pela Edge Function antiga).
       var aceiteTermoParceiroAcademia = document.getElementById('ac-aceite-termo-parceiro');
       var erroAceiteAcademia = document.getElementById('ac-aceite-termo-parceiro-erro');
       if (!aceiteTermoParceiroAcademia || !aceiteTermoParceiroAcademia.checked) {
@@ -2464,6 +2549,8 @@
         apresentacao: document.getElementById('ac-apresentacao').value,
         email: email,
         senha: senha,
+        // D071 (2026-10-10) -- so chega aqui porque a caixa, checada acima, esta marcada.
+        aceiteTermoParceiroVersao: TERMO_PARCEIRO_VERSAO_ATUAL,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
         galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
       })).then(function () {
@@ -2517,9 +2604,8 @@
         return;
       }
 
-      // D069 Parte 3 (2026-10-10) -- mesma trava da academia, acima. So cliente (UX) -- ver
-      // comentario equivalente em enviarCadastroAcademia() sobre a coluna de banco que ainda
-      // nao existe.
+      // D069 Parte 3 (2026-10-10) -- mesma trava da academia, acima. D071 (2026-10-10):
+      // ver o comentario equivalente em enviarCadastroAcademia() sobre a migration 043.
       var aceiteTermoParceiroPersonal = document.getElementById('pe-aceite-termo-parceiro');
       var erroAceitePersonal = document.getElementById('pe-aceite-termo-parceiro-erro');
       if (!aceiteTermoParceiroPersonal || !aceiteTermoParceiroPersonal.checked) {
@@ -2571,6 +2657,8 @@
         apresentacao: document.getElementById('pe-apresentacao').value,
         email: email,
         senha: senha,
+        // D071 (2026-10-10) -- so chega aqui porque a caixa, checada acima, esta marcada.
+        aceiteTermoParceiroVersao: TERMO_PARCEIRO_VERSAO_ATUAL,
         fotoPerfil: (arquivoFoto && arquivoFoto[0]) ? arquivoFoto[0] : null,
         galeria: galeriaArquivos ? Array.prototype.slice.call(galeriaArquivos) : []
       })).then(function () {

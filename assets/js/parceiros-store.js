@@ -607,7 +607,12 @@
     nome_obrigatorio: "Informe o nome da academia.",
     nao_autenticado: "Sessão inválida — faça login de novo e tente outra vez.",
     metodo_nao_permitido: "Erro interno (método não permitido) — avise o suporte.",
-    falha_cadastro: "Não deu para concluir o cadastro agora. Tenta de novo em instantes."
+    falha_cadastro: "Não deu para concluir o cadastro agora. Tenta de novo em instantes.",
+    // D071 (2026-10-10) -- migration 043 da Backend: as Edge Functions
+    // signup-personal/signup-academia agora exigem aceite_termo_parceiro_versao
+    // no corpo (gatilho BEFORE INSERT em personais/academias). Mesmo texto da
+    // caixa de aceite da tela (D069 Parte 3), para o erro nunca surpreender.
+    aceite_termo_parceiro_obrigatorio: "É necessário aceitar o Termo do Parceiro e a Política de Privacidade para concluir o cadastro."
   };
 
   function mensagemErroEdgeFunction(corpoResposta) {
@@ -719,10 +724,16 @@
         throw new Error("Conta criada. Confirme seu e-mail antes de continuar o cadastro.");
       }
       var cidadeUf = dividirCidadeUf(dados.cidade);
+      // D071 (2026-10-10) -- migration 043 da Backend (D144 dela): a Edge
+      // Function agora exige este campo (gatilho BEFORE INSERT em `academias`).
+      // Só chega aqui preenchido depois que a pessoa marca a caixa de aceite
+      // na tela (parceiro.html bloqueia o envio antes disso, D069 Parte 3) --
+      // nunca inventar valor aqui, sempre vem de quem chamou.
       return chamarEdgeFunctionCadastro("signup-academia", sessao.access_token, {
         nome: (dados.nome || "").trim(),
         cidade: cidadeUf.cidade || undefined,
-        uf: cidadeUf.uf || undefined
+        uf: cidadeUf.uf || undefined,
+        aceite_termo_parceiro_versao: (dados.aceiteTermoParceiroVersao || "").trim() || undefined
       }).then(function (corpoResposta) {
         var academiaId = corpoResposta.academia_id;
         // Campos novos da migration 024 (CNPJ, endereco, responsavel,
@@ -771,9 +782,12 @@
       if (!sessao || !sessao.access_token) {
         throw new Error("Conta criada. Confirme seu e-mail antes de continuar o cadastro.");
       }
+      // D071 (2026-10-10) -- mesma exigencia nova da migration 043, ver o
+      // comentario equivalente em cadastrarAcademia acima.
       return chamarEdgeFunctionCadastro("signup-personal", sessao.access_token, {
         nome_exibicao: (dados.nome || "").trim(),
-        cref: (dados.cref || "").trim() || undefined
+        cref: (dados.cref || "").trim() || undefined,
+        aceite_termo_parceiro_versao: (dados.aceiteTermoParceiroVersao || "").trim() || undefined
       }).then(function (corpoResposta) {
         var personalId = corpoResposta.personal_id;
         // Campos novos da migration 024 (formacao, especializacao, cidade,
@@ -827,7 +841,10 @@
       telefone: linha.telefone,
       apresentacao: linha.apresentacao,
       faixaId: linha.faixa_comercial_id,
-      criadoEm: linha.criada_em
+      criadoEm: linha.criada_em,
+      // D071 (2026-10-10) -- migration 043: NULL para quem se cadastrou antes
+      // dela. parceiro.html usa isto pra decidir se mostra o aceite retroativo.
+      aceiteTermoParceiroVersao: linha.aceite_termo_parceiro_versao
     };
   }
 
@@ -846,7 +863,10 @@
       telefone: linha.telefone,
       apresentacao: linha.apresentacao,
       faixaId: linha.faixa_comercial_id,
-      criadoEm: linha.criado_em
+      criadoEm: linha.criado_em,
+      // D071 (2026-10-10) -- ver o comentario equivalente em
+      // linhaAcademiaParaMinhaConta, acima.
+      aceiteTermoParceiroVersao: linha.aceite_termo_parceiro_versao
     };
   }
 
@@ -880,6 +900,40 @@
         return null;
       });
     });
+  };
+
+  // D071 (2026-10-10) -- aceite retroativo do Termo do Parceiro (migration
+  // 043 da Backend, D144 dela, item 2). Chamada pelo site no proximo login
+  // de quem se cadastrou antes da 043 (aceiteTermoParceiroVersao NULL em
+  // minhaConta()). A funcao RPC resolve o(s) proprio(s) registro(s) do
+  // chamador por auth.uid() -- nunca aceita id de personal/academia vindo do
+  // cliente, e e idempotente (nao sobrescreve um aceite real ja gravado). Se
+  // a 043 ainda nao estiver em producao, o PostgREST devolve PGRST202 --
+  // detectado aqui e trocado por mensagem amigavel, mesmo padrao ja usado em
+  // vinculo-convite-store.js (D070).
+  function mensagemFuncaoAindaNaoExisteAceite(erro) {
+    var codigo = erro && erro.code;
+    var texto = ((erro && erro.message) || "").toLowerCase();
+    return codigo === "PGRST202" || texto.indexOf("could not find the function") !== -1;
+  }
+
+  ParceirosStoreSupabase.registrarAceiteTermoParceiro = function (versao) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("registrar_aceite_termo_parceiro", { p_versao: versao })
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (mensagemFuncaoAindaNaoExisteAceite(resultado.error)) {
+            throw new Error("Essa função ainda não está em produção -- assim que a Backend publicar a migration 043, o aceite passa a ser gravado aqui.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para registrar o aceite agora.");
+        }
+        return resultado.data;
+      });
   };
 
   // Atualiza so os campos de perfil publico/privado da 024 -- nunca
