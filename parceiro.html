@@ -844,6 +844,15 @@
         return;
       }
       view.innerHTML = renderDetalheVinculado(aluno);
+      // D070 (2026-10-10) -- os listeners dos botoes novos sao presos
+      // DEPOIS do innerHTML, nunca via onclick inline com o nome do aluno
+      // interpolado na string (nome pode ter aspas/apostrofo e quebrar o
+      // HTML) -- mesmo padrao ja usado em renderAlunosVinculados() acima
+      // (addEventListener, nunca onclick com dado dinamico).
+      var btnAbrirFichaVinculado = document.getElementById('btn-abrir-ficha-vinculado');
+      if (btnAbrirFichaVinculado) { btnAbrirFichaVinculado.addEventListener('click', function () { abrirFichaDoVinculado(aluno.user_id); }); }
+      var btnDesfazerVinculo = document.getElementById('btn-desfazer-vinculo');
+      if (btnDesfazerVinculo) { btnDesfazerVinculo.addEventListener('click', function () { confirmarDesfazerVinculo(aluno.user_id, aluno.nome); }); }
     }
 
     function renderDetalheVinculado(aluno) {
@@ -861,7 +870,17 @@
       ];
       var html = '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>';
       html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 4px;">' + escaparHtmlAluno(aluno.nome) + '</h2>';
-      html += '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 18px;">Vinculado pelo código do app -- ainda sem ficha cadastrada. Abrir a ficha completa e desfazer o vínculo chegam na próxima etapa.</p>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 14px;">Vinculado pelo código do app.</p>';
+      // D070 (2026-10-10) -- Parte 2 da D069, adiantada em cima da
+      // migration 042 da Backend (PASSA da Seguranca de la, D063 dela,
+      // ainda NAO em producao no momento em que isto foi escrito). Os
+      // ids abaixo recebem addEventListener em abrirDetalheVinculado() --
+      // nunca onclick inline com o nome do aluno.
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px;">' +
+        '<button type="button" id="btn-abrir-ficha-vinculado" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Abrir ficha completa</button>' +
+        '<button type="button" id="btn-desfazer-vinculo" style="background:none;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Desfazer vínculo</button>' +
+      '</div>';
+      html += '<p id="vinculado-acao-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 14px;"></p>';
       linhas.forEach(function (linha) {
         if (linha[1] === null || linha[1] === undefined || linha[1] === '') { return; }
         html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-border);font-size:0.88rem;">' +
@@ -869,6 +888,47 @@
           '<span>' + escaparHtmlAluno(String(linha[1])) + '</span></div>';
       });
       return html;
+    }
+
+    // D070 (2026-10-10) -- Parte 2 da D069, adiantada em cima da migration
+    // 042 da Backend (PASSA da Seguranca de la, D063 dela, ainda NAO em
+    // producao no momento em que isto foi escrito). Chama
+    // ficha_do_aluno_vinculado_parceiro() -- nunca INSERT direto com
+    // aluno_user_id, exatamente como a D069/D070 pedem. Se a funcao ainda
+    // nao existir no banco, o erro amigavel do VinculoConviteStore aparece
+    // aqui, sem quebrar a tela.
+    function abrirFichaDoVinculado(alunoId) {
+      var erroEl = document.getElementById('vinculado-acao-erro');
+      if (erroEl) { erroEl.style.display = 'none'; }
+      VinculoConviteStore.abrirFichaVinculado(alunoId).then(function (ficha) {
+        abrirDetalheAluno(ficha.id);
+      }).catch(function (erro) {
+        if (erroEl) {
+          erroEl.textContent = mensagemSeguraErro(erro);
+          erroEl.style.display = 'block';
+        }
+      });
+    }
+
+    // D070 -- "Desfazer vínculo" do lado do parceiro, chamando
+    // encerrar_vinculo_com_aluno() (resolve o vínculo e fixa o motivo
+    // internamente -- nunca recebe id de vínculo nem motivo do cliente,
+    // por desenho da própria funcao/migration 042). Confirmacao antes,
+    // sem escolha de motivo nenhuma, como a D070 exige.
+    function confirmarDesfazerVinculo(alunoId, nomeAluno) {
+      var confirmado = window.confirm('Desfazer o vínculo com ' + nomeAluno + '? O aluno deixa de aparecer na sua lista de alunos, mas pode voltar a se vincular depois, se quiser.');
+      if (!confirmado) { return; }
+      var erroEl = document.getElementById('vinculado-acao-erro');
+      if (erroEl) { erroEl.style.display = 'none'; }
+      VinculoConviteStore.desfazerVinculoComAluno(alunoId).then(function () {
+        mostrarListaAlunos();
+        carregarListaAlunos(alunosPaginaAtual);
+      }).catch(function (erro) {
+        if (erroEl) {
+          erroEl.textContent = mensagemSeguraErro(erro);
+          erroEl.style.display = 'block';
+        }
+      });
     }
 
     function renderListaAlunos(resultado) {

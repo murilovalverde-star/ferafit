@@ -171,6 +171,69 @@
       });
   };
 
+  // D070 (2026-10-10) -- Parte 2 da D069, adiantada em cima da migration
+  // 042 da Backend (fase2/sql/042_ficha_pelo_site_e_desfazer_vinculo.sql),
+  // que já tem PASSA da Segurança (D063 dela) mas ainda NÃO está em
+  // produção no momento em que este trecho foi escrito. Enquanto isso, o
+  // PostgREST devolve "Could not find the function ... in the schema
+  // cache" (código PGRST202) para as duas funções novas abaixo -- detecta
+  // isso aqui e troca por uma mensagem amigável, exatamente como a D070
+  // pede ("se a função não existir no banco, erro amigável, sem quebrar").
+  function mensagemFuncaoAindaNaoExiste(erro) {
+    var codigo = erro && erro.code;
+    var texto = ((erro && erro.message) || "").toLowerCase();
+    return codigo === "PGRST202" || texto.indexOf("could not find the function") !== -1;
+  }
+
+  // D070 -- equivalente, para o SITE, da ficha_do_aluno_vinculado() que o
+  // app já usa (migration 038, só personal) -- cobre personal E academia.
+  // A própria função (042) confere vínculo aceito e em vigor antes de
+  // devolver a ficha existente ou criar uma vazia -- NUNCA é feito INSERT
+  // direto com aluno_user_id aqui, exatamente como a D069/D070 pedem.
+  VinculoConviteStoreSupabase.abrirFichaVinculado = function (alunoId) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("ficha_do_aluno_vinculado_parceiro", { p_aluno_id: alunoId })
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
+            throw new Error("Essa função ainda não está em produção -- assim que a Backend publicar a migration 042, abrir a ficha passa a funcionar aqui.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para abrir a ficha deste aluno agora.");
+        }
+        return resultado.data;
+      });
+  };
+
+  // D070 -- "Desfazer vínculo" do lado do PARCEIRO (personal ou academia).
+  // Nunca manda id de vínculo nem motivo -- a própria função (042) resolve
+  // o vínculo vigente internamente e fixa o motivo (ver o cabeçalho da
+  // migration, item 4b, sobre por que expor isso ao cliente seria
+  // arriscado: deixaria o parceiro registrar "revogado_pelo_aluno" sem o
+  // aluno ter agido, ou vice-versa).
+  VinculoConviteStoreSupabase.desfazerVinculoComAluno = function (alunoId) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("encerrar_vinculo_com_aluno", { p_aluno_id: alunoId })
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
+            throw new Error("Essa função ainda não está em produção -- assim que a Backend publicar a migration 042, desfazer o vínculo passa a funcionar aqui.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para desfazer esse vínculo agora.");
+        }
+        return resultado.data;
+      });
+  };
+
   global.VinculoConviteStore = VinculoConviteStoreSupabase;
   global.VinculoConviteStoreSupabase = VinculoConviteStoreSupabase;
 })(typeof window !== "undefined" ? window : global);
