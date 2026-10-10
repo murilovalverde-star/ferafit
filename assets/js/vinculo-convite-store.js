@@ -138,6 +138,39 @@
       });
   };
 
+  // D069 do Orquestrador (2026-10-10), Parte 1 -- Murilo escolheu a
+  // opção (a) da D068: a lista "Meus alunos" passa a mostrar também
+  // quem tem vínculo ativo (pelo código/QR da D067), mesmo sem
+  // ficha cadastrada à mão. Lê a view `vw_aluno_para_parceiro`
+  // (migration 005/032, confirmada no ar), que já filtra pelo
+  // parceiro certo via `pode_ver_aluno()` (RLS da própria view, não
+  // desta função) -- por isso não recebe nenhum parâmetro de
+  // parceiro aqui. SÓ LEITURA: esta função nunca grava nada em
+  // `fichas_aluno_parceiro` -- abrir a ficha de verdade pela função
+  // nova (sem INSERT direto com `aluno_user_id`) é a Parte 2,
+  // ainda esperando a migration 042 da Backend.
+  //
+  // `peso_meta_kg` só existe na view a partir da migration 041,
+  // ainda só-arquivo (D140 da Backend) no momento em que este
+  // trecho foi escrito -- por isso o código em parceiro.html lê
+  // esse campo de forma defensiva (undefined até a 041 publicar),
+  // em vez de supor que ele sempre vem preenchido.
+  VinculoConviteStoreSupabase.listarAlunosVinculados = function () {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.from("vw_aluno_para_parceiro").select("*")
+      .then(function (resultado) {
+        if (resultado.error) {
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para carregar os alunos vinculados agora.");
+        }
+        return resultado.data || [];
+      });
+  };
+
   global.VinculoConviteStore = VinculoConviteStoreSupabase;
   global.VinculoConviteStoreSupabase = VinculoConviteStoreSupabase;
 })(typeof window !== "undefined" ? window : global);

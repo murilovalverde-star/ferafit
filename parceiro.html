@@ -354,6 +354,14 @@
             </div>
 
             <div id="alunos-lista-view">
+              <!-- D069 Parte 1 (2026-10-10) -- vinculados pelo codigo/QR
+                   (D067), lidos de vw_aluno_para_parceiro, sem ficha
+                   cadastrada a mao ainda -- ver STATUS.md, entrada D069. -->
+              <div id="alunos-vinculados-secao" style="display:none;margin-bottom:18px;">
+                <h3 style="font-size:0.78rem;font-weight:800;color:var(--texto-secundario);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 8px;">Vinculados pelo app</h3>
+                <div id="alunos-vinculados-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
+                <div style="border-bottom:1px solid var(--card-border);margin:14px 0 0;"></div>
+              </div>
               <div class="campo" style="margin-bottom:12px;">
                 <input id="alunos-busca" type="text" placeholder="Buscar aluno pelo nome" oninput="buscarAlunosDebounced()">
               </div>
@@ -401,6 +409,13 @@
                 <p id="va-whatsapp-mensagem" style="display:none;font-size:0.85rem;margin:10px 0 0;"></p>
               </div>
             </div>
+
+            <!-- D069 Parte 1 -- detalhe so-leitura do aluno vinculado,
+                 sem ficha ainda. Abrir a ficha de verdade (pela funcao
+                 nova, sem INSERT direto com aluno_user_id) e o botao
+                 "Desfazer vinculo" sao a Parte 2 -- esperando a
+                 migration 042 da Backend. Ver STATUS.md, entrada D069. -->
+            <div id="aluno-vinculado-detalhe-view" style="display:none;"></div>
           </div>
 
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
@@ -673,6 +688,7 @@
     var parceiroAtual = null; // {tipo, id} -- setado em renderMeusAlunos()
     var alunosPaginaAtual = 1;
     var ALUNOS_POR_PAGINA = 10;
+    var ultimosAlunosVinculados = []; // D069 Parte 1 -- cache da ultima leitura de vw_aluno_para_parceiro, pra abrir o detalhe sem reconsultar
     var alunoAbertoId = null;
     var buscarAlunosTimeout = null;
 
@@ -696,6 +712,8 @@
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       var vincularAlunoView = document.getElementById('vincular-aluno-view');
       if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
+      var alunoVinculadoDetalheView = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheView) { alunoVinculadoDetalheView.style.display = 'none'; }
       limparTreinoFormResidual();
     }
 
@@ -729,6 +747,7 @@
       var termo = document.getElementById('alunos-busca').value;
       var corpo = document.getElementById('alunos-lista-corpo');
       corpo.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      carregarAlunosVinculados(termo);
       FichasStore.listarFichas(parceiroAtual, { busca: termo, pagina: pagina, porPagina: ALUNOS_POR_PAGINA }).then(function (resultado) {
         alunosPaginaAtual = resultado.pagina;
         renderListaAlunos(resultado);
@@ -736,6 +755,103 @@
         corpo.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
         document.getElementById('alunos-paginacao').innerHTML = '';
       });
+    }
+
+    // D069 Parte 1 -- le vw_aluno_para_parceiro (RLS da propria view ja
+    // filtra pelo parceiro certo) e filtra por nome no cliente -- sem
+    // paginacao de proposito, numero esperado e pequeno no Beta 1.
+    function carregarAlunosVinculados(termo) {
+      var secao = document.getElementById('alunos-vinculados-secao');
+      var corpo = document.getElementById('alunos-vinculados-corpo');
+      VinculoConviteStore.listarAlunosVinculados().then(function (alunos) {
+        ultimosAlunosVinculados = alunos || [];
+        renderAlunosVinculados(termo);
+      }).catch(function (erro) {
+        ultimosAlunosVinculados = [];
+        secao.style.display = 'block';
+        corpo.innerHTML = '<p style="color:#c0392b;font-size:0.82rem;">' + mensagemSeguraErro(erro) + '</p>';
+      });
+    }
+
+    function renderAlunosVinculados(termo) {
+      var secao = document.getElementById('alunos-vinculados-secao');
+      var corpo = document.getElementById('alunos-vinculados-corpo');
+      var termoBusca = (termo || '').trim().toLowerCase();
+      var filtrados = ultimosAlunosVinculados.filter(function (aluno) {
+        return !termoBusca || (aluno.nome || '').toLowerCase().indexOf(termoBusca) !== -1;
+      });
+      if (filtrados.length === 0) {
+        secao.style.display = 'none';
+        corpo.innerHTML = '';
+        return;
+      }
+      secao.style.display = 'block';
+      corpo.innerHTML = '';
+      filtrados.forEach(function (aluno) {
+        var linha = document.createElement('div');
+        linha.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--card-border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;';
+        var rotulo = document.createElement('span');
+        rotulo.innerHTML = '<strong>' + escaparHtmlAluno(aluno.nome) + '</strong>' +
+          ' <span style="font-size:0.68rem;font-weight:700;color:var(--ambar);border:1px solid var(--ambar);border-radius:999px;padding:2px 8px;margin-left:6px;white-space:nowrap;">Vinculado pelo app</span>';
+        var seta = document.createElement('span');
+        seta.style.color = 'var(--texto-secundario)';
+        seta.textContent = '›';
+        linha.appendChild(rotulo);
+        linha.appendChild(seta);
+        linha.addEventListener('click', function () { abrirDetalheVinculado(aluno.user_id); });
+        corpo.appendChild(linha);
+      });
+    }
+
+    // D069 Parte 1 -- so leitura dos dados que vw_aluno_para_parceiro ja
+    // devolve hoje. Nenhuma ficha e criada/editada aqui (nunca INSERT
+    // direto com aluno_user_id, como a propria D069 pede) -- abrir a
+    // ficha de verdade e "Desfazer vinculo" sao a Parte 2, esperando a
+    // migration 042 da Backend.
+    function abrirDetalheVinculado(userId) {
+      var encontrados = ultimosAlunosVinculados.filter(function (a) { return a.user_id === userId; });
+      var aluno = encontrados[0];
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var treinosBaseViewVn = document.getElementById('treinos-base-view');
+      if (treinosBaseViewVn) { treinosBaseViewVn.style.display = 'none'; }
+      var aparelhosCargaViewVn = document.getElementById('aparelhos-carga-view');
+      if (aparelhosCargaViewVn) { aparelhosCargaViewVn.style.display = 'none'; }
+      var vincularAlunoViewVn = document.getElementById('vincular-aluno-view');
+      if (vincularAlunoViewVn) { vincularAlunoViewVn.style.display = 'none'; }
+      var view = document.getElementById('aluno-vinculado-detalhe-view');
+      view.style.display = 'block';
+      if (!aluno) {
+        view.innerHTML = '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button><p style="color:#c0392b;">Não encontrei esse aluno na lista -- volte e tente de novo.</p>';
+        return;
+      }
+      view.innerHTML = renderDetalheVinculado(aluno);
+    }
+
+    function renderDetalheVinculado(aluno) {
+      var linhas = [
+        ['Objetivo', aluno.objetivo],
+        ['Nível', aluno.nivel],
+        ['Altura', aluno.altura_cm ? (aluno.altura_cm + ' cm') : null],
+        ['Peso inicial', aluno.peso_inicial_kg ? (aluno.peso_inicial_kg + ' kg') : null],
+        ['Peso meta', aluno.peso_meta_kg ? (aluno.peso_meta_kg + ' kg') : null], // so existe na view a partir da migration 041 (ainda so-arquivo)
+        ['Dias por semana', aluno.dias_por_semana],
+        ['Divisão', aluno.divisao],
+        ['Treino atual', aluno.treino_numero ? ('Treino ' + aluno.treino_numero) : null],
+        ['Congelado (vínculo patrocinado)', aluno.congelado === true ? 'Sim' : (aluno.congelado === false ? 'Não' : null)],
+        ['Última sincronização', aluno.ultima_sincronizacao ? new Date(aluno.ultima_sincronizacao).toLocaleString('pt-BR') : null]
+      ];
+      var html = '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>';
+      html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 4px;">' + escaparHtmlAluno(aluno.nome) + '</h2>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 18px;">Vinculado pelo código do app -- ainda sem ficha cadastrada. Abrir a ficha completa e desfazer o vínculo chegam na próxima etapa.</p>';
+      linhas.forEach(function (linha) {
+        if (linha[1] === null || linha[1] === undefined || linha[1] === '') { return; }
+        html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-border);font-size:0.88rem;">' +
+          '<span style="color:var(--texto-secundario);">' + escaparHtmlAluno(linha[0]) + '</span>' +
+          '<span>' + escaparHtmlAluno(String(linha[1])) + '</span></div>';
+      });
+      return html;
     }
 
     function renderListaAlunos(resultado) {
@@ -945,6 +1061,8 @@
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       var vincularAlunoView = document.getElementById('vincular-aluno-view');
       if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
+      var alunoVinculadoDetalheView = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheView) { alunoVinculadoDetalheView.style.display = 'none'; }
       view.style.display = 'block';
     }
 
@@ -1089,6 +1207,8 @@
       if (aparelhosCargaViewD) { aparelhosCargaViewD.style.display = 'none'; }
       var vincularAlunoViewD = document.getElementById('vincular-aluno-view');
       if (vincularAlunoViewD) { vincularAlunoViewD.style.display = 'none'; }
+      var alunoVinculadoDetalheViewD = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheViewD) { alunoVinculadoDetalheViewD.style.display = 'none'; }
       var view = document.getElementById('aluno-detalhe-view');
       view.style.display = 'block';
       view.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
@@ -1488,6 +1608,8 @@
       if (aparelhosCargaView) { aparelhosCargaView.style.display = 'none'; }
       var vincularAlunoView = document.getElementById('vincular-aluno-view');
       if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
+      var alunoVinculadoDetalheView = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheView) { alunoVinculadoDetalheView.style.display = 'none'; }
       document.getElementById('treinos-base-view').style.display = 'block';
       document.getElementById('treino-base-form-view').style.display = 'none';
       document.getElementById('treinos-base-lista-view').style.display = 'block';
@@ -1563,6 +1685,8 @@
       document.getElementById('treinos-base-view').style.display = 'none';
       var vincularAlunoView = document.getElementById('vincular-aluno-view');
       if (vincularAlunoView) { vincularAlunoView.style.display = 'none'; }
+      var alunoVinculadoDetalheView = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheView) { alunoVinculadoDetalheView.style.display = 'none'; }
       limparTreinoFormResidual();
       var view = document.getElementById('aparelhos-carga-view');
       view.style.display = 'block';
@@ -1597,6 +1721,8 @@
       if (treinosBaseViewV) { treinosBaseViewV.style.display = 'none'; }
       var aparelhosCargaViewV = document.getElementById('aparelhos-carga-view');
       if (aparelhosCargaViewV) { aparelhosCargaViewV.style.display = 'none'; }
+      var alunoVinculadoDetalheViewV = document.getElementById('aluno-vinculado-detalhe-view');
+      if (alunoVinculadoDetalheViewV) { alunoVinculadoDetalheViewV.style.display = 'none'; }
       document.getElementById('va-codigo').value = '';
       var msg = document.getElementById('va-mensagem');
       msg.style.display = 'none';
