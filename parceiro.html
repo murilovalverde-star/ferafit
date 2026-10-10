@@ -184,6 +184,16 @@
               <p id="ac-cadastro-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:-6px 0 14px;"></p>
               <p class="campo-nota">Ao enviar, os dados da academia e a galeria ficam visíveis na busca pública do Fera Fit depois da aprovação.</p>
 
+              <!-- D069 Parte 3 (2026-10-10) -- caixa de aceite do Termo do Parceiro, texto exato da
+                   Juridica (STATUS.md dela, entrada D063): "Li e aceito o Termo do Parceiro Fera Fit
+                   e a Política de Privacidade.", sem travessão, com os dois nomes como link. "Sem
+                   aceite, sem cadastro" -- enviarCadastroAcademia() bloqueia o envio se não estiver marcada. -->
+              <label style="display:flex;align-items:flex-start;gap:8px;margin:0 0 6px;font-size:0.85rem;color:var(--texto-secundario);cursor:pointer;">
+                <input id="ac-aceite-termo-parceiro" type="checkbox" style="margin-top:3px;flex-shrink:0;">
+                <span>Li e aceito o <a href="termo-parceiro.html" target="_blank" rel="noopener">Termo do Parceiro Fera Fit</a> e a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+              </label>
+              <p id="ac-aceite-termo-parceiro-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 14px;">É necessário aceitar o Termo do Parceiro e a Política de Privacidade para concluir o cadastro.</p>
+
               <button class="botao-primario largura-total" type="button" onclick="enviarCadastroAcademia()">Criar conta de academia</button>
             </div>
 
@@ -301,6 +311,13 @@
               </div>
 
               <p class="campo-nota">Ao enviar, sua foto, galeria e dados profissionais ficam visíveis na busca pública de personais do Fera Fit depois de aprovado. A aprovação é feita por alguém do Fera Fit e pode levar alguns dias — não é instantânea.</p>
+
+              <!-- D069 Parte 3 (2026-10-10) -- mesma caixa de aceite da academia, acima. -->
+              <label style="display:flex;align-items:flex-start;gap:8px;margin:0 0 6px;font-size:0.85rem;color:var(--texto-secundario);cursor:pointer;">
+                <input id="pe-aceite-termo-parceiro" type="checkbox" style="margin-top:3px;flex-shrink:0;">
+                <span>Li e aceito o <a href="termo-parceiro.html" target="_blank" rel="noopener">Termo do Parceiro Fera Fit</a> e a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+              </label>
+              <p id="pe-aceite-termo-parceiro-erro" style="display:none;color:#ff6a6a;font-size:0.85rem;margin:6px 0 14px;">É necessário aceitar o Termo do Parceiro e a Política de Privacidade para concluir o cadastro.</p>
 
               <button class="botao-primario largura-total" type="button" onclick="enviarCadastroPersonal()">Enviar cadastro</button>
             </div>
@@ -2358,6 +2375,21 @@
       }
       erro.style.display = 'none';
 
+      // D069 Parte 3 (2026-10-10) -- "sem aceite, sem cadastro" (texto literal da demanda).
+      // So trava no cliente (UX) -- nao existe hoje coluna no banco pra gravar esse aceite
+      // ( a Juridica recomendou aceite_termo_parceiro_versao/_em em personais/academias, D063
+      // dela, mas nenhuma migration criou essas colunas ainda -- ver STATUS.md, entrada desta
+      // rodada). Quando a Backend criar essa migration, este bloco passa a tambem enviar o
+      // aceite pro ParceirosStore.cadastrarAcademia (nunca inventar o nome do parametro aqui
+      // sem o contrato dela).
+      var aceiteTermoParceiroAcademia = document.getElementById('ac-aceite-termo-parceiro');
+      var erroAceiteAcademia = document.getElementById('ac-aceite-termo-parceiro-erro');
+      if (!aceiteTermoParceiroAcademia || !aceiteTermoParceiroAcademia.checked) {
+        if (erroAceiteAcademia) { erroAceiteAcademia.style.display = 'block'; }
+        return;
+      }
+      if (erroAceiteAcademia) { erroAceiteAcademia.style.display = 'none'; }
+
       var arquivoFoto = document.getElementById('ac-foto').files;
       var senha = document.getElementById('ac-senha').value;
       var botaoEnviar = document.querySelector('#cadastro-academia button.botao-primario');
@@ -2424,6 +2456,17 @@
         erroSenha.style.display = 'block';
         return;
       }
+
+      // D069 Parte 3 (2026-10-10) -- mesma trava da academia, acima. So cliente (UX) -- ver
+      // comentario equivalente em enviarCadastroAcademia() sobre a coluna de banco que ainda
+      // nao existe.
+      var aceiteTermoParceiroPersonal = document.getElementById('pe-aceite-termo-parceiro');
+      var erroAceitePersonal = document.getElementById('pe-aceite-termo-parceiro-erro');
+      if (!aceiteTermoParceiroPersonal || !aceiteTermoParceiroPersonal.checked) {
+        if (erroAceitePersonal) { erroAceitePersonal.style.display = 'block'; }
+        return;
+      }
+      if (erroAceitePersonal) { erroAceitePersonal.style.display = 'none'; }
 
       var arquivoFoto = document.getElementById('pe-foto').files;
 
