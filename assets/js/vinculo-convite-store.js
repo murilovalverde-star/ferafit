@@ -155,6 +155,23 @@
   // trecho foi escrito -- por isso o código em parceiro.html lê
   // esse campo de forma defensiva (undefined até a 041 publicar),
   // em vez de supor que ele sempre vem preenchido.
+  // D073 (2026-10-12) -- achado: a coluna `congelado` da view é
+  // computada por esta_congelado(), que só responde pro próprio
+  // aluno, o patrocinador dele ou admin (migration 032 da Backend,
+  // D111/D112) -- RAISE EXCEPTION pra qualquer outro parceiro. A
+  // migration 041 (já em produção) recriou a view sem a proteção
+  // que a 032 tinha posto nessa coluna (CASE que só chama a função
+  // pra quem tem o direito), então hoje ela quebra o SELECT inteiro
+  // pra qualquer parceiro com vínculo comum (não-patrocinado) --
+  // registrado no STATUS (P64/P65) pra Backend mesclar as duas
+  // migrations de vez. Enquanto isso não sobe, pedimos só as
+  // colunas que a view sempre teve, SEM `congelado` -- como é uma
+  // coluna computada dentro de uma view-SELECT simples (uma tabela
+  // só, sem agregação), o Postgres poda do plano a coluna não
+  // pedida e a função nunca chega a ser chamada. `aluno.congelado`
+  // fica `undefined` em vez de `true`/`false` -- renderDetalheVinculado()
+  // já trata isso (linha "Congelado" some da ficha em vez de
+  // quebrar), sem precisar mudar mais nada.
   VinculoConviteStoreSupabase.listarAlunosVinculados = function () {
     var cliente;
     try {
@@ -162,7 +179,8 @@
     } catch (erroSincrono) {
       return Promise.reject(erroSincrono);
     }
-    return cliente.from("vw_aluno_para_parceiro").select("*")
+    return cliente.from("vw_aluno_para_parceiro")
+      .select("user_id,nome,objetivo,altura_cm,peso_inicial_kg,nivel,dias_por_semana,divisao,treino_numero,calibracoes,historico_cargas,progressao,medidas,sessoes,ultima_sincronizacao,peso_meta_kg")
       .then(function (resultado) {
         if (resultado.error) {
           throw new Error((resultado.error && resultado.error.message) || "Não deu para carregar os alunos vinculados agora.");
