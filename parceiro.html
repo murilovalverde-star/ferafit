@@ -840,6 +840,7 @@
     // foi inventada para elas.
     var BOTAO_VOLTAR_ALUNOS_D074 = '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>';
     var TEXTO_REATIVAR_D074 = 'Para voltar a atender esta pessoa, é o convite normal (código ou QR), com o aceite do aluno no app.';
+    var TEXTO_FICHA_MANUAL_D075 = 'Ficha cadastrada à mão não volta: se o aluno voltar, cadastre uma ficha nova ou vincule pelo convite do app. No dia 31 ela é apagada, com as medições.';
 
     function esconderViewsDesvinculados() {
       var a = document.getElementById('desvinculados-view');
@@ -879,30 +880,64 @@
       carregarDesvinculados();
     }
 
+    function tentarDesvinculados(promessa) {
+      return promessa.then(function (dados) { return { dados: dados }; }, function (erro) { return { erro: erro }; });
+    }
+
+    // D075 -- a aba junta duas fontes: alunos do app (044, em producao) e
+    // fichas cadastradas a mao (045, so depois de publicada; antes disso a
+    // lista de fichas vem vazia). Se uma das duas falhar, a outra aparece
+    // mesmo assim e o erro vem escrito, sem esconder nada.
     function carregarDesvinculados() {
       var view = document.getElementById('desvinculados-view');
       var cabecalho = BOTAO_VOLTAR_ALUNOS_D074 +
         '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Desvinculados</h2>' +
-        '<p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 14px;">Quem foi desvinculado nos últimos 30 dias. Só leitura. ' + escaparHtmlAluno(TEXTO_REATIVAR_D074) + '</p>';
+        '<p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 14px;">Quem foi desvinculado nos últimos 30 dias. Só leitura. Aluno do app: ' + escaparHtmlAluno(TEXTO_REATIVAR_D074) + ' ' + escaparHtmlAluno(TEXTO_FICHA_MANUAL_D075) + '</p>';
       view.innerHTML = cabecalho + '<p style="color:var(--texto-secundario);">Carregando…</p>';
-      VinculoConviteStore.listarExAlunosEmLeitura().then(function (linhas) {
+      Promise.all([
+        tentarDesvinculados(VinculoConviteStore.listarExAlunosEmLeitura()),
+        tentarDesvinculados(FichasStore.listarFichasManuaisEmLeitura())
+      ]).then(function (r) {
         if (view.style.display === 'none') { return; }
-        if (!linhas.length) {
-          view.innerHTML = cabecalho + '<p style="color:var(--texto-secundario);">Ninguém desvinculado nos últimos 30 dias.</p>';
+        var apps = r[0], manuais = r[1];
+        var itens = [];
+        (manuais.dados || []).forEach(function (f) {
+          itens.push({ tipo: 'manual', id: f.ficha_id, nome: f.nome, expira_em: f.expira_em, quando: f.desvinculada_em });
+        });
+        (apps.dados || []).forEach(function (l) {
+          itens.push({ tipo: 'app', id: l.aluno_id, nome: l.nome, expira_em: l.expira_em, quando: l.vinculo_encerrado_em });
+        });
+        itens.sort(function (a, b) { return new Date(b.quando).getTime() - new Date(a.quando).getTime(); });
+        var html = cabecalho;
+        if (apps.erro) {
+          html += '<p style="color:#c0392b;">Alunos do app: ' + escaparHtmlAluno(mensagemSeguraErro(apps.erro)) + '</p>';
+        }
+        if (manuais.erro) {
+          html += '<p style="color:#c0392b;">Fichas cadastradas à mão: ' + escaparHtmlAluno(mensagemSeguraErro(manuais.erro)) + '</p>';
+        }
+        if (!itens.length) {
+          if (!apps.erro && !manuais.erro) {
+            html += '<p style="color:var(--texto-secundario);">Ninguém desvinculado nos últimos 30 dias.</p>';
+          }
+          view.innerHTML = html;
           return;
         }
-        var html = cabecalho;
-        linhas.forEach(function (l) {
-          html += '<div class="linha-desvinculado" data-aluno-id="' + escaparHtmlAluno(l.aluno_id) + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">' +
-            '<strong>' + escaparHtmlAluno(l.nome) + '</strong>' +
+        itens.forEach(function (l) {
+          var rotulo = l.tipo === 'manual' ? 'ficha à mão' : 'aluno do app';
+          html += '<div class="linha-desvinculado" data-tipo="' + l.tipo + '" data-id="' + escaparHtmlAluno(l.id) + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">' +
+            '<span><strong>' + escaparHtmlAluno(l.nome) + '</strong> <span style="color:var(--texto-secundario);font-size:0.78rem;">· ' + rotulo + '</span></span>' +
             '<span style="color:var(--texto-secundario);font-size:0.84rem;">' + escaparHtmlAluno(textoExpiraEm(l.expira_em)) + '</span></div>';
         });
         view.innerHTML = html;
         Array.prototype.forEach.call(view.querySelectorAll('.linha-desvinculado'), function (el) {
-          el.addEventListener('click', function () { abrirDetalheDesvinculado(el.getAttribute('data-aluno-id')); });
+          el.addEventListener('click', function () {
+            if (el.getAttribute('data-tipo') === 'manual') {
+              abrirDetalheAluno(Number(el.getAttribute('data-id')));
+            } else {
+              abrirDetalheDesvinculado(el.getAttribute('data-id'));
+            }
+          });
         });
-      }).catch(function (erro) {
-        view.innerHTML = cabecalho + '<p style="color:#c0392b;">' + escaparHtmlAluno(mensagemSeguraErro(erro)) + '</p>';
       });
     }
 
@@ -1546,14 +1581,29 @@
       var contrato = ficha.contrato || {};
       var anamnese = ficha.anamnese || {};
       var enderecoTexto = [endereco.rua, endereco.numero, endereco.bairro, endereco.cidade, endereco.cep].filter(Boolean).join(', ');
+      // D075 -- ficha desvinculada (045): SO LEITURA, sem editar, sem desvincular,
+      // sem treino novo, sem medicao nova. O banco tambem recusa qualquer gravacao.
+      var lerSo = !!ficha.desvinculada_em;
+      fichaDetalheAtual = ficha;
 
       var html = '';
       html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">';
       html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0;">' + escaparHtmlAluno(ficha.nome) + '</h2>';
-      html += '<div style="display:flex;gap:8px;">';
-      html += '<button type="button" onclick="abrirEdicaoAluno()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Editar</button>';
-      html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar</button>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      if (lerSo) {
+        html += '<button type="button" onclick="mostrarDesvinculados()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos desvinculados</button>';
+      } else {
+        html += '<button type="button" onclick="abrirEdicaoAluno()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Editar</button>';
+        html += '<button type="button" id="btn-desvincular-ficha" onclick="pedirConfirmacaoDesvincularFicha()" style="background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Desvincular</button>';
+        html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar</button>';
+      }
       html += '</div></div>';
+      if (lerSo) {
+        var expiraFichaMs = new Date(ficha.desvinculada_em).getTime() + 30 * 86400000;
+        html += '<p id="ficha-desvinculada-aviso" style="color:var(--texto-secundario);font-size:0.84rem;margin:0 0 14px;">Desvinculada em ' + escaparHtmlAluno(dataBrasileira(ficha.desvinculada_em)) + ' · ' + escaparHtmlAluno(textoExpiraEm(new Date(expiraFichaMs).toISOString())) + ' · somente leitura. ' + escaparHtmlAluno(TEXTO_FICHA_MANUAL_D075) + '</p>';
+      } else {
+        html += '<div id="desvincular-confirmacao" style="display:none;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin:0 0 14px;"></div>';
+      }
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Identificação</div>';
       html += linhaDetalhe('Data de nascimento', ficha.data_nascimento);
@@ -1588,20 +1638,71 @@
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Treino</div>';
       html += '<div id="treino-resumo"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
+      if (!lerSo) {
       html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">';
       html += '<button type="button" onclick="abrirSeletorAplicarBase()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Aplicar um treino-base</button>';
       html += '<button type="button" onclick="abrirMontadorTreinoPersonalizado()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Montar/editar personalizado</button>';
       html += '</div>';
       html += '<div id="treino-form" style="display:none;margin-top:12px;"></div>';
+      }
       html += '</div>';
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Medições</div>';
       html += '<div id="medicoes-lista"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
+      if (!lerSo) {
       html += '<button type="button" onclick="abrirFormularioMedicao()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-top:8px;">+ Registrar medição</button>';
       html += '<div id="medicao-form" style="display:none;margin-top:12px;"></div>';
+      }
       html += '</div>';
 
       document.getElementById('aluno-detalhe-view').innerHTML = html;
+    }
+
+    // --- D075 -- "Desvincular" (nunca "excluir") --------------------------
+    // Unico caminho que tira uma ficha da lista: rpc('desvincular_ficha')
+    // da migration 045. Confirmacao em duas etapas, na propria tela.
+    var fichaDetalheAtual = null;
+
+    function dataBrasileira(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) { return '—'; }
+      return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    }
+
+    function pedirConfirmacaoDesvincularFicha() {
+      var caixa = document.getElementById('desvincular-confirmacao');
+      if (!caixa) { return; }
+      var ehAluno = !!(fichaDetalheAtual && fichaDetalheAtual.aluno_user_id);
+      var texto = ehAluno
+        ? 'Desvincular este aluno? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
+        : 'Desvincular esta ficha? Ela fica só para leitura por 30 dias, não volta mais (nunca teve vínculo de app) e no dia 31 é apagada por inteiro, com as medições. Não há como desfazer.';
+      caixa.innerHTML = '<p style="margin:0 0 10px;font-size:0.9rem;">' + escaparHtmlAluno(texto) + '</p>' +
+        '<p id="desvincular-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 10px;"></p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<button type="button" id="btn-confirmar-desvincular" onclick="confirmarDesvincularFicha()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Sim, desvincular</button>' +
+        '<button type="button" id="btn-cancelar-desvincular" onclick="cancelarDesvincularFicha()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Cancelar</button>' +
+        '</div>';
+      caixa.style.display = 'block';
+    }
+
+    function cancelarDesvincularFicha() {
+      var caixa = document.getElementById('desvincular-confirmacao');
+      if (caixa) { caixa.style.display = 'none'; caixa.innerHTML = ''; }
+    }
+
+    function confirmarDesvincularFicha() {
+      var botao = document.getElementById('btn-confirmar-desvincular');
+      var erroEl = document.getElementById('desvincular-erro');
+      if (botao) { botao.disabled = true; }
+      if (erroEl) { erroEl.style.display = 'none'; }
+      FichasStore.desvincularFicha(alunoAbertoId).then(function () {
+        // 'ficha_manual_desvinculada' e 'vinculo_app_encerrado' levam ao mesmo
+        // lugar: a aba Desvinculados (as duas listas).
+        mostrarDesvinculados();
+      }).catch(function (erro) {
+        if (botao) { botao.disabled = false; }
+        if (erroEl) { erroEl.textContent = mensagemSeguraErro(erro); erroEl.style.display = 'block'; }
+      });
     }
 
     function abrirEdicaoAluno() {

@@ -156,19 +156,35 @@
     var de = (pagina - 1) * porPagina;
     var ate = de + porPagina - 1;
 
-    var consulta = cliente
-      .from("fichas_aluno_parceiro")
-      .select("id,nome,email,telefone,data_nascimento,treino_modo,criado_em", { count: "exact" })
-      .eq(coluna, parceiro.id)
-      .order("nome", { ascending: true })
-      .range(de, ate);
-
     var termo = (opcoes.busca || "").trim();
-    if (termo) {
-      consulta = consulta.ilike("nome", "%" + termo + "%");
+
+    // D075 (2026-10-15) -- a migration 045 (Backend, ainda so arquivo)
+    // cria `fichas_aluno_parceiro.desvinculada_em`; ficha desvinculada
+    // sai desta lista (vai para a aba "Desvinculados"). Antes da 045
+    // em producao a coluna NAO existe e o PostgREST recusa o filtro
+    // (42703) -- por isso, se for esse o erro, repete a consulta sem o
+    // filtro (comportamento de hoje) em vez de quebrar a lista inteira.
+    function montarConsulta(somenteAtivas) {
+      var c = cliente
+        .from("fichas_aluno_parceiro")
+        .select("id,nome,email,telefone,data_nascimento,treino_modo,criado_em", { count: "exact" })
+        .eq(coluna, parceiro.id);
+      if (somenteAtivas) {
+        c = c.is("desvinculada_em", null);
+      }
+      c = c.order("nome", { ascending: true }).range(de, ate);
+      if (termo) {
+        c = c.ilike("nome", "%" + termo + "%");
+      }
+      return c;
     }
 
-    return consulta.then(function (resultado) {
+    return montarConsulta(true).then(function (resultado) {
+      if (resultado.error && colunaDesvinculadaEmAusente(resultado.error)) {
+        return montarConsulta(false);
+      }
+      return resultado;
+    }).then(function (resultado) {
       if (resultado.error) {
         throw new Error("Não deu para buscar os alunos agora.");
       }
@@ -180,6 +196,16 @@
       };
     });
   };
+
+  function colunaDesvinculadaEmAusente(erro) {
+    var texto = ((erro && erro.message) || "").toLowerCase();
+    return (erro && erro.code === "42703") || texto.indexOf("desvinculada_em") !== -1;
+  }
+
+  function funcaoAindaNaoExiste(erro) {
+    var texto = ((erro && erro.message) || "").toLowerCase();
+    return (erro && erro.code === "PGRST202") || texto.indexOf("could not find the function") !== -1;
+  }
 
   // --- Buscar uma ficha completa (todos os campos, inclusive
   // anamnese -- RLS já garante que só quem cadastrou/admin chega
@@ -330,6 +356,58 @@
           throw new Error("Não deu para salvar esse treino agora.");
         }
         return resultado.data;
+      });
+  };
+
+  // D075 (2026-10-15) -- NAO existe excluir ficha no site (decisao de
+  // Murilo: so "Desvincular", igual para todos). Este e o unico caminho
+  // que tira uma ficha da lista: a fachada `desvincular_ficha` da
+  // migration 045 (Backend D149/D150, ainda so arquivo). Devolve o texto
+  // do banco: 'ficha_manual_desvinculada' (ficha feita a mao: so leitura
+  // 30 dias, apagada no dia 31, nunca volta) ou 'vinculo_app_encerrado'
+  // (aluno do app: o vinculo foi desfeito; vale a 044). As mensagens de
+  // erro do banco ja vem em portugues simples ("Ficha nao encontrada.",
+  // "Esta ficha ja foi desvinculada em DD/MM/AAAA e sera apagada em ...",
+  // "Este aluno nao tem vinculo ativo com voce...") e sao repassadas.
+  FichasStoreSupabase.desvincularFicha = function (fichaId) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("desvincular_ficha", { p_ficha_id: fichaId })
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (funcaoAindaNaoExiste(resultado.error)) {
+            throw new Error("Desvincular ainda não está disponível -- assim que a Backend publicar a migration 045, o botão passa a funcionar.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para desvincular agora.");
+        }
+        return resultado.data;
+      });
+  };
+
+  // D075 -- fichas feitas a mao que o parceiro desvinculou ha menos de 30
+  // dias (aba "Desvinculados"): linhas { ficha_id, nome, desvinculada_em,
+  // expira_em }. Antes da 045 em producao a funcao nao existe: a lista
+  // vem vazia (nao e erro -- ainda nao ha ficha desvinculada possivel).
+  FichasStoreSupabase.listarFichasManuaisEmLeitura = function () {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("minhas_fichas_manuais_em_leitura", {})
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (funcaoAindaNaoExiste(resultado.error)) {
+            return [];
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para carregar as fichas desvinculadas agora.");
+        }
+        return resultado.data || [];
       });
   };
 
