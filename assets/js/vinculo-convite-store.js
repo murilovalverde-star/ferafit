@@ -252,6 +252,59 @@
       });
   };
 
+  // D074 (2026-10-14) -- aba "Desvinculados": leitura pos-vinculo de 30
+  // dias, pelas duas funcoes da migration 044 (Backend D147, em producao).
+  // SO LEITURA: nada aqui grava, reativa ou exclui. Nunca manda nada de
+  // parceiro -- as proprias funcoes resolvem quem e o parceiro logado.
+  //
+  // meus_ex_alunos_em_leitura() -> linhas { aluno_id, nome,
+  //   vinculo_encerrado_em, expira_em }. Fichas MANUAIS (sem vinculo de
+  //   app) so entram aqui quando a Backend publicar a 045 (D148): quem
+  //   decide o que aparece e a funcao, nao este codigo.
+  VinculoConviteStoreSupabase.listarExAlunosEmLeitura = function () {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("meus_ex_alunos_em_leitura", {})
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
+            throw new Error("A leitura de desvinculados ainda não está em produção -- assim que a Backend publicar a migration 044, a lista passa a funcionar aqui.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para carregar os desvinculados agora.");
+        }
+        return resultado.data || [];
+      });
+  };
+
+  // ficha_pos_vinculo_parceiro(p_aluno_id) -> RETURNS TABLE { nome,
+  // contrato, anamnese, vinculo_encerrado_em, expira_em }. O PostgREST
+  // devolve ARRAY mesmo com 1 linha (mesmo bug ja corrigido na D060,
+  // metricas_periodo) -- desembrulha aqui, devolve a linha ou null.
+  VinculoConviteStoreSupabase.buscarFichaPosVinculo = function (alunoId) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("ficha_pos_vinculo_parceiro", { p_aluno_id: alunoId })
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
+            throw new Error("A leitura de desvinculados ainda não está em produção -- assim que a Backend publicar a migration 044, a ficha passa a abrir aqui.");
+          }
+          throw new Error((resultado.error && resultado.error.message) || "Não deu para abrir essa ficha agora.");
+        }
+        var dados = resultado.data;
+        var linha = Array.isArray(dados) ? dados[0] : dados;
+        return linha || null;
+      });
+  };
+
   global.VinculoConviteStore = VinculoConviteStoreSupabase;
   global.VinculoConviteStoreSupabase = VinculoConviteStoreSupabase;
 })(typeof window !== "undefined" ? window : global);

@@ -386,6 +386,7 @@
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
                 <button type="button" id="btn-aparelhos-carga" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;display:none;">Aparelhos de carga</button>
+                <button type="button" onclick="mostrarDesvinculados()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Desvinculados</button>
                 <button type="button" onclick="abrirVincularAluno()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Vincular aluno</button>
                 <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
               </div>
@@ -454,6 +455,12 @@
                  "Desfazer vinculo" sao a Parte 2 -- esperando a
                  migration 042 da Backend. Ver STATUS.md, entrada D069. -->
             <div id="aluno-vinculado-detalhe-view" style="display:none;"></div>
+
+            <!-- D074 -- aba "Desvinculados": lista dos ultimos 30 dias e
+                 ficha SO LEITURA (migration 044). Sem editar, sem excluir,
+                 sem reativar. -->
+            <div id="desvinculados-view" style="display:none;"></div>
+            <div id="aluno-desvinculado-detalhe-view" style="display:none;"></div>
           </div>
 
           <div class="parceiro-box" id="escolha-modo" style="max-width:480px;text-align:center;">
@@ -806,6 +813,7 @@
     }
 
     function mostrarListaAlunos() {
+      esconderViewsDesvinculados(); // D074
       document.getElementById('alunos-lista-view').style.display = 'block';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
@@ -820,6 +828,142 @@
       limparTreinoFormResidual();
     }
 
+    // ---- D074 (2026-10-14) -- aba "Desvinculados" -------------------
+    // Lista de quem foi desvinculado nos ultimos 30 dias e ficha SO
+    // LEITURA, pelas funcoes da migration 044 (meus_ex_alunos_em_leitura
+    // e ficha_pos_vinculo_parceiro). Regras da D074: nenhum botao de
+    // editar, excluir ou reativar; reativar so pelo convite normal
+    // (codigo/QR) com o aceite do aluno, e isso aparece em uma linha na
+    // tela. Fichas manuais (sem vinculo de app) NAO sao tratadas aqui:
+    // quem decide o que aparece na lista e meus_ex_alunos_em_leitura();
+    // isso muda quando a Backend publicar a 045 (D148) -- nenhuma funcao
+    // foi inventada para elas.
+    var BOTAO_VOLTAR_ALUNOS_D074 = '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>';
+    var TEXTO_REATIVAR_D074 = 'Para voltar a atender esta pessoa, é o convite normal (código ou QR), com o aceite do aluno no app.';
+
+    function esconderViewsDesvinculados() {
+      var a = document.getElementById('desvinculados-view');
+      if (a) { a.style.display = 'none'; }
+      var b = document.getElementById('aluno-desvinculado-detalhe-view');
+      if (b) { b.style.display = 'none'; }
+    }
+
+    function diasParaExpirar(expiraEm) {
+      var fim = new Date(expiraEm).getTime();
+      if (isNaN(fim)) { return null; }
+      return Math.max(0, Math.ceil((fim - Date.now()) / 86400000));
+    }
+
+    function textoExpiraEm(expiraEm) {
+      var dias = diasParaExpirar(expiraEm);
+      if (dias === null) { return 'prazo indisponível'; }
+      if (dias === 0) { return 'expira hoje'; }
+      return 'expira em ' + dias + (dias === 1 ? ' dia' : ' dias');
+    }
+
+    function mostrarDesvinculados() {
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('aluno-form-view').style.display = 'none';
+      document.getElementById('aluno-detalhe-view').style.display = 'none';
+      var tb = document.getElementById('treinos-base-view');
+      if (tb) { tb.style.display = 'none'; }
+      var ac = document.getElementById('aparelhos-carga-view');
+      if (ac) { ac.style.display = 'none'; }
+      var va = document.getElementById('vincular-aluno-view');
+      if (va) { va.style.display = 'none'; }
+      var vd = document.getElementById('aluno-vinculado-detalhe-view');
+      if (vd) { vd.style.display = 'none'; }
+      document.getElementById('aluno-desvinculado-detalhe-view').style.display = 'none';
+      var view = document.getElementById('desvinculados-view');
+      view.style.display = 'block';
+      carregarDesvinculados();
+    }
+
+    function carregarDesvinculados() {
+      var view = document.getElementById('desvinculados-view');
+      var cabecalho = BOTAO_VOLTAR_ALUNOS_D074 +
+        '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Desvinculados</h2>' +
+        '<p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 14px;">Quem foi desvinculado nos últimos 30 dias. Só leitura. ' + escaparHtmlAluno(TEXTO_REATIVAR_D074) + '</p>';
+      view.innerHTML = cabecalho + '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      VinculoConviteStore.listarExAlunosEmLeitura().then(function (linhas) {
+        if (view.style.display === 'none') { return; }
+        if (!linhas.length) {
+          view.innerHTML = cabecalho + '<p style="color:var(--texto-secundario);">Ninguém desvinculado nos últimos 30 dias.</p>';
+          return;
+        }
+        var html = cabecalho;
+        linhas.forEach(function (l) {
+          html += '<div class="linha-desvinculado" data-aluno-id="' + escaparHtmlAluno(l.aluno_id) + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">' +
+            '<strong>' + escaparHtmlAluno(l.nome) + '</strong>' +
+            '<span style="color:var(--texto-secundario);font-size:0.84rem;">' + escaparHtmlAluno(textoExpiraEm(l.expira_em)) + '</span></div>';
+        });
+        view.innerHTML = html;
+        Array.prototype.forEach.call(view.querySelectorAll('.linha-desvinculado'), function (el) {
+          el.addEventListener('click', function () { abrirDetalheDesvinculado(el.getAttribute('data-aluno-id')); });
+        });
+      }).catch(function (erro) {
+        view.innerHTML = cabecalho + '<p style="color:#c0392b;">' + escaparHtmlAluno(mensagemSeguraErro(erro)) + '</p>';
+      });
+    }
+
+    function voltarParaDesvinculados() {
+      document.getElementById('aluno-desvinculado-detalhe-view').style.display = 'none';
+      var view = document.getElementById('desvinculados-view');
+      view.style.display = 'block';
+      carregarDesvinculados();
+    }
+
+    function abrirDetalheDesvinculado(alunoId) {
+      document.getElementById('desvinculados-view').style.display = 'none';
+      var view = document.getElementById('aluno-desvinculado-detalhe-view');
+      view.style.display = 'block';
+      var voltar = '<button type="button" id="btn-voltar-desvinculados" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos desvinculados</button>';
+      function ligarVoltar() {
+        var b = document.getElementById('btn-voltar-desvinculados');
+        if (b) { b.addEventListener('click', voltarParaDesvinculados); }
+      }
+      view.innerHTML = voltar + '<p style="color:var(--texto-secundario);">Carregando…</p>';
+      ligarVoltar();
+      VinculoConviteStore.buscarFichaPosVinculo(alunoId).then(function (ficha) {
+        if (view.style.display === 'none') { return; }
+        if (!ficha) {
+          view.innerHTML = voltar + '<p style="color:var(--texto-secundario);">Essa ficha não está mais disponível para leitura (os 30 dias já passaram ou o vínculo foi retomado).</p>';
+          ligarVoltar();
+          return;
+        }
+        view.innerHTML = voltar + renderDetalheDesvinculado(ficha);
+        ligarVoltar();
+      }).catch(function (erro) {
+        view.innerHTML = voltar + '<p style="color:#c0392b;">' + escaparHtmlAluno(mensagemSeguraErro(erro)) + '</p>';
+        ligarVoltar();
+      });
+    }
+
+    // Mesmos campos de contrato e anamnese do renderDetalheAluno(), SEM
+    // nenhum botao de editar ou excluir.
+    function renderDetalheDesvinculado(ficha) {
+      var contrato = ficha.contrato || {};
+      var anamnese = ficha.anamnese || {};
+      var html = '';
+      html += '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 4px;">' + escaparHtmlAluno(ficha.nome) + '</h2>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.84rem;margin:0 0 6px;">Desvinculado · ' + escaparHtmlAluno(textoExpiraEm(ficha.expira_em)) + ' · somente leitura.</p>';
+      html += '<p style="color:var(--texto-secundario);font-size:0.84rem;margin:0 0 14px;">' + escaparHtmlAluno(TEXTO_REATIVAR_D074) + '</p>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Contrato</div>';
+      html += linhaDetalhe('Plano', contrato.plano) + linhaDetalhe('Forma de pagamento', contrato.formaPagamento) + linhaDetalhe('Início', contrato.dataInicio);
+      html += linhaDetalhe('Termo de responsabilidade', contrato.termoResponsabilidade ? 'Assinado' : 'Pendente');
+      html += linhaDetalhe('Atestado médico', contrato.atestadoMedico ? 'Entregue' : 'Pendente');
+      html += '</div>';
+
+      html += '<div class="cadastro-grupo"><div class="titulo-grupo">Anamnese — dado de saúde, só você e o admin veem</div>';
+      html += linhaDetalhe('Objetivo', anamnese.objetivo) + linhaDetalhe('Nível de experiência', anamnese.nivelExperiencia) + linhaDetalhe('Frequência semanal desejada', anamnese.frequenciaSemanalDesejada);
+      html += linhaDetalhe('Histórico de atividade', anamnese.historicoAtividade) + linhaDetalhe('Doenças', anamnese.doencas) + linhaDetalhe('Lesões', anamnese.lesoes);
+      html += linhaDetalhe('Medicamentos', anamnese.medicamentos) + linhaDetalhe('Restrições médicas', anamnese.restricoesMedicas);
+      html += linhaDetalhe('Gestação / pós-parto', anamnese.gestacaoPosParto) + linhaDetalhe('Hábitos', anamnese.habitos);
+      html += '</div>';
+      return html;
+    }
+
     function renderMeusAlunos(conta) {
       parceiroAtual = { tipo: conta.tipo, id: conta.id };
       document.getElementById('meus-alunos-real').style.display = 'block';
@@ -832,6 +976,7 @@
     }
 
     function esconderMeusAlunos() {
+      esconderViewsDesvinculados(); // D074
       document.getElementById('meus-alunos-real').style.display = 'none';
       parceiroAtual = null;
       treinosBaseCache = [];
@@ -912,6 +1057,7 @@
     // ficha de verdade e "Desfazer vinculo" sao a Parte 2, esperando a
     // migration 042 da Backend.
     function abrirDetalheVinculado(userId) {
+      esconderViewsDesvinculados(); // D074
       var encontrados = ultimosAlunosVinculados.filter(function (a) { return a.user_id === userId; });
       var aluno = encontrados[0];
       document.getElementById('alunos-lista-view').style.display = 'none';
@@ -1213,6 +1359,7 @@
     }
 
     function abrirFormularioNovoAluno() {
+      esconderViewsDesvinculados(); // D074
       alunoAbertoId = null;
       var view = document.getElementById('aluno-form-view');
       view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Novo aluno</h2>' + templateFormAluno();
@@ -1361,6 +1508,7 @@
     // "Editar") + histórico de medições + formulário de nova medição ---
 
     function abrirDetalheAluno(fichaId) {
+      esconderViewsDesvinculados(); // D074
       alunoAbertoId = fichaId;
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
@@ -1764,6 +1912,7 @@
     var treinoBaseEmEdicaoId = null; // null = criando um novo
 
     function mostrarTreinosBase() {
+      esconderViewsDesvinculados(); // D074
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
@@ -1841,6 +1990,7 @@
     }
 
     function mostrarAparelhosCarga() {
+      esconderViewsDesvinculados(); // D074
       if (!parceiroAtual || parceiroAtual.tipo !== 'academia') { return; } // D057 -- so Academia
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
@@ -1877,6 +2027,7 @@
     // pela camera ficou fora desta rodada -- ver STATUS.
     // =========================================================
     function abrirVincularAluno() {
+      esconderViewsDesvinculados(); // D074
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
