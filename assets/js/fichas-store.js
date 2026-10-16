@@ -202,6 +202,12 @@
     return (erro && erro.code === "42703") || texto.indexOf("desvinculada_em") !== -1;
   }
 
+  // D080 -- "a ficha nao existe mais" (aluno excluiu a conta). Ponto unico:
+  // o que conta como "sumiu" mora em aluno-indisponivel.js.
+  function ficha_sumiu(erroDoBanco, gravacao) {
+    return !!(global.AlunoIndisponivel && global.AlunoIndisponivel.ehErroDoBanco(erroDoBanco, { gravacao: !!gravacao }));
+  }
+
   function funcaoAindaNaoExiste(erro) {
     var texto = ((erro && erro.message) || "").toLowerCase();
     return (erro && erro.code === "PGRST202") || texto.indexOf("could not find the function") !== -1;
@@ -218,6 +224,8 @@
           throw new Error("Não deu para abrir essa ficha agora.");
         }
         if (!resultado.data) {
+          // D080: ficha que sumiu (ex.: aluno excluiu a conta) = mensagem neutra.
+          if (global.AlunoIndisponivel) { throw global.AlunoIndisponivel.criarErro(); }
           throw new Error("Ficha não encontrada (ou você não tem acesso a ela).");
         }
         return resultado.data;
@@ -290,6 +298,7 @@
     return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
       .then(function (resultado) {
         if (resultado.error) {
+          if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           throw new Error("Não deu para salvar essa ficha agora.");
         }
         return resultado.data;
@@ -327,6 +336,7 @@
     return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
       .then(function (resultado) {
         if (resultado.error) {
+          if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           if ((resultado.error.message || "").indexOf("não pertence a este parceiro") !== -1) {
             throw new Error("Esse treino-base não pertence a este parceiro.");
           }
@@ -353,6 +363,7 @@
     return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
       .then(function (resultado) {
         if (resultado.error) {
+          if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           throw new Error("Não deu para salvar esse treino agora.");
         }
         return resultado.data;
@@ -379,6 +390,7 @@
     return cliente.rpc("desvincular_ficha", { p_ficha_id: fichaId })
       .then(function (resultado) {
         if (resultado.error) {
+          if (ficha_sumiu(resultado.error, false)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           if (funcaoAindaNaoExiste(resultado.error)) {
             throw new Error("Desvincular ainda não está disponível -- assim que a Backend publicar a migration 045, o botão passa a funcionar.");
           }
@@ -474,6 +486,7 @@
       return cliente.from("medidas_parceiro").insert(corpo).select("id").single()
         .then(function (resultado) {
           if (resultado.error) {
+            if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
             throw new Error("Não deu para registrar essa medição agora.");
           }
           return resultado.data;

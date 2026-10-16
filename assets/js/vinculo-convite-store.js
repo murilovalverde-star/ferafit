@@ -203,6 +203,12 @@
     return codigo === "PGRST202" || texto.indexOf("could not find the function") !== -1;
   }
 
+  // D080 -- aluno que sumiu (excluiu a conta): ponto unico em
+  // aluno-indisponivel.js.
+  function alunoSumiu(erroDoBanco) {
+    return !!(global.AlunoIndisponivel && global.AlunoIndisponivel.ehErroDoBanco(erroDoBanco));
+  }
+
   // D070 -- equivalente, para o SITE, da ficha_do_aluno_vinculado() que o
   // app já usa (migration 038, só personal) -- cobre personal E academia.
   // A própria função (042) confere vínculo aceito e em vigor antes de
@@ -218,6 +224,7 @@
     return cliente.rpc("ficha_do_aluno_vinculado_parceiro", { p_aluno_id: alunoId })
       .then(function (resultado) {
         if (resultado.error) {
+          if (alunoSumiu(resultado.error)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
             throw new Error("Essa função ainda não está em produção -- assim que a Backend publicar a migration 042, abrir a ficha passa a funcionar aqui.");
           }
@@ -243,6 +250,7 @@
     return cliente.rpc("encerrar_vinculo_com_aluno", { p_aluno_id: alunoId })
       .then(function (resultado) {
         if (resultado.error) {
+          if (alunoSumiu(resultado.error)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
             throw new Error("Essa função ainda não está em produção -- assim que a Backend publicar a migration 042, desfazer o vínculo passa a funcionar aqui.");
           }
@@ -294,6 +302,7 @@
     return cliente.rpc("ficha_pos_vinculo_parceiro", { p_aluno_id: alunoId })
       .then(function (resultado) {
         if (resultado.error) {
+          if (alunoSumiu(resultado.error)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           if (mensagemFuncaoAindaNaoExiste(resultado.error)) {
             throw new Error("A leitura de desvinculados ainda não está em produção -- assim que a Backend publicar a migration 044, a ficha passa a abrir aqui.");
           }
