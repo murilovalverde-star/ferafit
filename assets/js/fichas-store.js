@@ -167,7 +167,7 @@
     function montarConsulta(somenteAtivas) {
       var c = cliente
         .from("fichas_aluno_parceiro")
-        .select("id,nome,email,telefone,data_nascimento,treino_modo,criado_em", { count: "exact" })
+        .select("id,nome,email,telefone,data_nascimento,treino_modo,aluno_user_id,criado_em", { count: "exact" })
         .eq(coluna, parceiro.id);
       if (somenteAtivas) {
         c = c.is("desvinculada_em", null);
