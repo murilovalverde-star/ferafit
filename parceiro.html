@@ -1119,7 +1119,7 @@
       var btnAbrirFichaVinculado = document.getElementById('btn-abrir-ficha-vinculado');
       if (btnAbrirFichaVinculado) { btnAbrirFichaVinculado.addEventListener('click', function () { abrirFichaDoVinculado(aluno.user_id); }); }
       var btnDesfazerVinculo = document.getElementById('btn-desfazer-vinculo');
-      if (btnDesfazerVinculo) { btnDesfazerVinculo.addEventListener('click', function () { confirmarDesfazerVinculo(aluno.user_id, aluno.nome); }); }
+      if (btnDesfazerVinculo) { btnDesfazerVinculo.addEventListener('click', function () { confirmarDesvincularVinculado(aluno.user_id, aluno.nome); }); }
     }
 
     function renderDetalheVinculado(aluno) {
@@ -1145,7 +1145,7 @@
       // nunca onclick inline com o nome do aluno.
       html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px;">' +
         '<button type="button" id="btn-abrir-ficha-vinculado" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Abrir ficha completa</button>' +
-        '<button type="button" id="btn-desfazer-vinculo" style="background:none;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Desfazer vínculo</button>' +
+        '<button type="button" id="btn-desfazer-vinculo" style="background:none;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Desvincular</button>' +
       '</div>';
       html += '<p id="vinculado-acao-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 14px;"></p>';
       linhas.forEach(function (linha) {
@@ -1177,25 +1177,36 @@
       });
     }
 
-    // D070 -- "Desfazer vínculo" do lado do parceiro, chamando
-    // encerrar_vinculo_com_aluno() (resolve o vínculo e fixa o motivo
-    // internamente -- nunca recebe id de vínculo nem motivo do cliente,
-    // por desenho da própria funcao/migration 042). Confirmacao antes,
-    // sem escolha de motivo nenhuma, como a D070 exige.
-    function confirmarDesfazerVinculo(alunoId, nomeAluno) {
-      var confirmado = window.confirm('Desfazer o vínculo com ' + nomeAluno + '? O aluno deixa de aparecer na sua lista de alunos, mas pode voltar a se vincular depois, se quiser.');
-      if (!confirmado) { return; }
+    // D076 -- "Desvincular" do detalhe "Vinculados pelo app". Quando o aluno
+    // TEM ficha, usa a mesma porta unica da D075: rpc('desvincular_ficha')
+    // (migration 045). Quando NAO tem ficha (nunca abriu "Abrir ficha
+    // completa"), nao existe id de ficha para mandar: o botao continua
+    // sendo "Desvincular", mas por baixo desfaz so o vinculo, pela funcao
+    // da 042 (encerrar_vinculo_com_aluno) -- nao ha ficha a apagar nem a
+    // deixar em leitura. Nada aqui cria ficha (a leitura e so SELECT).
+    function confirmarDesvincularVinculado(alunoId, nomeAluno) {
       var erroEl = document.getElementById('vinculado-acao-erro');
       if (erroEl) { erroEl.style.display = 'none'; }
-      VinculoConviteStore.desfazerVinculoComAluno(alunoId).then(function () {
-        mostrarListaAlunos();
-        carregarListaAlunos(alunosPaginaAtual);
-      }).catch(function (erro) {
-        if (erroEl) {
-          erroEl.textContent = mensagemSeguraErro(erro);
-          erroEl.style.display = 'block';
-        }
-      });
+      var botao = document.getElementById('btn-desfazer-vinculo');
+      if (botao) { botao.disabled = true; }
+      function mostrarErro(erro) {
+        if (botao) { botao.disabled = false; }
+        if (erroEl) { erroEl.textContent = mensagemSeguraErro(erro); erroEl.style.display = 'block'; }
+      }
+      FichasStore.fichaIdDoAlunoVinculado(alunoId).then(function (fichaId) {
+        var temFicha = fichaId !== null && fichaId !== undefined;
+        var texto = temFicha
+          ? 'Desvincular ' + nomeAluno + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
+          : 'Desvincular ' + nomeAluno + '? O vínculo é desfeito agora e o aluno sai da sua lista. Você não tem ficha dele, então não há nada para ler depois; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).';
+        if (!window.confirm(texto)) { if (botao) { botao.disabled = false; } return; }
+        var acao = temFicha
+          ? FichasStore.desvincularFicha(fichaId).then(function () { mostrarDesvinculados(); })
+          : VinculoConviteStore.desfazerVinculoComAluno(alunoId).then(function () {
+              mostrarListaAlunos();
+              carregarListaAlunos(alunosPaginaAtual);
+            });
+        return acao;
+      }).catch(mostrarErro);
     }
 
     function renderListaAlunos(resultado) {

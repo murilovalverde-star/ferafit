@@ -388,6 +388,37 @@
       });
   };
 
+  // D076 -- id da ficha (ativa) de um aluno vinculado pelo app, para o
+  // botao "Desvincular" do detalhe "Vinculados pelo app". So LE: nunca cria
+  // ficha (abrirFichaVinculado, da 042, cria; esta nao). Devolve o id
+  // (bigint) ou null quando o aluno nao tem ficha. Antes da 045 em producao
+  // a coluna desvinculada_em nao existe: refaz a leitura sem o filtro.
+  FichasStoreSupabase.fichaIdDoAlunoVinculado = function (alunoUserId) {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    function consulta(somenteAtivas) {
+      var q = cliente.from("fichas_aluno_parceiro").select("id").eq("aluno_user_id", alunoUserId);
+      if (somenteAtivas) { q = q.is("desvinculada_em", null); }
+      return q.limit(1);
+    }
+    return consulta(true).then(function (resultado) {
+      if (resultado.error && colunaDesvinculadaEmAusente(resultado.error)) {
+        return consulta(false);
+      }
+      return resultado;
+    }).then(function (resultado) {
+      if (resultado.error) {
+        throw new Error("Não deu para conferir a ficha deste aluno agora.");
+      }
+      var linhas = resultado.data || [];
+      return linhas.length ? linhas[0].id : null;
+    });
+  };
+
   // D075 -- fichas feitas a mao que o parceiro desvinculou ha menos de 30
   // dias (aba "Desvinculados"): linhas { ficha_id, nome, desvinculada_em,
   // expira_em }. Antes da 045 em producao a funcao nao existe: a lista
