@@ -398,8 +398,8 @@
                    cadastrada a mao ainda -- ver STATUS.md, entrada D069. -->
               <div id="alunos-vinculados-secao" style="display:none;margin-bottom:18px;">
                 <h3 style="font-size:0.78rem;font-weight:800;color:var(--texto-secundario);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 8px;">Vinculados pelo app</h3>
-                <!-- D080: frase PROVISORIA ate a Juridica aprovar a redacao final. Sem promessa de exportacao. -->
-                <p id="alunos-vinculados-aviso-exclusao" style="color:var(--texto-secundario);font-size:0.8rem;margin:0 0 8px;">Se o aluno excluir a conta dele no app, os dados dele somem da sua lista na hora, sem aviso.</p>
+                <!-- D080/D083: frase APROVADA por Murilo em 17/10 (a ficha fica 30 dias so para consulta); a Juridica ainda confere a redacao final. Sem promessa de exportacao. -->
+                <p id="alunos-vinculados-aviso-exclusao" style="color:var(--texto-secundario);font-size:0.8rem;margin:0 0 8px;">Se o aluno excluir a conta dele no app, a ficha dele passa para Desvinculados e fica só para consulta por 30 dias.</p>
                 <div id="alunos-vinculados-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
                 <div style="border-bottom:1px solid var(--card-border);margin:14px 0 0;"></div>
               </div>
@@ -816,7 +816,8 @@
       return escaparHtmlAluno((erro && erro.message) || 'Não deu para completar essa ação agora.');
     }
 
-    // D080 (P72 = A) -- o aluno excluiu a conta no app: a ficha some na hora.
+    // D080 (P72) -- aluno que nao esta mais disponivel (regra de 17/10: a Backend vai manter a
+    // ficha 30 dias em Desvinculados; ate la, e assim que o painel se comporta).
     // PONTO UNICO da tela: se o erro for "aluno indisponivel" (regra em
     // assets/js/aluno-indisponivel.js), mostra a frase neutra e volta para a
     // lista (recarregada) -- ou para a aba Desvinculados, quando o erro veio
@@ -1123,7 +1124,7 @@
       limparErroDaLista();
       var ehApp = !!ficha.aluno_user_id;
       var texto = ehApp
-        ? 'Desvincular ' + ficha.nome + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR). Se o aluno excluir a conta dele no app antes disso, a ficha some na hora.'
+        ? 'Desvincular ' + ficha.nome + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
         : 'Desvincular ' + ficha.nome + '? A ficha fica só para leitura por 30 dias, não volta mais (nunca teve vínculo de app) e no dia 31 é apagada por inteiro, com as medições. Não há como desfazer.';
       if (!window.confirm(texto)) { return; }
       FichasStore.desvincularFicha(ficha.id).then(function () {
@@ -1280,7 +1281,7 @@
       FichasStore.fichaIdDoAlunoVinculado(alunoId).then(function (fichaId) {
         var temFicha = fichaId !== null && fichaId !== undefined;
         var texto = temFicha
-          ? 'Desvincular ' + nomeAluno + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR). Se o aluno excluir a conta dele no app antes disso, a ficha some na hora.'
+          ? 'Desvincular ' + nomeAluno + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
           : 'Desvincular ' + nomeAluno + '? O vínculo é desfeito agora e o aluno sai da sua lista. Você não tem ficha dele, então não há nada para ler depois; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).';
         if (!window.confirm(texto)) { if (botao) { botao.disabled = false; } return; }
         var acao = temFicha
@@ -1772,7 +1773,7 @@
       if (!caixa) { return; }
       var ehAluno = !!(fichaDetalheAtual && fichaDetalheAtual.aluno_user_id);
       var texto = ehAluno
-        ? 'Desvincular este aluno? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR). Se o aluno excluir a conta dele no app antes disso, a ficha some na hora.'
+        ? 'Desvincular este aluno? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
         : 'Desvincular esta ficha? Ela fica só para leitura por 30 dias, não volta mais (nunca teve vínculo de app) e no dia 31 é apagada por inteiro, com as medições. Não há como desfazer.';
       caixa.innerHTML = '<p style="margin:0 0 10px;font-size:0.9rem;">' + escaparHtmlAluno(texto) + '</p>' +
         '<p id="desvincular-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 10px;"></p>' +
