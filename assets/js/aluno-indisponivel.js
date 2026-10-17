@@ -19,6 +19,11 @@
   var MENSAGEM = "Esta ficha não existe mais. O aluno encerrou a conta dele no Fera Fit, e os dados dele foram apagados.";
   // Codigo estavel da Backend (D155) -- AINDA VAZIO de proposito.
   var CODIGOS = [];
+  // D085: a migration 049 (EM PRODUCAO desde 17/10) devolve, quando a conta do
+  // aluno nao existe mais, message === "aluno_inexistente" (code P0002). Decide-se
+  // pela IGUALDADE EXATA da mensagem, nunca pelo P0002 (o P0002 tambem e usado por
+  // outros erros da 051; parecer D074/D075 da Seguranca, item 3).
+  var MENSAGEM_ESTAVEL = "aluno_inexistente";
   // Mensagens que a 042/045 devolvem hoje (comparacao sem acento/caixa).
   var TRECHOS = [
     "sem vinculo ativo com este aluno",
@@ -41,6 +46,7 @@
   function ehErroDoBanco(erroDoBanco, opcoes) {
     if (!erroDoBanco) { return false; }
     var codigo = erroDoBanco.code;
+    if (erroDoBanco.message === MENSAGEM_ESTAVEL) { return true; }
     if (codigo && CODIGOS.indexOf(codigo) !== -1) { return true; }
     if (opcoes && opcoes.gravacao && codigo && GRAVACAO.indexOf(codigo) !== -1) { return true; }
     var texto = semAcento(erroDoBanco.message);
