@@ -119,7 +119,7 @@
   // que decide esse valor; criarFicha()/atualizarFicha() sempre mandam
   // este valor, nunca o que vier (ou não vier) da tela, pelo mesmo motivo
   // que a Site nunca confia no cliente para a data da declaração.
-  var VERSAO_TERMO_PARCEIRO_ATUAL = "termo_parceiro_v1";
+  var VERSAO_TERMO_PARCEIRO_ATUAL = "termo_parceiro_v1_1"; // D086: Termo v1.1
 
   var MENSAGEM_CONSENTIMENTO_OBRIGATORIO =
     "Marque a declaração de que você tem o consentimento do aluno para registrar os dados de saúde (anamnese) -- sem isso, a ficha não é salva (exigência do banco, migration 029).";
@@ -449,6 +449,28 @@
             return [];
           }
           throw new Error((resultado.error && resultado.error.message) || "Não deu para carregar as fichas desvinculadas agora.");
+        }
+        return resultado.data || [];
+      });
+  };
+
+  // D086 -- alunos que EXCLUIRAM a conta e deixaram cobranca/contrato (migration 052,
+  // em producao): { ficha_id, nome, telefone, conta_excluida_em, expira_em, nota }.
+  // So nome e telefone (a saude ja foi apagada); o pagamento vem da 053. So consulta.
+  FichasStoreSupabase.listarFichasContaExcluidaEmLeitura = function () {
+    var cliente;
+    try {
+      cliente = clienteSupabase();
+    } catch (erroSincrono) {
+      return Promise.reject(erroSincrono);
+    }
+    return cliente.rpc("minhas_fichas_conta_excluida_em_leitura", {})
+      .then(function (resultado) {
+        if (resultado.error) {
+          if (funcaoAindaNaoExiste(resultado.error)) {
+            return [];
+          }
+          throw new Error("Não deu para carregar os alunos que excluíram a conta agora.");
         }
         return resultado.data || [];
       });

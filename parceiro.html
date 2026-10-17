@@ -393,24 +393,25 @@
             </div>
 
             <div id="alunos-lista-view">
-              <!-- D069 Parte 1 (2026-10-10) -- vinculados pelo codigo/QR
-                   (D067), lidos de vw_aluno_para_parceiro, sem ficha
-                   cadastrada a mao ainda -- ver STATUS.md, entrada D069. -->
-              <div id="alunos-vinculados-secao" style="display:none;margin-bottom:18px;">
-                <h3 style="font-size:0.78rem;font-weight:800;color:var(--texto-secundario);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 8px;">Vinculados pelo app</h3>
-                <!-- D080/D083: regra de Murilo (17/10). Redacao da Juridica (ENTREGA_D078, item 2.1): "ficha" sozinha prometia anamnese; so nome, telefone e pagamento ficam. Sem promessa de exportacao. -->
-                <p id="alunos-vinculados-aviso-exclusao" style="color:var(--texto-secundario);font-size:0.8rem;margin:0 0 8px;">Se o aluno excluir a conta dele no app, a ficha de treino, as medidas e a anamnese são apagadas na hora. Havendo cobrança ou contrato, o nome, o telefone e o pagamento dele ficam em Desvinculados, só para consulta, por 30 dias.</p>
-                <div id="alunos-vinculados-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
-                <div style="border-bottom:1px solid var(--card-border);margin:14px 0 0;"></div>
-              </div>
+              <!-- D083 (2026-10-17) -- lista simples A-Z, uma palavra de situacao por aluno,
+                   busca e filtros (mockup v4 aprovado por Murilo). Alunos do app e fichas a mao
+                   na mesma lista. -->
               <p id="alunos-lista-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 10px;"></p>
-              <div class="campo" style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+                <strong id="alunos-contagem" style="font-size:1rem;"></strong>
+                <button type="button" id="btn-abrir-pagamentos" class="botao-primario" onclick="abrirPagamentos()" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;">Pagamentos</button>
+              </div>
+              <div class="campo" style="margin-bottom:10px;">
                 <input id="alunos-busca" type="text" placeholder="Buscar aluno pelo nome" oninput="buscarAlunosDebounced()">
               </div>
+              <div id="alunos-filtros" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+              <p id="alunos-filtro-aviso" style="display:none;color:var(--texto-secundario);font-size:0.82rem;margin:0 0 8px;"></p>
               <div id="alunos-lista-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
-              <div id="alunos-paginacao" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:0.8rem;color:var(--texto-secundario);"></div>
+              <!-- D080/D083: regra de Murilo (17/10). Redacao da Juridica (ENTREGA_D078, item 2.1): "ficha" sozinha prometia anamnese; so nome, telefone e pagamento ficam. Sem promessa de exportacao. -->
+              <p id="alunos-vinculados-aviso-exclusao" style="display:none;color:var(--texto-secundario);font-size:0.8rem;margin:14px 0 0;">Se o aluno excluir a conta dele no app, a ficha de treino, as medidas e a anamnese são apagadas na hora. Havendo cobrança ou contrato, o nome, o telefone e o pagamento dele ficam em Desvinculados, só para consulta, por 30 dias.</p>
             </div>
 
+            <div id="pagamentos-view" style="display:none;"></div>
             <div id="aluno-form-view" style="display:none;"></div>
             <div id="aluno-detalhe-view" style="display:none;"></div>
 
@@ -629,6 +630,8 @@
   <script src="assets/js/treinos-store.js"></script>
   <script src="assets/js/carga-config-store.js"></script>
   <script src="assets/js/vinculo-convite-store.js"></script>
+  <script src="assets/js/painel-alunos.js"></script>
+  <script src="assets/js/pagamentos-store.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -798,13 +801,19 @@
     // D071 (2026-10-10) -- mesma versao usada na caixa de aceite do cadastro
     // novo (D069 Parte 3) e no aceite retroativo (abaixo). Um unico lugar pra
     // trocar quando existir uma v2 do Termo -- nao decidido nesta rodada.
-    var TERMO_PARCEIRO_VERSAO_ATUAL = 'termo_parceiro_v1';
+    var TERMO_PARCEIRO_VERSAO_ATUAL = 'termo_parceiro_v1_1'; // D086: Termo v1.1
     var contaPendenteAceiteRetroativo = null; // D071 -- guardada entre mostrarAceiteRetroativo() e confirmarAceiteRetroativo()
     var alunosPaginaAtual = 1;
     var ALUNOS_POR_PAGINA = 10;
     var ultimosAlunosVinculados = []; // D069 Parte 1 -- cache da ultima leitura de vw_aluno_para_parceiro, pra abrir o detalhe sem reconsultar
     var alunoAbertoId = null;
     var buscarAlunosTimeout = null;
+
+    // D084 (parecer D074 item e): para valores que entram dentro de atributo HTML entre aspas.
+    // Troca & < > " ' (escaparHtmlAluno nao troca aspas).
+    function escaparAtributo(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
     function escaparHtmlAluno(s) {
       var div = document.createElement('div');
@@ -873,6 +882,8 @@
     var TEXTO_FICHA_MANUAL_D075 = 'Ficha cadastrada à mão não volta: se o aluno voltar, cadastre uma ficha nova ou vincule pelo convite do app. No dia 31 ela é apagada, com as medições.';
 
     function esconderViewsDesvinculados() {
+      var pv = document.getElementById('pagamentos-view'); // D083
+      if (pv) { pv.style.display = 'none'; }
       var a = document.getElementById('desvinculados-view');
       if (a) { a.style.display = 'none'; }
       var b = document.getElementById('aluno-desvinculado-detalhe-view');
@@ -893,6 +904,8 @@
     }
 
     function mostrarDesvinculados() {
+      var pv = document.getElementById('pagamentos-view'); // D083
+      if (pv) { pv.style.display = 'none'; }
       document.getElementById('alunos-lista-view').style.display = 'none';
       document.getElementById('aluno-form-view').style.display = 'none';
       document.getElementById('aluno-detalhe-view').style.display = 'none';
@@ -926,16 +939,23 @@
       view.innerHTML = cabecalho + '<p style="color:var(--texto-secundario);">Carregando…</p>';
       Promise.all([
         tentarDesvinculados(VinculoConviteStore.listarExAlunosEmLeitura()),
-        tentarDesvinculados(FichasStore.listarFichasManuaisEmLeitura())
+        tentarDesvinculados(FichasStore.listarFichasManuaisEmLeitura()),
+        tentarDesvinculados(FichasStore.listarFichasContaExcluidaEmLeitura()),
+        tentarDesvinculados(window.PagamentosStore ? PagamentosStore.listar() : Promise.resolve({}))
       ]).then(function (r) {
         if (view.style.display === 'none') { return; }
-        var apps = r[0], manuais = r[1];
+        var apps = r[0], manuais = r[1], excluidas = r[2], pagsDes = r[3].dados || {};
         var itens = [];
         (manuais.dados || []).forEach(function (f) {
           itens.push({ tipo: 'manual', id: f.ficha_id, nome: f.nome, expira_em: f.expira_em, quando: f.desvinculada_em });
         });
         (apps.dados || []).forEach(function (l) {
-          itens.push({ tipo: 'app', id: l.aluno_id, nome: l.nome, expira_em: l.expira_em, quando: l.vinculo_encerrado_em });
+          itens.push({ tipo: 'app', id: l.aluno_id, nome: l.nome, expira_em: l.expira_em, quando: l.vinculo_encerrado_em, dados: l });
+        });
+        // D086: aluno que EXCLUIU a conta (052). So nome, telefone e pagamento, so consulta, ate o dia 30.
+        (excluidas.dados || []).forEach(function (l) {
+          itens.push({ tipo: 'excluiu', id: l.ficha_id, nome: l.nome, expira_em: l.expira_em, quando: l.conta_excluida_em,
+            dados: { telefone: l.telefone, pagamento: pagsDes['f:' + l.ficha_id] || null } });
         });
         itens.sort(function (a, b) { return new Date(b.quando).getTime() - new Date(a.quando).getTime(); });
         var html = cabecalho;
@@ -949,24 +969,30 @@
         if (manuais.erro) {
           html += '<p style="color:#c0392b;">Fichas cadastradas à mão: ' + escaparHtmlAluno(mensagemSeguraErro(manuais.erro)) + '</p>';
         }
+        if (excluidas.erro) {
+          html += '<p style="color:#c0392b;">Alunos que excluíram a conta: ' + escaparHtmlAluno(mensagemSeguraErro(excluidas.erro)) + '</p>';
+        }
         if (!itens.length) {
-          if (!apps.erro && !manuais.erro) {
+          if (!apps.erro && !manuais.erro && !excluidas.erro) {
             html += '<p style="color:var(--texto-secundario);">Ninguém desvinculado nos últimos 30 dias.</p>';
           }
           view.innerHTML = html;
           return;
         }
         itens.forEach(function (l) {
-          var rotulo = l.tipo === 'manual' ? 'ficha à mão' : 'aluno do app';
-          html += '<div class="linha-desvinculado" data-tipo="' + l.tipo + '" data-id="' + escaparHtmlAluno(l.id) + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">' +
+          var rotulo = l.tipo === 'manual' ? 'ficha à mão' : (l.tipo === 'excluiu' ? 'O aluno excluiu a conta · só consulta' : 'aluno do app');
+          html += '<div class="linha-desvinculado" data-tipo="' + escaparAtributo(l.tipo) + '" data-id="' + escaparAtributo(l.id) + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">' +
             '<span><strong>' + escaparHtmlAluno(l.nome) + '</strong> <span style="color:var(--texto-secundario);font-size:0.78rem;">· ' + rotulo + '</span></span>' +
             '<span style="color:var(--texto-secundario);font-size:0.84rem;">' + escaparHtmlAluno(textoExpiraEm(l.expira_em)) + '</span></div>';
         });
         view.innerHTML = html;
+        desvinculadosItens = itens;
         Array.prototype.forEach.call(view.querySelectorAll('.linha-desvinculado'), function (el) {
           el.addEventListener('click', function () {
             if (el.getAttribute('data-tipo') === 'manual') {
               abrirDetalheAluno(Number(el.getAttribute('data-id')));
+            } else if (el.getAttribute('data-tipo') === 'excluiu') {
+              abrirDetalheContaExcluida(el.getAttribute('data-id'));
             } else {
               abrirDetalheDesvinculado(el.getAttribute('data-id'));
             }
@@ -974,6 +1000,32 @@
         });
       });
     }
+
+    // D083 (regra de Murilo, 17/10): quando o aluno exclui a conta, o personal
+    // continua vendo SO nome, telefone e pagamento por 30 dias, para saber se
+    // o aluno devia ou estava em dia. Nada de contrato, anamnese ou treino.
+    var desvinculadosItens = [];
+    function abrirDetalheContaExcluida(id) {
+      var item = null;
+      desvinculadosItens.forEach(function (i) { if (i.tipo === 'excluiu' && String(i.id) === String(id)) { item = i; } });
+      if (!item) { voltarParaDesvinculados(); return; }
+      document.getElementById('desvinculados-view').style.display = 'none';
+      var view = document.getElementById('aluno-desvinculado-detalhe-view');
+      view.style.display = 'block';
+      var d = item.dados || {};
+      var st = PainelAlunos.statusPagamento(d.pagamento, new Date());
+      var pgTexto = d.pagamento ? (PainelAlunos.detalhePagamento(d.pagamento, st) + ' · ' + PainelAlunos.textoStatusPagamento(st)) : 'Sem cobrança cadastrada';
+      view.innerHTML = BOTAO_VOLTAR_DESVINCULADOS_D083 +
+        '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 4px;">' + escaparHtmlAluno(item.nome) + '</h2>' +
+        '<p id="conta-excluida-aviso" style="color:var(--texto-secundario);font-size:0.84rem;margin:0 0 14px;">O aluno excluiu a conta · só consulta · ' + escaparHtmlAluno(textoExpiraEm(item.expira_em)) + '. No dia 31 tudo é apagado.</p>' +
+        '<div class="cadastro-grupo">' +
+          linhaDetalhe('Telefone', d.telefone) +
+          linhaDetalhe('Pagamento', pgTexto) +
+        '</div>';
+      var b = document.getElementById('btn-voltar-desvinculados');
+      if (b) { b.addEventListener('click', voltarParaDesvinculados); }
+    }
+    var BOTAO_VOLTAR_DESVINCULADOS_D083 = '<button type="button" id="btn-voltar-desvinculados" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos desvinculados</button>';
 
     function voltarParaDesvinculados() {
       document.getElementById('aluno-desvinculado-detalhe-view').style.display = 'none';
@@ -1038,6 +1090,7 @@
       parceiroAtual = { tipo: conta.tipo, id: conta.id };
       document.getElementById('meus-alunos-real').style.display = 'block';
       document.getElementById('alunos-busca').value = '';
+      filtroListaAtual = 'todos'; // D083
       // D057 (2026-10-06): "Aparelhos de carga" passa a ser so da Academia --
       // decisao de Murilo de tirar essa opcao do Personal.
       var btnAparelhosCarga = document.getElementById('btn-aparelhos-carga');
@@ -1054,56 +1107,133 @@
       exerciciosEmEdicao = [];
     }
 
+    // ---- D083 (2026-10-17) -- lista simples A-Z com busca e filtros ------
+    // Tudo no cliente: o painel le as fichas a mao, os alunos vinculados pelo
+    // app e (quando existir) os pagamentos, junta numa lista so, ordena A-Z e
+    // filtra. Logica pura em assets/js/painel-alunos.js (PainelAlunos).
+    var listaAlunosCache = { manuais: [], vinculados: [], pagamentos: null, pagamentosErro: null, frequencia: null };
+    var linhasAlunos = [];
+    var filtroListaAtual = 'todos';
+
     function buscarAlunosDebounced() {
-      clearTimeout(buscarAlunosTimeout);
-      buscarAlunosTimeout = setTimeout(function () { carregarListaAlunos(1); }, 350);
+      desenharListaAlunos();
     }
 
-    function carregarListaAlunos(pagina) {
+    function recalcularLinhasAlunos() {
+      linhasAlunos = PainelAlunos.ordenarAZ(PainelAlunos.montarLinhas(listaAlunosCache.manuais, listaAlunosCache.vinculados, listaAlunosCache.pagamentos, listaAlunosCache.frequencia));
+    }
+
+    function carregarListaAlunos() {
       if (!parceiroAtual) { return; }
       mostrarListaAlunos();
-      var termo = document.getElementById('alunos-busca').value;
       var corpo = document.getElementById('alunos-lista-corpo');
       corpo.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
-      carregarAlunosVinculados(termo);
-      FichasStore.listarFichas(parceiroAtual, { busca: termo, pagina: pagina, porPagina: ALUNOS_POR_PAGINA }).then(function (resultado) {
-        alunosPaginaAtual = resultado.pagina;
-        renderListaAlunos(resultado);
-      }).catch(function (erro) {
-        corpo.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(erro) + '</p>';
-        document.getElementById('alunos-paginacao').innerHTML = '';
+      var pagamentos = window.PagamentosStore ? PagamentosStore.listar() : Promise.reject(new Error('Pagamentos indisponíveis.'));
+      var frequencia = window.PagamentosStore ? PagamentosStore.listarFrequencia() : Promise.reject(new Error('Frequência indisponível.'));
+      Promise.all([
+        tentarDesvinculados(FichasStore.listarFichas(parceiroAtual, { pagina: 1, porPagina: 1000 })),
+        tentarDesvinculados(VinculoConviteStore.listarAlunosVinculados()),
+        tentarDesvinculados(pagamentos),
+        tentarDesvinculados(frequencia)
+      ]).then(function (r) {
+        var fichas = r[0], vinc = r[1], pags = r[2], freq = r[3];
+        if (fichas.erro && vinc.erro) {
+          corpo.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(fichas.erro) + '</p>';
+          document.getElementById('alunos-contagem').textContent = '';
+          return;
+        }
+        listaAlunosCache.manuais = fichas.dados ? (fichas.dados.itens || []) : [];
+        ultimosAlunosVinculados = vinc.dados || [];
+        listaAlunosCache.vinculados = ultimosAlunosVinculados;
+        listaAlunosCache.pagamentos = pags.dados || null;
+        listaAlunosCache.pagamentosErro = pags.erro || null;
+        listaAlunosCache.frequencia = freq.dados || null; // sem dado = filtro 'Faltou 2 treinos' diz que ainda nao ha dado
+        var parcial = fichas.erro || vinc.erro;
+        if (parcial) {
+          var el = document.getElementById('alunos-lista-erro');
+          el.style.color = '#c0392b';
+          el.textContent = (fichas.erro ? 'Fichas cadastradas à mão: ' : 'Alunos do app: ') + mensagemSeguraErro(parcial);
+          el.style.display = 'block';
+        }
+        desenharListaAlunos();
       });
     }
 
-    // D069 Parte 1 -- le vw_aluno_para_parceiro (RLS da propria view ja
-    // filtra pelo parceiro certo) e filtra por nome no cliente -- sem
-    // paginacao de proposito, numero esperado e pequeno no Beta 1.
-    function carregarAlunosVinculados(termo) {
-      var secao = document.getElementById('alunos-vinculados-secao');
-      var corpo = document.getElementById('alunos-vinculados-corpo');
-      VinculoConviteStore.listarAlunosVinculados().then(function (alunos) {
-        ultimosAlunosVinculados = alunos || [];
-        renderAlunosVinculados(termo);
-      }).catch(function (erro) {
-        ultimosAlunosVinculados = [];
-        secao.style.display = 'block';
-        corpo.innerHTML = '<p style="color:#c0392b;font-size:0.82rem;">' + mensagemSeguraErro(erro) + '</p>';
+    function estiloSituacao(classe) {
+      if (classe === 'r') { return 'color:#e0594a;font-weight:700;'; }
+      if (classe === 'a') { return 'color:var(--ambar);font-weight:700;'; }
+      return 'color:var(--texto-secundario);';
+    }
+
+    function desenharFiltrosLista() {
+      var cont = document.getElementById('alunos-filtros');
+      cont.innerHTML = '';
+      PainelAlunos.FILTROS.forEach(function (f) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip-filtro-aluno';
+        b.setAttribute('data-filtro', f.id);
+        b.setAttribute('aria-pressed', f.id === filtroListaAtual ? 'true' : 'false');
+        b.textContent = f.rotulo;
+        b.style.cssText = 'border:1px solid ' + (f.id === filtroListaAtual ? 'var(--texto)' : 'var(--card-border)') + ';border-radius:999px;padding:5px 11px;font-family:inherit;font-size:0.76rem;cursor:pointer;' +
+          (f.id === filtroListaAtual ? 'background:var(--texto);color:var(--fundo,#17120f);font-weight:800;' : 'background:none;color:var(--texto-secundario);');
+        b.addEventListener('click', function () { filtroListaAtual = f.id; desenharListaAlunos(); });
+        cont.appendChild(b);
       });
     }
 
-    // D078 (pedido de Murilo, 2026-10-15) -- botao "Desvincular" tambem na
-    // LISTA de alunos (manuais e "Vinculados pelo app"). Mesma porta unica
-    // da D075/D076: rpc('desvincular_ficha') quando ha ficha; sem ficha, so
-    // desfaz o vinculo (ver confirmarDesvincularVinculado). O clique no botao
-    // NAO abre o detalhe da linha (stopPropagation).
-    function botaoDesvincularLinha(aoClicar) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'btn-desvincular-linha';
-      b.textContent = 'Desvincular';
-      b.style.cssText = 'margin-left:auto;background:none;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;font-size:0.75rem;white-space:nowrap;';
-      b.addEventListener('click', function (ev) { ev.stopPropagation(); aoClicar(); });
-      return b;
+    function abrirLinhaAluno(l) {
+      if (l.fichaId != null) { abrirDetalheAluno(l.fichaId); } else { abrirDetalheVinculado(l.userId); }
+    }
+
+    function desenharListaAlunos() {
+      var corpo = document.getElementById('alunos-lista-corpo');
+      if (!corpo) { return; }
+      recalcularLinhasAlunos();
+      desenharFiltrosLista();
+      var hoje = new Date();
+      var termo = document.getElementById('alunos-busca').value;
+      var total = linhasAlunos.length;
+      document.getElementById('alunos-contagem').textContent = total ? (total + (total === 1 ? ' aluno' : ' alunos')) : '';
+      document.getElementById('alunos-vinculados-aviso-exclusao').style.display = linhasAlunos.some(function (l) { return l.entrouNoApp; }) ? 'block' : 'none';
+      var visiveis = PainelAlunos.filtrar(linhasAlunos, { busca: termo, filtro: filtroListaAtual, hoje: hoje });
+      var aviso = document.getElementById('alunos-filtro-aviso');
+      aviso.style.display = 'none';
+      corpo.innerHTML = '';
+      if (!visiveis.length) {
+        var vazio = document.createElement('p');
+        vazio.style.color = 'var(--texto-secundario)';
+        if (!total) { vazio.textContent = 'Você ainda não cadastrou nenhum aluno.'; }
+        else if (termo.trim()) { vazio.textContent = 'Nenhum aluno encontrado com esse nome.'; }
+        else if (!PainelAlunos.filtroTemDados(linhasAlunos, filtroListaAtual)) { vazio.textContent = 'Ainda não há dados para este filtro.'; }
+        else { vazio.textContent = 'Nenhum aluno neste filtro.'; }
+        corpo.appendChild(vazio);
+        return;
+      }
+      PainelAlunos.agruparPorLetra(visiveis).forEach(function (g) {
+        var letra = document.createElement('div');
+        letra.className = 'letra-lista-aluno';
+        letra.textContent = g.letra;
+        letra.style.cssText = 'font-size:0.74rem;font-weight:800;color:var(--texto-secundario);margin:12px 0 2px;';
+        corpo.appendChild(letra);
+        g.itens.forEach(function (l) {
+          var sit = PainelAlunos.situacao(l, hoje);
+          var linha = document.createElement('div');
+          linha.className = 'linha-aluno';
+          linha.setAttribute('data-chave', l.chave);
+          linha.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--card-border);cursor:pointer;';
+          var nome = document.createElement('span');
+          nome.textContent = l.nome;
+          var estado = document.createElement('span');
+          estado.className = 'situacao-aluno';
+          estado.textContent = sit.texto;
+          estado.style.cssText = 'font-size:0.8rem;white-space:nowrap;text-align:right;' + estiloSituacao(sit.classe);
+          linha.appendChild(nome);
+          linha.appendChild(estado);
+          linha.addEventListener('click', function () { abrirLinhaAluno(l); });
+          corpo.appendChild(linha);
+        });
+      });
     }
 
     function mostrarErroDaLista(erro) {
@@ -1118,49 +1248,6 @@
     function limparErroDaLista() {
       var el = document.getElementById('alunos-lista-erro');
       if (el) { el.style.display = 'none'; }
-    }
-
-    function desvincularFichaDaLista(ficha) {
-      limparErroDaLista();
-      var ehApp = !!ficha.aluno_user_id;
-      var texto = ehApp
-        ? 'Desvincular ' + ficha.nome + '? O vínculo é desfeito agora. Por 30 dias você só lê o contrato e a anamnese; para voltar a atender, o aluno precisa aceitar um convite novo (código ou QR).'
-        : 'Desvincular ' + ficha.nome + '? A ficha fica só para leitura por 30 dias, não volta mais (nunca teve vínculo de app) e no dia 31 é apagada por inteiro, com as medições. Não há como desfazer.';
-      if (!window.confirm(texto)) { return; }
-      FichasStore.desvincularFicha(ficha.id).then(function () {
-        mostrarDesvinculados();
-      }).catch(mostrarErroDaLista);
-    }
-
-    function renderAlunosVinculados(termo) {
-      var secao = document.getElementById('alunos-vinculados-secao');
-      var corpo = document.getElementById('alunos-vinculados-corpo');
-      var termoBusca = (termo || '').trim().toLowerCase();
-      var filtrados = ultimosAlunosVinculados.filter(function (aluno) {
-        return !termoBusca || (aluno.nome || '').toLowerCase().indexOf(termoBusca) !== -1;
-      });
-      if (filtrados.length === 0) {
-        secao.style.display = 'none';
-        corpo.innerHTML = '';
-        return;
-      }
-      secao.style.display = 'block';
-      corpo.innerHTML = '';
-      filtrados.forEach(function (aluno) {
-        var linha = document.createElement('div');
-        linha.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--card-border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;';
-        var rotulo = document.createElement('span');
-        rotulo.innerHTML = '<strong>' + escaparHtmlAluno(aluno.nome) + '</strong>' +
-          ' <span style="font-size:0.68rem;font-weight:700;color:var(--ambar);border:1px solid var(--ambar);border-radius:999px;padding:2px 8px;margin-left:6px;white-space:nowrap;">Vinculado pelo app</span>';
-        var seta = document.createElement('span');
-        seta.style.color = 'var(--texto-secundario)';
-        seta.textContent = '›';
-        linha.appendChild(rotulo);
-        linha.appendChild(botaoDesvincularLinha(function () { confirmarDesvincularVinculado(aluno.user_id, aluno.nome); }));
-        linha.appendChild(seta);
-        linha.addEventListener('click', function () { abrirDetalheVinculado(aluno.user_id); });
-        corpo.appendChild(linha);
-      });
     }
 
     // D069 Parte 1 -- so leitura dos dados que vw_aluno_para_parceiro ja
@@ -1294,61 +1381,196 @@
       }).catch(mostrarErro);
     }
 
-    function renderListaAlunos(resultado) {
-      var corpo = document.getElementById('alunos-lista-corpo');
-      corpo.innerHTML = '';
-      if (resultado.itens.length === 0) {
-        var vazio = document.createElement('p');
-        vazio.style.color = 'var(--texto-secundario)';
-        vazio.textContent = resultado.total === 0 && !document.getElementById('alunos-busca').value.trim()
-          ? 'Você ainda não cadastrou nenhum aluno.'
-          : 'Nenhum aluno encontrado com esse nome.';
-        corpo.appendChild(vazio);
-      } else {
-        resultado.itens.forEach(function (ficha) {
-          var linha = document.createElement('div');
-          linha.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--card-border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;';
-          var rotulo = document.createElement('span');
-          rotulo.innerHTML = '<strong>' + escaparHtmlAluno(ficha.nome) + '</strong>' +
-            (ficha.telefone ? ' <span style="color:var(--texto-secundario);">— ' + escaparHtmlAluno(ficha.telefone) + '</span>' : '');
-          var seta = document.createElement('span');
-          seta.style.color = 'var(--texto-secundario)';
-          seta.textContent = '›';
-          linha.appendChild(rotulo);
-          linha.appendChild(botaoDesvincularLinha(function () { desvincularFichaDaLista(ficha); }));
-          linha.appendChild(seta);
-          linha.addEventListener('click', function () { abrirDetalheAluno(ficha.id); });
-          corpo.appendChild(linha);
-        });
+    // ---- D083 (2026-10-17) -- tela Pagamentos (controle MANUAL do personal) ----
+    // O personal cadastra valor e dia de vencimento e marca "pago". O Fera Fit
+    // NAO processa pagamento. Dados: RPCs da migration 053 (pagamentos_das_minhas_fichas
+    // etc.; ver assets/js/pagamentos-store.js). Se a leitura falhar a tela avisa e pronto.
+    var filtroPagamentosAtual = 'todos';
+    var pagamentoAbertoChave = null;
+
+    function abrirWhatsApp(telefone, texto) {
+      var link = PainelAlunos.linkWhatsapp(telefone, texto);
+      if (!link) { return false; }
+      window.open(link, '_blank', 'noopener');
+      return true;
+    }
+
+    function abrirPagamentos() {
+      document.getElementById('alunos-lista-view').style.display = 'none';
+      document.getElementById('pagamentos-view').style.display = 'block';
+      if (!linhasAlunos.length) { recalcularLinhasAlunos(); }
+      desenharPagamentos();
+    }
+
+    function fecharPagamentos() {
+      mostrarListaAlunos();
+      carregarListaAlunos();
+    }
+
+    function desenharPagamentos() {
+      var view = document.getElementById('pagamentos-view');
+      if (!view || view.style.display === 'none') { return; }
+      var hoje = new Date();
+      var erro = listaAlunosCache.pagamentosErro;
+      var html = '<button type="button" id="btn-voltar-pagamentos" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>' +
+        '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Pagamentos</h2>' +
+        '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 12px;">Controle seu: você cadastra o valor e o dia do vencimento e marca como pago. O Fera Fit não processa pagamento.</p>';
+      if (erro) {
+        html += '<p id="pagamentos-aviso" style="color:var(--texto-secundario);">' + escaparHtmlAluno(erro.codigo === 'indisponivel' ? PagamentosStore.TEXTO_INDISPONIVEL : mensagemSeguraErro(erro)) + '</p>';
+        view.innerHTML = html;
+        ligarVoltarPagamentos();
+        return;
       }
-
-      var pag = document.getElementById('alunos-paginacao');
-      pag.innerHTML = '';
-      var totalPaginas = Math.max(1, Math.ceil(resultado.total / resultado.porPagina));
-      if (resultado.total > 0) {
-        var legenda = document.createElement('span');
-        legenda.textContent = resultado.total + (resultado.total === 1 ? ' aluno — página ' : ' alunos — página ') + resultado.pagina + ' de ' + totalPaginas;
-        pag.appendChild(legenda);
-
-        if (totalPaginas > 1) {
-          var botoes = document.createElement('span');
-          var btnAnterior = document.createElement('button');
-          btnAnterior.type = 'button';
-          btnAnterior.textContent = '← Anterior';
-          btnAnterior.disabled = resultado.pagina <= 1;
-          btnAnterior.style.cssText = 'background:none;border:1px solid var(--card-border);border-radius:8px;padding:6px 10px;margin-right:8px;cursor:pointer;font-family:inherit;font-size:0.78rem;color:inherit;';
-          btnAnterior.onclick = function () { carregarListaAlunos(resultado.pagina - 1); };
-          var btnProxima = document.createElement('button');
-          btnProxima.type = 'button';
-          btnProxima.textContent = 'Próxima →';
-          btnProxima.disabled = resultado.pagina >= totalPaginas;
-          btnProxima.style.cssText = btnAnterior.style.cssText;
-          btnProxima.onclick = function () { carregarListaAlunos(resultado.pagina + 1); };
-          botoes.appendChild(btnAnterior);
-          botoes.appendChild(btnProxima);
-          pag.appendChild(botoes);
+      var c = PainelAlunos.contagemPagamentos(linhasAlunos, hoje);
+      var chips = [
+        { id: 'todos', rotulo: 'Todos' },
+        { id: 'atrasados', rotulo: 'Atrasados ' + c.atrasados },
+        { id: 'semana', rotulo: 'Vencem esta semana ' + c.semana },
+        { id: 'em_dia', rotulo: 'Em dia ' + c.emDia }
+      ];
+      html += '<div id="pagamentos-filtros" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">';
+      chips.forEach(function (f) {
+        var on = f.id === filtroPagamentosAtual;
+        html += '<button type="button" class="chip-filtro-pagamento" data-filtro="' + escaparAtributo(f.id) + '" aria-pressed="' + escaparAtributo(on) + '" style="border:1px solid ' + (on ? 'var(--texto)' : 'var(--card-border)') + ';border-radius:999px;padding:5px 11px;font-family:inherit;font-size:0.76rem;cursor:pointer;' + (on ? 'background:var(--texto);color:var(--fundo,#17120f);font-weight:800;' : 'background:none;color:var(--texto-secundario);') + '">' + escaparHtmlAluno(f.rotulo) + '</button>';
+      });
+      html += '</div><div id="pagamentos-corpo"></div>';
+      view.innerHTML = html;
+      ligarVoltarPagamentos();
+      Array.prototype.forEach.call(view.querySelectorAll('.chip-filtro-pagamento'), function (b) {
+        b.addEventListener('click', function () { filtroPagamentosAtual = b.getAttribute('data-filtro'); pagamentoAbertoChave = null; desenharPagamentos(); });
+      });
+      var corpo = document.getElementById('pagamentos-corpo');
+      var linhas = PainelAlunos.filtrarPagamentos(linhasAlunos, filtroPagamentosAtual, hoje);
+      if (!linhas.length) {
+        corpo.innerHTML = '<p style="color:var(--texto-secundario);">' + (linhasAlunos.length ? 'Ninguém neste filtro.' : 'Você ainda não cadastrou nenhum aluno.') + '</p>';
+        return;
+      }
+      linhas.forEach(function (l) {
+        var s = PainelAlunos.statusPagamento(l.pagamento, hoje);
+        var cls = s ? (s.tipo === 'atrasado' ? 'r' : (s.tipo === 'em_dia' ? '' : 'a')) : '';
+        var caixa = document.createElement('div');
+        caixa.className = 'linha-pagamento';
+        caixa.setAttribute('data-chave', l.chave);
+        var topo = document.createElement('div');
+        topo.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--card-border);cursor:pointer;';
+        var esq = document.createElement('span');
+        var nome = document.createElement('span');
+        nome.textContent = l.nome;
+        esq.appendChild(nome);
+        var det = PainelAlunos.detalhePagamento(l.pagamento, s);
+        if (det) {
+          var peq = document.createElement('small');
+          peq.style.cssText = 'display:block;color:var(--texto-secundario);font-size:0.74rem;';
+          peq.textContent = det;
+          esq.appendChild(peq);
         }
+        var dir = document.createElement('span');
+        dir.className = 'situacao-pagamento';
+        dir.textContent = PainelAlunos.textoStatusPagamento(s);
+        dir.style.cssText = 'font-size:0.8rem;white-space:nowrap;text-align:right;' + estiloSituacao(cls);
+        topo.appendChild(esq);
+        topo.appendChild(dir);
+        topo.addEventListener('click', function () { pagamentoAbertoChave = (pagamentoAbertoChave === l.chave ? null : l.chave); desenharPagamentos(); });
+        caixa.appendChild(topo);
+        if (pagamentoAbertoChave === l.chave) { caixa.appendChild(painelEdicaoPagamento(l, s)); }
+        corpo.appendChild(caixa);
+      });
+    }
+
+    function ligarVoltarPagamentos() {
+      var b = document.getElementById('btn-voltar-pagamentos');
+      if (b) { b.addEventListener('click', fecharPagamentos); }
+    }
+
+    function painelEdicaoPagamento(l, status) {
+      var pg = l.pagamento;
+      var box = document.createElement('div');
+      box.className = 'painel-pagamento';
+      box.style.cssText = 'padding:12px 4px 14px;border-bottom:1px solid var(--card-border);';
+      // D086: o controle e por FICHA (migration 053). Aluno do app sem ficha sua nao tem onde guardar.
+      if (l.fichaId == null) {
+        box.innerHTML = '<p class="pg-sem-ficha" style="color:var(--texto-secundario);font-size:0.82rem;margin:0;">Para controlar o pagamento, este aluno precisa ter uma ficha sua. Abra o aluno na lista e crie a ficha.</p>';
+        return box;
       }
+      if (pg && pg.so_leitura) {
+        box.innerHTML = '<p class="pg-so-leitura" style="color:var(--texto-secundario);font-size:0.82rem;margin:0;">Aluno desvinculado: o pagamento fica só para consulta.</p>';
+        return box;
+      }
+      box.innerHTML =
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+          '<div class="campo" style="flex:1 1 140px;margin:0;"><label>Valor (R$)</label><input class="pg-valor" type="text" inputmode="decimal" placeholder="150"></div>' +
+          '<div class="campo" style="flex:1 1 140px;margin:0;"><label>Dia do vencimento</label><input class="pg-dia" type="number" min="1" max="31" placeholder="10"></div>' +
+        '</div>' +
+        '<p class="pg-erro" style="display:none;color:#c0392b;font-size:0.82rem;margin:8px 0 0;"></p>' +
+        '<div class="pg-acoes" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>';
+      var campoValor = box.querySelector('.pg-valor');
+      var campoDia = box.querySelector('.pg-dia');
+      if (pg) {
+        campoValor.value = String(pg.valor_centavos / 100).replace('.', ',');
+        campoDia.value = pg.dia_vencimento;
+      }
+      var erroEl = box.querySelector('.pg-erro');
+      function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
+      function guardar(mapa) {
+        listaAlunosCache.pagamentos = mapa;
+        listaAlunosCache.pagamentosErro = null;
+        recalcularLinhasAlunos();
+        desenharPagamentos();
+      }
+      var acoes = box.querySelector('.pg-acoes');
+      function botao(rotulo, primario, aoClicar, classe) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = rotulo;
+        if (classe) { b.className = classe; }
+        b.style.cssText = primario ? 'background:var(--grad,linear-gradient(90deg,#ff5b1a,#ffb238));color:#1a0f00;font-weight:800;border:none;border-radius:9px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;'
+          : 'background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:9px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;';
+        b.addEventListener('click', function () { erroEl.style.display = 'none'; aoClicar(b); });
+        acoes.appendChild(b);
+        return b;
+      }
+      botao(pg ? 'Salvar alterações' : 'Cadastrar cobrança', !pg, function () {
+        var valor = PainelAlunos.valorParaCentavos(campoValor.value);
+        if (valor === null) { mostrarErro('Digite um valor maior que zero. Exemplo: 150 ou 150,50.'); return; }
+        PagamentosStore.salvarCobranca(l.fichaId, { valor_centavos: valor, dia_vencimento: Number(campoDia.value) })
+          .then(guardar).catch(function (e) { mostrarErro(e.message); });
+      }, 'btn-salvar-cobranca');
+      if (pg) {
+        var pendentes = PainelAlunos.mesesPendentes(pg, new Date());
+        if (pendentes.length) {
+          pendentes.forEach(function (comp) {
+            botao('Marcar ' + PainelAlunos.rotuloMes(comp) + ' como pago', comp === pg.competencia_atual, function () {
+              PagamentosStore.marcarMes(l.fichaId, comp, true).then(guardar).catch(function (e) { mostrarErro(e.message); });
+            }, 'btn-marcar-mes');
+          });
+        } else if (pg.pago_mes_atual) {
+          botao('Desmarcar ' + PainelAlunos.rotuloMes(pg.competencia_atual), false, function () {
+            PagamentosStore.marcarMes(l.fichaId, pg.competencia_atual, false).then(guardar).catch(function (e) { mostrarErro(e.message); });
+          }, 'btn-desmarcar-mes');
+        } else {
+          botao('Marcar ' + PainelAlunos.rotuloMes(pg.competencia_atual) + ' como pago', true, function () {
+            PagamentosStore.marcarMes(l.fichaId, pg.competencia_atual, true).then(guardar).catch(function (e) { mostrarErro(e.message); });
+          }, 'btn-marcar-mes');
+        }
+        if (l.telefone && PainelAlunos.numeroWhatsapp(l.telefone)) {
+          botao('Cobrar pelo WhatsApp', false, function () { abrirWhatsApp(l.telefone, PainelAlunos.mensagemCobranca(l.nome)); }, 'btn-cobrar-whatsapp');
+        } else {
+          var nota = document.createElement('p');
+          nota.style.cssText = 'color:var(--texto-secundario);font-size:0.78rem;margin:8px 0 0;width:100%;';
+          nota.textContent = 'Sem telefone com WhatsApp cadastrado para este aluno.';
+          box.appendChild(nota);
+        }
+        // Parar de controlar apaga valor, dia e meses marcados: pede um segundo toque (sem janela do navegador).
+        var apagar = botao('Parar de controlar', false, function (b) {
+          if (!b.getAttribute('data-confirma')) {
+            b.setAttribute('data-confirma', '1');
+            b.textContent = 'Toque de novo: apaga valor, dia e meses marcados';
+            return;
+          }
+          PagamentosStore.remover(l.fichaId).then(guardar).catch(function (e) { mostrarErro(e.message); });
+        }, 'btn-parar-controle');
+      }
+      return box;
     }
 
     // --- Formulário da ficha (criação e edição compartilham o
@@ -1442,7 +1664,7 @@
     // com `aplicar-treino-base-select` na parte 2).
     function templateCheckboxesDias(grupo) {
       return DIAS_SEMANA.map(function (d) {
-        return '<label><input type="checkbox" value="' + d.chave + '" data-afdias-grupo="' + grupo + '"> ' + escaparHtmlAluno(d.rotulo) + '</label>';
+        return '<label><input type="checkbox" value="' + escaparAtributo(d.chave) + '" data-afdias-grupo="' + escaparAtributo(grupo) + '"> ' + escaparHtmlAluno(d.rotulo) + '</label>';
       }).join('');
     }
 
@@ -1675,6 +1897,13 @@
       return '<p style="margin:0 0 6px;"><strong>' + escaparHtmlAluno(rotulo) + ':</strong> ' + escaparHtmlAluno(texto) + '</p>';
     }
 
+    // D083 -- "WhatsApp" abre a conversa; "Cobrar" abre com a mensagem pronta
+    // (o personal edita antes de enviar). Nada e enviado pelo Fera Fit.
+    function abrirWhatsAppFichaAtual(cobrar) {
+      if (!fichaDetalheAtual) { return; }
+      abrirWhatsApp(fichaDetalheAtual.telefone, cobrar ? PainelAlunos.mensagemCobranca(fichaDetalheAtual.nome) : '');
+    }
+
     function renderDetalheAluno(ficha) {
       var endereco = ficha.endereco || {};
       var contrato = ficha.contrato || {};
@@ -1692,6 +1921,10 @@
       if (lerSo) {
         html += '<button type="button" onclick="mostrarDesvinculados()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos desvinculados</button>';
       } else {
+        if (PainelAlunos.numeroWhatsapp(ficha.telefone)) { // D083
+          html += '<button type="button" id="btn-whatsapp-aluno" onclick="abrirWhatsAppFichaAtual(false)" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">WhatsApp</button>';
+          html += '<button type="button" id="btn-cobrar-aluno" onclick="abrirWhatsAppFichaAtual(true)" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Cobrar</button>';
+        }
         html += '<button type="button" onclick="abrirEdicaoAluno()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Editar</button>';
         html += '<button type="button" id="btn-desvincular-ficha" onclick="pedirConfirmacaoDesvincularFicha()" style="background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Desvincular</button>';
         html += '<button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar</button>';
@@ -2096,7 +2329,7 @@
       });
       gruposUnicos.sort();
       var optsGrupo = '<option value="">Todos os grupos</option>' + gruposUnicos.map(function (g) {
-        return '<option value="' + escaparHtmlAluno(g) + '">' + escaparHtmlAluno(g) + '</option>';
+        return '<option value="' + escaparAtributo(g) + '">' + escaparHtmlAluno(g) + '</option>';
       }).join('');
       return '' +
         '<div class="campo" style="margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;">' +
@@ -2616,7 +2849,7 @@
         }
         var opts = lista.map(function (tb) {
           var qtd = (tb.exercicios || []).length;
-          return '<option value="' + tb.id + '">' + escaparHtmlAluno(tb.nome) + ' (' + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + ')</option>';
+          return '<option value="' + escaparAtributo(tb.id) + '">' + escaparHtmlAluno(tb.nome) + ' (' + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + ')</option>';
         }).join('');
         form.innerHTML =
           '<div class="campo"><label for="aplicar-treino-base-select">Escolha um treino-base</label><select id="aplicar-treino-base-select">' + opts + '</select></div>' +
