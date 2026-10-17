@@ -16,7 +16,7 @@
 (function (global) {
   "use strict";
 
-  var MENSAGEM = "Este aluno não está mais disponível.";
+  var MENSAGEM = "Esta ficha não existe mais. O aluno encerrou a conta dele no Fera Fit, e os dados dele foram apagados.";
   // Codigo estavel da Backend (D155) -- AINDA VAZIO de proposito.
   var CODIGOS = [];
   // Mensagens que a 042/045 devolvem hoje (comparacao sem acento/caixa).
