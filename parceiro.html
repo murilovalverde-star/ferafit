@@ -364,6 +364,50 @@
             <button type="button" onclick="sairDaMinhaConta()" style="background:none;border:none;color:var(--texto-secundario);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:0.82rem;margin:14px 0 0;display:block;">Sair</button>
           </div>
 
+          <!-- D082 (2026-10-16) -- ENCERRAR A CONTA DE PARCEIRO. Texto, botoes e
+               requisitos de desenho: Juridica, ENTREGA_D075 secao 3 (a D082 chama de
+               "secao 6"). Requisitos: os 2 botoes de encerrar com O MESMO peso visual;
+               "Cancelar" com o MAIOR destaque; confirmacao propria so no "apagar agora";
+               NENHUMA frase de dissuasao. Liga em assets/js/encerramento-conta-store.js
+               (contrato A10 da Backend, D162, ainda so em arquivo). NAO publicado. -->
+          <div class="parceiro-box" id="encerrar-conta-view" style="display:none;max-width:560px;margin:0 auto 24px;text-align:left;">
+            <div id="enc-passo-principal">
+              <h1 style="font-size:1.2rem;font-weight:800;margin:0 0 12px;">Encerrar a minha conta de parceiro</h1>
+              <p style="font-size:0.92rem;margin:0 0 12px;">Ao confirmar, você perde o acesso à área de parceiros e às fichas dos seus alunos no mesmo instante.</p>
+              <p style="font-size:0.92rem;margin:0 0 12px;"><strong>A sua conta fica guardada por 30 dias e depois é apagada em definitivo.</strong> Nesse período ninguém acessa nada: nem você, nem os seus alunos, nem a equipe do Fera Fit para qualquer outra finalidade. Ela existe apenas para o caso de este encerramento ter sido um engano ou uma falha, e só a nossa administração pode restaurá-la.</p>
+              <p style="font-size:0.92rem;margin:0 0 12px;"><strong>Depois dos 30 dias nada volta</strong>, nem o seu cadastro, nem as fichas, nem os contratos. O Fera Fit não envia cópia dos dados em nenhum momento, então guarde o que você precisa antes de confirmar.</p>
+              <p style="font-size:0.92rem;margin:0 0 18px;"><strong>Uma exceção, por obrigação legal:</strong> se você já pagou alguma cobrança ao Fera Fit, o registro fiscal desse pagamento é guardado por cinco anos, mesmo depois do apagamento.</p>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button type="button" class="enc-botao-encerrar" id="enc-btn-aguardar" onclick="encerrarContaParceiro('quarentena')" style="width:100%;padding:14px 18px;background:none;border:2px solid var(--texto);color:var(--texto);border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;">Encerrar e aguardar os 30 dias</button>
+                <button type="button" class="enc-botao-encerrar" id="enc-btn-agora" onclick="pedirConfirmacaoApagarAgora()" style="width:100%;padding:14px 18px;background:none;border:2px solid var(--texto);color:var(--texto);border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;">Encerrar e apagar tudo agora</button>
+                <button type="button" class="botao-primario" id="enc-btn-cancelar" onclick="cancelarEncerramentoConta()" style="width:100%;padding:18px 18px;border:none;border-radius:10px;font-size:1.05rem;font-weight:800;cursor:pointer;font-family:inherit;margin:4px 0 0;">Cancelar</button>
+              </div>
+            </div>
+            <div id="enc-passo-confirmar-agora" style="display:none;">
+              <h1 style="font-size:1.2rem;font-weight:800;margin:0 0 12px;">Apagar tudo agora?</h1>
+              <p style="font-size:0.92rem;margin:0 0 18px;">Sem os 30 dias, sem restauração possível, nem por engano. Esta ação não tem volta.</p>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button type="button" class="enc-botao-encerrar" id="enc-btn-apagar-definitivo" onclick="encerrarContaParceiro('imediato')" style="width:100%;padding:14px 18px;background:none;border:2px solid var(--texto);color:var(--texto);border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;">Apagar definitivamente</button>
+                <button type="button" class="enc-botao-encerrar" id="enc-btn-voltar" onclick="voltarDoApagarAgora()" style="width:100%;padding:14px 18px;background:none;border:2px solid var(--texto);color:var(--texto);border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;">Voltar</button>
+              </div>
+            </div>
+            <div id="enc-passo-senha" style="display:none;">
+              <h1 style="font-size:1.2rem;font-weight:800;margin:0 0 12px;">Confirme a sua senha</h1>
+              <p style="font-size:0.92rem;margin:0 0 12px;">Para esta ação, precisamos que você digite a senha da sua conta de novo.</p>
+              <input id="enc-senha" type="password" autocomplete="current-password" placeholder="Senha" style="width:100%;padding:12px;margin:0 0 12px;font-size:1rem;font-family:inherit;box-sizing:border-box;">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button type="button" class="enc-botao-encerrar" id="enc-btn-senha-ok" onclick="confirmarSenhaEncerramento()" style="width:100%;padding:14px 18px;background:none;border:2px solid var(--texto);color:var(--texto);border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;">Confirmar senha e continuar</button>
+                <button type="button" class="botao-primario" id="enc-btn-senha-cancelar" onclick="cancelarEncerramentoConta()" style="width:100%;padding:18px 18px;border:none;border-radius:10px;font-size:1.05rem;font-weight:800;cursor:pointer;font-family:inherit;">Cancelar</button>
+              </div>
+            </div>
+            <div id="enc-passo-fim" style="display:none;">
+              <h1 id="enc-fim-titulo" style="font-size:1.2rem;font-weight:800;margin:0 0 12px;"></h1>
+              <p id="enc-fim-texto" style="font-size:0.92rem;margin:0 0 18px;"></p>
+              <button type="button" class="botao-primario" id="enc-btn-fim" onclick="terminarEncerramentoConta()" style="width:auto;padding:12px 24px;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;">Ir para o login</button>
+            </div>
+            <p id="enc-erro" style="display:none;color:#ff6a6a;font-size:0.88rem;margin:14px 0 0;"></p>
+          </div>
+
           <!-- D045, item 1/6.3 (2026-10-01): tela real pós-login, perfil lido
                do Supabase pelo próprio dono (RLS). Alunos/Montar treino abaixo
                (escolha-modo/painel-conta) continuam só demonstração até os
@@ -374,6 +418,7 @@
               <button type="button" onclick="sairDaMinhaConta()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:999px;padding:8px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">Sair</button>
             </div>
             <div id="minha-conta-corpo" style="color:var(--texto);font-size:0.9rem;"></div>
+            <p style="margin:18px 0 0;"><button type="button" id="btn-abrir-encerramento-conta" onclick="abrirEncerramentoConta()" style="background:none;border:none;color:var(--texto-secundario);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:0.82rem;padding:0;">Encerrar a minha conta de parceiro</button></p>
             <!-- D068 (2026-10-10): a frase antiga ("Alunos e Montar treino
                  ainda nao estao ligados a sua conta real") foi tirada --
                  nao e mais verdade desde a D045 (fichas reais) e a D067
@@ -625,6 +670,7 @@
   <script src="assets/js/supabase.js"></script>
   <script src="assets/js/dados-demo.js"></script>
   <script src="assets/js/parceiros-store.js"></script>
+  <script src="assets/js/encerramento-conta-store.js"></script>
   <script src="assets/js/aluno-indisponivel.js"></script>
   <script src="assets/js/fichas-store.js"></script>
   <script src="assets/js/treinos-store.js"></script>
@@ -720,6 +766,115 @@
         linha.innerHTML = '<strong>' + par[0] + ':</strong> ' + valor.replace(/</g, '&lt;');
         corpo.appendChild(linha);
       });
+    }
+
+    // ---------------------------------------------------------------
+    // D082 (2026-10-16) -- encerramento da conta de parceiro. So local.
+    // Contrato: assets/js/encerramento-conta-store.js (A10 da Backend).
+    // ---------------------------------------------------------------
+    var encerramentoRestaurar = {};
+    var encerramentoModoPendente = null;
+    var encerramentoOcupado = false;
+    var ENC_PASSOS = ['enc-passo-principal', 'enc-passo-confirmar-agora', 'enc-passo-senha', 'enc-passo-fim'];
+
+    function mostrarPassoEncerramento(id) {
+      ENC_PASSOS.forEach(function (p) {
+        document.getElementById(p).style.display = (p === id) ? 'block' : 'none';
+      });
+      mostrarErroEncerramento('');
+    }
+    function mostrarErroEncerramento(texto) {
+      var el = document.getElementById('enc-erro');
+      el.textContent = texto || '';
+      el.style.display = texto ? 'block' : 'none';
+    }
+    function travarBotoesEncerramento(travar) {
+      encerramentoOcupado = !!travar;
+      var bs = document.querySelectorAll('#encerrar-conta-view button');
+      for (var i = 0; i < bs.length; i++) { bs[i].disabled = !!travar; }
+    }
+
+    function abrirEncerramentoConta() {
+      encerramentoRestaurar = {};
+      ['minha-conta-real', 'meus-alunos-real'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { encerramentoRestaurar[id] = el.style.display; el.style.display = 'none'; }
+      });
+      encerramentoModoPendente = null;
+      travarBotoesEncerramento(false);
+      mostrarPassoEncerramento('enc-passo-principal');
+      document.getElementById('encerrar-conta-view').style.display = 'block';
+    }
+
+    function cancelarEncerramentoConta() {
+      if (encerramentoOcupado) { return; }
+      document.getElementById('encerrar-conta-view').style.display = 'none';
+      Object.keys(encerramentoRestaurar).forEach(function (id) {
+        document.getElementById(id).style.display = encerramentoRestaurar[id];
+      });
+      encerramentoRestaurar = {};
+      encerramentoModoPendente = null;
+      document.getElementById('enc-senha').value = '';
+    }
+
+    function pedirConfirmacaoApagarAgora() { mostrarPassoEncerramento('enc-passo-confirmar-agora'); }
+    function voltarDoApagarAgora() { mostrarPassoEncerramento('enc-passo-principal'); }
+
+    function encerrarContaParceiro(modo) {
+      if (encerramentoOcupado) { return; }
+      mostrarErroEncerramento('');
+      travarBotoesEncerramento(true);
+      EncerramentoContaStore.encerrar(modo).then(function (resposta) {
+        return EncerramentoContaStore.sairLocal().then(function () { mostrarFimEncerramento(modo, resposta); });
+      }).catch(function (erro) {
+        travarBotoesEncerramento(false);
+        if (erro && erro.codigo === 'reautenticacao_necessaria') {
+          encerramentoModoPendente = modo;
+          document.getElementById('enc-senha').value = '';
+          mostrarPassoEncerramento('enc-passo-senha');
+          return;
+        }
+        mostrarErroEncerramento((erro && erro.message) || 'Não conseguimos concluir agora. Tente de novo em instantes.');
+      });
+    }
+
+    function confirmarSenhaEncerramento() {
+      if (encerramentoOcupado) { return; }
+      var senha = document.getElementById('enc-senha').value;
+      var modo = encerramentoModoPendente;
+      if (!senha || !modo) { mostrarErroEncerramento('Digite a sua senha.'); return; }
+      mostrarErroEncerramento('');
+      travarBotoesEncerramento(true);
+      EncerramentoContaStore.reautenticar(senha).then(function () {
+        travarBotoesEncerramento(false);
+        document.getElementById('enc-senha').value = '';
+        encerrarContaParceiro(modo);
+      }).catch(function (erro) {
+        travarBotoesEncerramento(false);
+        mostrarErroEncerramento((erro && erro.message) || 'Não conseguimos concluir agora. Tente de novo em instantes.');
+      });
+    }
+
+    function mostrarFimEncerramento(modo, resposta) {
+      var titulo = document.getElementById('enc-fim-titulo');
+      var texto = document.getElementById('enc-fim-texto');
+      if (modo === 'imediato') {
+        titulo.textContent = 'Conta apagada';
+        texto.textContent = 'A sua conta e os dados dela foram apagados. Não há como restaurá-la.';
+      } else {
+        var ate = resposta && resposta.recuperavel_ate ? new Date(resposta.recuperavel_ate) : null;
+        var dataTexto = (ate && !isNaN(ate.getTime())) ? ate.toLocaleDateString('pt-BR') : '';
+        titulo.textContent = 'Conta encerrada';
+        texto.textContent = 'O acesso foi bloqueado agora. A sua conta fica guardada' + (dataTexto ? ' até ' + dataTexto : ' por 30 dias') + ' e só a administração do Fera Fit pode restaurá-la nesse período. Depois disso, é apagada em definitivo.';
+      }
+      travarBotoesEncerramento(false);
+      mostrarPassoEncerramento('enc-passo-fim');
+    }
+
+    function terminarEncerramentoConta() {
+      document.getElementById('encerrar-conta-view').style.display = 'none';
+      encerramentoRestaurar = {};
+      sairDaMinhaConta();
     }
 
     function sairDaMinhaConta() {
