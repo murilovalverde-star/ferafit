@@ -368,7 +368,36 @@
                do Supabase pelo próprio dono (RLS). Alunos/Montar treino abaixo
                (escolha-modo/painel-conta) continuam só demonstração até os
                itens 2 e 3 da D045 ligarem os dados reais. -->
-          <div class="parceiro-box" id="minha-conta-real" style="display:none;max-width:560px;margin:0 auto 24px;text-align:left;">
+          <div class="parceiro-box" id="meus-alunos-real" style="display:none;max-width:860px;margin:0 auto 24px;text-align:left;">
+
+            <style>
+              .pcard:hover{border-color:var(--laranja)!important;}
+              #pnav-menu button,#psub-alunos button,#psub-treinos button{white-space:nowrap;}
+            </style>
+            <div id="pnav" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
+              <div id="pnav-menu" style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" data-secao="inicio" onclick="irParaSecao('inicio')">Início</button>
+                <button type="button" data-secao="alunos" onclick="irParaSecao('alunos')">Alunos</button>
+                <button type="button" data-secao="treinos" onclick="irParaSecao('treinos')">Treinos</button>
+              </div>
+              <button type="button" id="pnav-conta" aria-label="Minha conta" title="Minha conta" onclick="irParaSecao('conta')" style="width:40px;height:40px;border-radius:50%;background:none;border:1px solid var(--card-border);color:var(--texto);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg>
+              </button>
+            </div>
+            <div id="psub-alunos" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+              <button type="button" data-sub="meus" onclick="irParaSubAlunos('meus')">Meus alunos</button>
+              <button type="button" data-sub="pagamentos" onclick="irParaSubAlunos('pagamentos')">Pagamentos</button>
+              <button type="button" data-sub="vincular" onclick="irParaSubAlunos('vincular')">Vincular aluno</button>
+              <button type="button" data-sub="desv" onclick="irParaSubAlunos('desv')">Desvinculados</button>
+              <button type="button" data-sub="novo" class="botao-primario" onclick="irParaSubAlunos('novo')" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;margin-left:auto;">+ Novo aluno</button>
+            </div>
+            <div id="psub-treinos" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+              <button type="button" data-sub="lista" onclick="irParaSubTreinos('lista')">Meus treinos-base</button>
+              <button type="button" data-sub="criar" onclick="irParaSubTreinos('criar')">Criar treino base</button>
+              <button type="button" data-sub="fera" onclick="irParaSubTreinos('fera')">Vincular Treino Fera</button>
+              <button type="button" data-sub="aparelhos" id="btn-aparelhos-carga" onclick="irParaSubTreinos('aparelhos')">Aparelhos e carga</button>
+            </div>
+<div id="minha-conta-real" style="display:none;max-width:560px;margin:0 auto 24px;text-align:left;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
               <h1 id="minha-conta-titulo" style="font-size:1.2rem;font-weight:800;margin:0;"></h1>
               <button type="button" onclick="sairDaMinhaConta()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:999px;padding:8px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">Sair</button>
@@ -380,17 +409,18 @@
                  (vinculo por codigo). Ver STATUS.md, entrada D068. -->
           </div>
 
-          <div class="parceiro-box" id="meus-alunos-real" style="display:none;max-width:860px;margin:0 auto 24px;text-align:left;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-              <h1 style="font-size:1.2rem;font-weight:800;margin:0;">Meus alunos</h1>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button type="button" onclick="mostrarTreinosBase()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Treinos-base</button>
-                <button type="button" id="btn-aparelhos-carga" onclick="mostrarAparelhosCarga()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;display:none;">Aparelhos de carga</button>
-                <button type="button" onclick="mostrarDesvinculados()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Desvinculados</button>
-                <button type="button" onclick="abrirVincularAluno()" style="width:auto;padding:10px 18px;background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;cursor:pointer;font-family:inherit;">Vincular aluno</button>
-                <button type="button" class="botao-primario" onclick="abrirFormularioNovoAluno()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
+          
+            <div id="inicio-view" style="display:none;">
+              <h2 style="font-size:1.05rem;font-weight:800;margin:0 0 12px;">Início</h2>
+              <div id="inicio-cards"></div>
+              <div id="inicio-atalhos" style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" id="atalho-novo-aluno" class="botao-primario" onclick="irParaSubAlunos('novo')" style="width:auto;padding:10px 20px;border:none;cursor:pointer;font-family:inherit;">+ Novo aluno</button>
+                <button type="button" id="atalho-criar-treino" onclick="irParaSubTreinos('criar')" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:10px 20px;cursor:pointer;font-family:inherit;">Criar treino base</button>
               </div>
             </div>
+            <div id="criar-treino-view" style="display:none;"></div>
+            <div id="vincular-fera-view" style="display:none;"></div>
+            <div id="aplicar-alunos-view" style="display:none;"></div>
 
             <div id="alunos-lista-view">
               <!-- D083 (2026-10-17) -- lista simples A-Z, uma palavra de situacao por aluno,
@@ -399,7 +429,7 @@
               <p id="alunos-lista-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:0 0 10px;"></p>
               <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
                 <strong id="alunos-contagem" style="font-size:1rem;"></strong>
-                <button type="button" id="btn-abrir-pagamentos" class="botao-primario" onclick="abrirPagamentos()" style="width:auto;padding:8px 16px;border:none;cursor:pointer;font-family:inherit;">Pagamentos</button>
+                
               </div>
               <div class="campo" style="margin-bottom:10px;">
                 <input id="alunos-busca" type="text" placeholder="Buscar aluno pelo nome" oninput="buscarAlunosDebounced()">
@@ -416,10 +446,8 @@
             <div id="aluno-detalhe-view" style="display:none;"></div>
 
             <div id="treinos-base-view" style="display:none;">
-              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-                <button type="button" onclick="mostrarListaAlunos()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">← Voltar aos alunos</button>
-                <button type="button" class="botao-primario" id="btn-novo-treino-base" onclick="abrirFormularioNovoTreinoBase()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Novo treino-base</button>
-              </div>
+              <h2 style="font-size:1.05rem;font-weight:800;margin:0 0 4px;">Meus treinos-base</h2>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:10px;"><button type="button" class="botao-primario" id="btn-novo-treino-base" onclick="abrirFormularioNovoTreinoBase()" style="width:auto;padding:10px 18px;border:none;cursor:pointer;font-family:inherit;">+ Criar treino base</button></div>
               <div id="treinos-base-lista-view">
                 <div id="treinos-base-lista-corpo" style="color:var(--texto);font-size:0.9rem;"><p style="color:var(--texto-secundario);">Carregando…</p></div>
               </div>
@@ -632,6 +660,7 @@
   <script src="assets/js/vinculo-convite-store.js"></script>
   <script src="assets/js/painel-alunos.js"></script>
   <script src="assets/js/pagamentos-store.js"></script>
+  <script src="assets/js/painel-treinos.js"></script>
   <script>
     // Login real (D045, item 1/6.3) — Supabase Auth, mesma sessao
     // compartilhada (sessionStorage) ja usada em admin.html (D043/D044).
@@ -1095,7 +1124,6 @@
       // decisao de Murilo de tirar essa opcao do Personal.
       var btnAparelhosCarga = document.getElementById('btn-aparelhos-carga');
       if (btnAparelhosCarga) { btnAparelhosCarga.style.display = (conta.tipo === 'academia') ? '' : 'none'; }
-      carregarListaAlunos(1);
     }
 
     function esconderMeusAlunos() {
@@ -1156,6 +1184,7 @@
           el.style.display = 'block';
         }
         desenharListaAlunos();
+        desenharPagamentos(); // reforma: a aba Pagamentos usa os mesmos dados
       });
     }
 
@@ -1407,172 +1436,6 @@
       carregarListaAlunos();
     }
 
-    function desenharPagamentos() {
-      var view = document.getElementById('pagamentos-view');
-      if (!view || view.style.display === 'none') { return; }
-      var hoje = new Date();
-      var erro = listaAlunosCache.pagamentosErro;
-      var html = '<button type="button" id="btn-voltar-pagamentos" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-bottom:14px;">← Voltar aos alunos</button>' +
-        '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Pagamentos</h2>' +
-        '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 12px;">Controle seu: você cadastra o valor e o dia do vencimento e marca como pago. O Fera Fit não processa pagamento.</p>';
-      if (erro) {
-        html += '<p id="pagamentos-aviso" style="color:var(--texto-secundario);">' + escaparHtmlAluno(erro.codigo === 'indisponivel' ? PagamentosStore.TEXTO_INDISPONIVEL : mensagemSeguraErro(erro)) + '</p>';
-        view.innerHTML = html;
-        ligarVoltarPagamentos();
-        return;
-      }
-      var c = PainelAlunos.contagemPagamentos(linhasAlunos, hoje);
-      var chips = [
-        { id: 'todos', rotulo: 'Todos' },
-        { id: 'atrasados', rotulo: 'Atrasados ' + c.atrasados },
-        { id: 'semana', rotulo: 'Vencem esta semana ' + c.semana },
-        { id: 'em_dia', rotulo: 'Em dia ' + c.emDia }
-      ];
-      html += '<div id="pagamentos-filtros" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">';
-      chips.forEach(function (f) {
-        var on = f.id === filtroPagamentosAtual;
-        html += '<button type="button" class="chip-filtro-pagamento" data-filtro="' + escaparAtributo(f.id) + '" aria-pressed="' + escaparAtributo(on) + '" style="border:1px solid ' + (on ? 'var(--texto)' : 'var(--card-border)') + ';border-radius:999px;padding:5px 11px;font-family:inherit;font-size:0.76rem;cursor:pointer;' + (on ? 'background:var(--texto);color:var(--fundo,#17120f);font-weight:800;' : 'background:none;color:var(--texto-secundario);') + '">' + escaparHtmlAluno(f.rotulo) + '</button>';
-      });
-      html += '</div><div id="pagamentos-corpo"></div>';
-      view.innerHTML = html;
-      ligarVoltarPagamentos();
-      Array.prototype.forEach.call(view.querySelectorAll('.chip-filtro-pagamento'), function (b) {
-        b.addEventListener('click', function () { filtroPagamentosAtual = b.getAttribute('data-filtro'); pagamentoAbertoChave = null; desenharPagamentos(); });
-      });
-      var corpo = document.getElementById('pagamentos-corpo');
-      var linhas = PainelAlunos.filtrarPagamentos(linhasAlunos, filtroPagamentosAtual, hoje);
-      if (!linhas.length) {
-        corpo.innerHTML = '<p style="color:var(--texto-secundario);">' + (linhasAlunos.length ? 'Ninguém neste filtro.' : 'Você ainda não cadastrou nenhum aluno.') + '</p>';
-        return;
-      }
-      linhas.forEach(function (l) {
-        var s = PainelAlunos.statusPagamento(l.pagamento, hoje);
-        var cls = s ? (s.tipo === 'atrasado' ? 'r' : (s.tipo === 'em_dia' ? '' : 'a')) : '';
-        var caixa = document.createElement('div');
-        caixa.className = 'linha-pagamento';
-        caixa.setAttribute('data-chave', l.chave);
-        var topo = document.createElement('div');
-        topo.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--card-border);cursor:pointer;';
-        var esq = document.createElement('span');
-        var nome = document.createElement('span');
-        nome.textContent = l.nome;
-        esq.appendChild(nome);
-        var det = PainelAlunos.detalhePagamento(l.pagamento, s);
-        if (det) {
-          var peq = document.createElement('small');
-          peq.style.cssText = 'display:block;color:var(--texto-secundario);font-size:0.74rem;';
-          peq.textContent = det;
-          esq.appendChild(peq);
-        }
-        var dir = document.createElement('span');
-        dir.className = 'situacao-pagamento';
-        dir.textContent = PainelAlunos.textoStatusPagamento(s);
-        dir.style.cssText = 'font-size:0.8rem;white-space:nowrap;text-align:right;' + estiloSituacao(cls);
-        topo.appendChild(esq);
-        topo.appendChild(dir);
-        topo.addEventListener('click', function () { pagamentoAbertoChave = (pagamentoAbertoChave === l.chave ? null : l.chave); desenharPagamentos(); });
-        caixa.appendChild(topo);
-        if (pagamentoAbertoChave === l.chave) { caixa.appendChild(painelEdicaoPagamento(l, s)); }
-        corpo.appendChild(caixa);
-      });
-    }
-
-    function ligarVoltarPagamentos() {
-      var b = document.getElementById('btn-voltar-pagamentos');
-      if (b) { b.addEventListener('click', fecharPagamentos); }
-    }
-
-    function painelEdicaoPagamento(l, status) {
-      var pg = l.pagamento;
-      var box = document.createElement('div');
-      box.className = 'painel-pagamento';
-      box.style.cssText = 'padding:12px 4px 14px;border-bottom:1px solid var(--card-border);';
-      // D086: o controle e por FICHA (migration 053). Aluno do app sem ficha sua nao tem onde guardar.
-      if (l.fichaId == null) {
-        box.innerHTML = '<p class="pg-sem-ficha" style="color:var(--texto-secundario);font-size:0.82rem;margin:0;">Para controlar o pagamento, este aluno precisa ter uma ficha sua. Abra o aluno na lista e crie a ficha.</p>';
-        return box;
-      }
-      if (pg && pg.so_leitura) {
-        box.innerHTML = '<p class="pg-so-leitura" style="color:var(--texto-secundario);font-size:0.82rem;margin:0;">Aluno desvinculado: o pagamento fica só para consulta.</p>';
-        return box;
-      }
-      box.innerHTML =
-        '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-          '<div class="campo" style="flex:1 1 140px;margin:0;"><label>Valor (R$)</label><input class="pg-valor" type="text" inputmode="decimal" placeholder="150"></div>' +
-          '<div class="campo" style="flex:1 1 140px;margin:0;"><label>Dia do vencimento</label><input class="pg-dia" type="number" min="1" max="31" placeholder="10"></div>' +
-        '</div>' +
-        '<p class="pg-erro" style="display:none;color:#c0392b;font-size:0.82rem;margin:8px 0 0;"></p>' +
-        '<div class="pg-acoes" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>';
-      var campoValor = box.querySelector('.pg-valor');
-      var campoDia = box.querySelector('.pg-dia');
-      if (pg) {
-        campoValor.value = String(pg.valor_centavos / 100).replace('.', ',');
-        campoDia.value = pg.dia_vencimento;
-      }
-      var erroEl = box.querySelector('.pg-erro');
-      function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
-      function guardar(mapa) {
-        listaAlunosCache.pagamentos = mapa;
-        listaAlunosCache.pagamentosErro = null;
-        recalcularLinhasAlunos();
-        desenharPagamentos();
-      }
-      var acoes = box.querySelector('.pg-acoes');
-      function botao(rotulo, primario, aoClicar, classe) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.textContent = rotulo;
-        if (classe) { b.className = classe; }
-        b.style.cssText = primario ? 'background:var(--grad,linear-gradient(90deg,#ff5b1a,#ffb238));color:#1a0f00;font-weight:800;border:none;border-radius:9px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;'
-          : 'background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:9px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;';
-        b.addEventListener('click', function () { erroEl.style.display = 'none'; aoClicar(b); });
-        acoes.appendChild(b);
-        return b;
-      }
-      botao(pg ? 'Salvar alterações' : 'Cadastrar cobrança', !pg, function () {
-        var valor = PainelAlunos.valorParaCentavos(campoValor.value);
-        if (valor === null) { mostrarErro('Digite um valor maior que zero. Exemplo: 150 ou 150,50.'); return; }
-        PagamentosStore.salvarCobranca(l.fichaId, { valor_centavos: valor, dia_vencimento: Number(campoDia.value) })
-          .then(guardar).catch(function (e) { mostrarErro(e.message); });
-      }, 'btn-salvar-cobranca');
-      if (pg) {
-        var pendentes = PainelAlunos.mesesPendentes(pg, new Date());
-        if (pendentes.length) {
-          pendentes.forEach(function (comp) {
-            botao('Marcar ' + PainelAlunos.rotuloMes(comp) + ' como pago', comp === pg.competencia_atual, function () {
-              PagamentosStore.marcarMes(l.fichaId, comp, true).then(guardar).catch(function (e) { mostrarErro(e.message); });
-            }, 'btn-marcar-mes');
-          });
-        } else if (pg.pago_mes_atual) {
-          botao('Desmarcar ' + PainelAlunos.rotuloMes(pg.competencia_atual), false, function () {
-            PagamentosStore.marcarMes(l.fichaId, pg.competencia_atual, false).then(guardar).catch(function (e) { mostrarErro(e.message); });
-          }, 'btn-desmarcar-mes');
-        } else {
-          botao('Marcar ' + PainelAlunos.rotuloMes(pg.competencia_atual) + ' como pago', true, function () {
-            PagamentosStore.marcarMes(l.fichaId, pg.competencia_atual, true).then(guardar).catch(function (e) { mostrarErro(e.message); });
-          }, 'btn-marcar-mes');
-        }
-        if (l.telefone && PainelAlunos.numeroWhatsapp(l.telefone)) {
-          botao('Cobrar pelo WhatsApp', false, function () { abrirWhatsApp(l.telefone, PainelAlunos.mensagemCobranca(l.nome)); }, 'btn-cobrar-whatsapp');
-        } else {
-          var nota = document.createElement('p');
-          nota.style.cssText = 'color:var(--texto-secundario);font-size:0.78rem;margin:8px 0 0;width:100%;';
-          nota.textContent = 'Sem telefone com WhatsApp cadastrado para este aluno.';
-          box.appendChild(nota);
-        }
-        // Parar de controlar apaga valor, dia e meses marcados: pede um segundo toque (sem janela do navegador).
-        var apagar = botao('Parar de controlar', false, function (b) {
-          if (!b.getAttribute('data-confirma')) {
-            b.setAttribute('data-confirma', '1');
-            b.textContent = 'Toque de novo: apaga valor, dia e meses marcados';
-            return;
-          }
-          PagamentosStore.remover(l.fichaId).then(guardar).catch(function (e) { mostrarErro(e.message); });
-        }, 'btn-parar-controle');
-      }
-      return box;
-    }
-
     // --- Formulário da ficha (criação e edição compartilham o
     // mesmo template -- af-ficha-id vazio = criação) ---
 
@@ -1588,6 +1451,7 @@
           '<div class="campo"><label for="af-email">E-mail</label><input id="af-email" type="email"></div>' +
           '<div class="campo"><label for="af-telefone">Telefone / WhatsApp</label><input id="af-telefone" type="text" placeholder="(00) 00000-0000" oninput="mascararTelefoneDigitado(this)"></div>' +
         '</div>' +
+        templateCobrancaAluno() +
         '<div class="cadastro-grupo">' +
           '<div class="titulo-grupo">Endereço</div>' +
           '<div class="campo"><label for="af-end-cep">CEP</label><input id="af-end-cep" type="text" oninput="aoDigitarCepFicha(this)"></div>' +
@@ -1834,6 +1698,13 @@
         return;
       }
 
+      var cobranca = lerCobrancaFormulario();
+      if (cobranca.erro) {
+        erroEl.textContent = cobranca.erro;
+        erroEl.style.display = 'block';
+        return;
+      }
+
       var botao = document.getElementById('af-botao-salvar');
       botao.disabled = true;
       botao.textContent = 'Salvando…';
@@ -1842,13 +1713,17 @@
         ? FichasStore.atualizarFicha(alunoAbertoId, dados)
         : FichasStore.criarFicha(parceiroAtual, dados);
 
-      promessa.then(function () {
+      promessa.then(function (resultadoFicha) {
+        return salvarCobrancaDoFormulario(resultadoFicha, cobranca);
+      }).then(function (avisoCobranca) {
         botao.disabled = false;
         botao.textContent = 'Salvar';
         if (alunoAbertoId) {
           abrirDetalheAluno(alunoAbertoId);
+          if (avisoCobranca) { setTimeout(function () { var a = document.getElementById('aluno-detalhe-view'); if (a) { var p = document.createElement('p'); p.style.cssText = 'color:#c0392b;font-size:0.85rem;margin:0 0 10px;'; p.textContent = avisoCobranca; a.insertBefore(p, a.firstChild); } }, 0); }
         } else {
           carregarListaAlunos(1);
+          mostrarAvisoNaLista(avisoCobranca);
         }
       }).catch(function (erro) {
         botao.disabled = false;
@@ -1946,6 +1821,12 @@
       html += '</div>';
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Observação</div>' + linhaDetalhe('', ficha.observacao) + '</div>';
+      { // reforma: cobranca do aluno (so leitura; edita no cadastro)
+        var pgDet = listaAlunosCache.pagamentos && listaAlunosCache.pagamentos['f:' + ficha.id];
+        var stDet = pgDet ? PainelAlunos.statusPagamento(pgDet, new Date()) : null;
+        html += '<div class="cadastro-grupo" id="detalhe-cobranca"><div class="titulo-grupo">Cobrança</div>' +
+          linhaDetalhe('Situação', pgDet ? (PainelAlunos.detalhePagamento(pgDet, stDet) + ' · ' + PainelAlunos.textoStatusPagamento(stDet)) : 'Sem cobrança') + '</div>';
+      }
 
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Contrato</div>';
       html += linhaDetalhe('Plano', contrato.plano) + linhaDetalhe('Forma de pagamento', contrato.formaPagamento) + linhaDetalhe('Início', contrato.dataInicio);
@@ -1972,7 +1853,7 @@
       html += '<div id="treino-resumo"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
       if (!lerSo) {
       html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">';
-      html += '<button type="button" onclick="abrirSeletorAplicarBase()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Aplicar um treino-base</button>';
+      html += '<button type="button" onclick="abrirSeletorAplicarBase()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Escolher treino</button>';
       html += '<button type="button" onclick="abrirMontadorTreinoPersonalizado()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Montar/editar personalizado</button>';
       html += '</div>';
       html += '<div id="treino-form" style="display:none;margin-top:12px;"></div>';
@@ -2044,6 +1925,7 @@
         var view = document.getElementById('aluno-form-view');
         view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Editar ' + escaparHtmlAluno(ficha.nome) + '</h2>' + templateFormAluno();
         preencherFormularioAluno(ficha);
+        preencherCobrancaFormulario(fichaId);
         document.getElementById('aluno-detalhe-view').style.display = 'none';
         view.style.display = 'block';
       }).catch(function (erro) {
@@ -2706,7 +2588,8 @@
         var qtd = (tb.exercicios || []).length;
         html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--card-border);flex-wrap:wrap;">';
         html += '<span><strong>' + escaparHtmlAluno(tb.nome) + '</strong> <span style="color:var(--texto-secundario);">— ' + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + '</span></span>';
-        html += '<span style="display:flex;gap:8px;">';
+        html += '<span style="display:flex;gap:8px;flex-wrap:wrap;">';
+        html += '<button type="button" class="btn-aplicar-alunos" onclick="abrirAplicarAlunos(' + tb.id + ')" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.82rem;">Aplicar a alunos</button>';
         html += '<button type="button" onclick="abrirFormularioEdicaoTreinoBase(' + tb.id + ')" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem;">Editar</button>';
         html += '<button type="button" onclick="excluirTreinoBaseClicado(' + tb.id + ')" style="background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem;">Apagar</button>';
         html += '</span></div>';
@@ -2843,7 +2726,7 @@
       TreinosStore.listarTreinosBase(parceiroAtual).then(function (lista) {
         treinosBaseParaAplicarCache = lista;
         if (lista.length === 0) {
-          form.innerHTML = '<p style="color:var(--texto-secundario);">Você ainda não tem nenhum treino-base. Crie um em "Treinos-base", no topo da tela.</p>' +
+          form.innerHTML = '<p style="color:var(--texto-secundario);">Você ainda não tem nenhum treino-base. Crie um em Treinos > Criar treino base.</p>' +
             '<button type="button" onclick="fecharFormTreino()" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;">Fechar</button>';
           return;
         }
@@ -4539,6 +4422,667 @@
         salvarTreinoAtualComoBase: salvarTreinoAtualComoBase,
         abrirSugestaoExercicio: abrirSugestaoExercicio
       };
+    })();
+  </script>
+  <script>
+    // =========================================================
+    // REFORMA DO PAINEL DO PERSONAL (aprovada por Murilo em 18/10/2026)
+    // Menu de cima: Início | Alunos | Treinos + ícone da conta.
+    // Esta camada fica POR CIMA das telas que já existiam: ela só decide qual
+    // tela aparece e em qual aba. Regra de treino pura em assets/js/painel-treinos.js.
+    // =========================================================
+    (function () {
+      'use strict';
+      var PT = window.PainelTreinos;
+      var secaoAtual = 'inicio';
+      var subAtual = null;
+      var contaDoPainel = null;
+      var wz = null; // estado do assistente "Criar treino base"
+
+      function el(id) { return document.getElementById(id); }
+      function mostrar(id, sim) { var e = el(id); if (e) { e.style.display = sim ? 'block' : 'none'; } }
+
+      var TELAS_NOVAS = ['inicio-view', 'criar-treino-view', 'vincular-fera-view', 'aplicar-alunos-view', 'minha-conta-real'];
+      var TELAS_ANTIGAS = ['alunos-lista-view', 'pagamentos-view', 'aluno-form-view', 'aluno-detalhe-view', 'treinos-base-view',
+        'aparelhos-carga-view', 'vincular-aluno-view', 'aluno-vinculado-detalhe-view', 'desvinculados-view', 'aluno-desvinculado-detalhe-view'];
+
+      function esconderTelasNovas() { TELAS_NOVAS.forEach(function (id) { mostrar(id, false); }); }
+      function esconderTelasAntigas() {
+        TELAS_ANTIGAS.forEach(function (id) { mostrar(id, false); });
+        if (typeof limparTreinoFormResidual === 'function') { limparTreinoFormResidual(); }
+      }
+
+      var CSS_BTN_ON = 'background:var(--texto);color:var(--bg);font-weight:800;border:1px solid var(--texto);';
+      var CSS_BTN_OFF = 'background:none;color:var(--texto-secundario);border:1px solid var(--card-border);';
+      function estiloAba(on) { return (on ? CSS_BTN_ON : CSS_BTN_OFF) + 'border-radius:999px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:0.86rem;'; }
+
+      function marcarMenu(secao, sub) {
+        secaoAtual = secao;
+        if (sub) { subAtual = sub; }
+        Array.prototype.forEach.call(document.querySelectorAll('#pnav-menu button'), function (b) {
+          var on = b.getAttribute('data-secao') === secao;
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.style.cssText = estiloAba(on);
+        });
+        var c = el('pnav-conta');
+        if (c) { c.setAttribute('aria-pressed', secao === 'conta' ? 'true' : 'false'); c.style.borderColor = secao === 'conta' ? 'var(--texto)' : 'var(--card-border)'; }
+        mostrar('psub-alunos', secao === 'alunos');
+        mostrar('psub-treinos', secao === 'treinos');
+        var subs = { alunos: 'psub-alunos', treinos: 'psub-treinos' };
+        if (subs[secao]) {
+          Array.prototype.forEach.call(document.querySelectorAll('#' + subs[secao] + ' button[data-sub]'), function (b) {
+            var on = b.getAttribute('data-sub') === subAtual;
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (b.getAttribute('data-sub') !== 'novo') { var disp = b.style.display; b.style.cssText = estiloAba(on); b.style.display = disp; }
+          });
+        }
+      }
+      window.marcarMenuPainel = marcarMenu;
+
+      // As funções antigas continuam sendo a porta de cada tela; só passam a acertar o menu e esconder as telas novas.
+      function envolver(nome, secao, sub) {
+        var orig = window[nome];
+        if (typeof orig !== 'function') { return; }
+        window[nome] = function () {
+          esconderTelasNovas();
+          marcarMenu(secao, sub);
+          return orig.apply(this, arguments);
+        };
+      }
+      envolver('mostrarListaAlunos', 'alunos', 'meus');
+      envolver('abrirPagamentos', 'alunos', 'pagamentos');
+      envolver('abrirVincularAluno', 'alunos', 'vincular');
+      envolver('mostrarDesvinculados', 'alunos', 'desv');
+      envolver('abrirFormularioNovoAluno', 'alunos', 'novo');
+      envolver('abrirDetalheAluno', 'alunos', null);
+      envolver('abrirDetalheVinculado', 'alunos', null);
+      envolver('mostrarTreinosBase', 'treinos', 'lista');
+      envolver('mostrarAparelhosCarga', 'treinos', 'aparelhos');
+
+      // ---- Navegação ----
+      window.irParaSecao = function (secao) {
+        if (secao === 'inicio') {
+          esconderTelasAntigas(); esconderTelasNovas();
+          marcarMenu('inicio', null);
+          mostrar('inicio-view', true);
+          carregarResumoInicio();
+        } else if (secao === 'alunos') {
+          carregarListaAlunos(1);
+        } else if (secao === 'treinos') {
+          mostrarTreinosBase();
+        } else if (secao === 'conta') {
+          esconderTelasAntigas(); esconderTelasNovas();
+          marcarMenu('conta', null);
+          mostrar('minha-conta-real', true);
+        }
+      };
+      window.irParaSubAlunos = function (sub) {
+        if (sub === 'meus') { carregarListaAlunos(1); }
+        else if (sub === 'pagamentos') { carregarListaAlunos(1); abrirPagamentos(); }
+        else if (sub === 'vincular') { abrirVincularAluno(); }
+        else if (sub === 'desv') { mostrarDesvinculados(); }
+        else if (sub === 'novo') { abrirFormularioNovoAluno(); }
+      };
+      window.irParaSubTreinos = function (sub) {
+        if (sub === 'lista') { mostrarTreinosBase(); }
+        else if (sub === 'criar') { abrirCriarTreinoBase(); }
+        else if (sub === 'fera') { abrirVincularFera(); }
+        else if (sub === 'aparelhos') { mostrarAparelhosCarga(); }
+      };
+
+      // renderMeusAlunos (original) agora só prepara; quem decide a primeira tela é o Início.
+      var renderMeusAlunosOriginal = window.renderMeusAlunos;
+      window.renderMeusAlunos = function (conta) {
+        contaDoPainel = conta;
+        renderMeusAlunosOriginal.apply(this, arguments);
+        window.irParaSecao('inicio');
+      };
+
+      // ---- Início ----
+      function cartao(id, rotulo, valor, nota, aoClicar) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.id = id;
+        b.className = 'pcard';
+        b.style.cssText = 'text-align:left;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:14px 14px 12px;cursor:pointer;font-family:inherit;color:var(--texto);';
+        var v = document.createElement('div'); v.className = 'pcard-valor'; v.style.cssText = 'font-size:1.6rem;font-weight:800;line-height:1.1;'; v.textContent = valor;
+        var r = document.createElement('div'); r.style.cssText = 'font-size:0.84rem;margin-top:4px;'; r.textContent = rotulo;
+        b.appendChild(v); b.appendChild(r);
+        if (nota) { var n = document.createElement('div'); n.className = 'pcard-nota'; n.style.cssText = 'font-size:0.72rem;color:var(--texto-secundario);margin-top:3px;'; n.textContent = nota; b.appendChild(n); }
+        b.addEventListener('click', aoClicar);
+        return b;
+      }
+
+      function carregarResumoInicio() {
+        if (!parceiroAtual) { return; }
+        var corpo = el('inicio-cards');
+        corpo.innerHTML = '<p style="color:var(--texto-secundario);">Carregando…</p>';
+        var PS = window.PagamentosStore;
+        var ts = typeof tentarDesvinculados === 'function' ? tentarDesvinculados : function (p) { return p.then(function (d) { return { dados: d }; }, function (e) { return { erro: e }; }); };
+        var minhaAtual = parceiroAtual;
+        Promise.all([
+          ts(FichasStore.listarFichas(parceiroAtual, { pagina: 1, porPagina: 1000 })),
+          ts(VinculoConviteStore.listarAlunosVinculados()),
+          ts(PS ? PS.listar() : Promise.reject(new Error('Pagamentos indisponíveis.'))),
+          ts(PS ? PS.listarFrequencia() : Promise.reject(new Error('Frequência indisponível.'))),
+          ts(TreinosStore.listarTreinosBase(parceiroAtual)),
+          ts(VinculoConviteStore.listarExAlunosEmLeitura()),
+          ts(FichasStore.listarFichasManuaisEmLeitura()),
+          ts(FichasStore.listarFichasContaExcluidaEmLeitura())
+        ]).then(function (r) {
+          if (parceiroAtual !== minhaAtual || secaoAtual !== 'inicio') { return; }
+          var fichas = r[0], vinc = r[1], pags = r[2], freq = r[3], tb = r[4];
+          var hoje = new Date();
+          var manuais = fichas.dados ? (fichas.dados.itens || []) : [];
+          var linhas = PainelAlunos.ordenarAZ(PainelAlunos.montarLinhas(manuais, vinc.dados || [], pags.dados || null, freq.dados || null));
+          var des = [].concat(r[5].dados || [], r[6].dados || [], r[7].dados || []);
+          var limite = contaDoPainel && typeof contaDoPainel.limiteAlunos === 'number' ? contaDoPainel.limiteAlunos : null;
+          var s = PT.resumoInicio(PainelAlunos, linhas, hoje, tb.dados || null, des, limite);
+          var falhaAlunos = fichas.erro && vinc.erro;
+          corpo.innerHTML = '';
+          function irPag(filtro) { filtroPagamentosAtual = filtro; carregarListaAlunos(1); abrirPagamentos(); }
+          var cards = [
+            cartao('card-ativos', 'Alunos ativos', falhaAlunos ? '—' : String(s.ativos), s.limite ? ('limite do plano: ' + s.limite) : null, function () { carregarListaAlunos(1); }),
+            cartao('card-atrasados', 'Pagamentos atrasados', pags.erro ? '—' : String(s.atrasados), pags.erro ? 'indisponível agora' : null, function () { irPag('atrasados'); }),
+            cartao('card-semana', 'Vencem esta semana', pags.erro ? '—' : String(s.vencemSemana), pags.erro ? 'indisponível agora' : null, function () { irPag('semana'); }),
+            cartao('card-faltaram', 'Faltaram 2 treinos', s.faltaram2 === null ? '—' : String(s.faltaram2), s.faltaram2 === null ? 'ainda sem dados' : null, function () { filtroListaAtual = 'faltou2'; carregarListaAlunos(1); }),
+            cartao('card-treinos', 'Treinos base', tb.erro ? '—' : String(s.treinosBase), tb.erro ? 'indisponível agora' : null, function () { mostrarTreinosBase(); }),
+            cartao('card-desv', 'Desvinculados expirando', String(s.desvinculadosExpirando), 'nos próximos 7 dias', function () { mostrarDesvinculados(); })
+          ];
+          var grade = document.createElement('div');
+          grade.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;';
+          cards.forEach(function (c) { grade.appendChild(c); });
+          corpo.appendChild(grade);
+          if (fichas.erro && !vinc.erro) { corpo.appendChild(notaErro('Fichas cadastradas à mão: ' + (fichas.erro.message || 'indisponível agora'))); }
+          if (vinc.erro && !fichas.erro) { corpo.appendChild(notaErro('Alunos do app: ' + (vinc.erro.message || 'indisponível agora'))); }
+        });
+      }
+      function notaErro(txt) {
+        var p = document.createElement('p'); p.style.cssText = 'color:#c0392b;font-size:0.82rem;margin:0 0 6px;'; p.textContent = txt; return p;
+      }
+      window.carregarResumoInicio = carregarResumoInicio;
+
+      // ---- Pagamentos: só lista (Cobrar, Marcar pago). Quem edita valor e dia é o cadastro do aluno. ----
+      window.desenharPagamentos = function () {
+        var view = el('pagamentos-view');
+        if (!view || view.style.display === 'none') { return; }
+        var hoje = new Date();
+        var erro = listaAlunosCache.pagamentosErro;
+        var html = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Pagamentos</h2>' +
+          '<p style="color:var(--texto-secundario);font-size:0.82rem;margin:0 0 12px;">Controle seu: o valor e o dia do vencimento ficam no cadastro do aluno. Aqui você cobra e marca como pago. O Fera Fit não processa pagamento.</p>';
+        if (erro) {
+          html += '<p id="pagamentos-aviso" style="color:var(--texto-secundario);">' + escaparHtmlAluno(erro.codigo === 'indisponivel' ? PagamentosStore.TEXTO_INDISPONIVEL : mensagemSeguraErro(erro)) + '</p>';
+          view.innerHTML = html;
+          return;
+        }
+        var c = PainelAlunos.contagemPagamentos(linhasAlunos, hoje);
+        var chips = [
+          { id: 'todos', rotulo: 'Todos' },
+          { id: 'atrasados', rotulo: 'Atrasados ' + c.atrasados },
+          { id: 'semana', rotulo: 'Vencem esta semana ' + c.semana },
+          { id: 'em_dia', rotulo: 'Em dia ' + c.emDia }
+        ];
+        html += '<div id="pagamentos-filtros" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">';
+        chips.forEach(function (f) {
+          var on = f.id === filtroPagamentosAtual;
+          html += '<button type="button" class="chip-filtro-pagamento" data-filtro="' + escaparAtributo(f.id) + '" aria-pressed="' + escaparAtributo(on) + '" style="border:1px solid ' + (on ? 'var(--texto)' : 'var(--card-border)') + ';border-radius:999px;padding:5px 11px;font-family:inherit;font-size:0.76rem;cursor:pointer;' +
+            (on ? 'background:var(--texto);color:var(--bg);font-weight:800;' : 'background:none;color:var(--texto-secundario);') + '">' + escaparHtmlAluno(f.rotulo) + '</button>';
+        });
+        html += '</div><p id="pagamentos-erro" style="display:none;color:#c0392b;font-size:0.84rem;margin:0 0 8px;"></p><div id="pagamentos-corpo"></div>';
+        view.innerHTML = html;
+        Array.prototype.forEach.call(view.querySelectorAll('.chip-filtro-pagamento'), function (b) {
+          b.addEventListener('click', function () { filtroPagamentosAtual = b.getAttribute('data-filtro'); desenharPagamentos(); });
+        });
+        var corpo = el('pagamentos-corpo');
+        var linhas = PainelAlunos.filtrarPagamentos(linhasAlunos, filtroPagamentosAtual, hoje);
+        if (!linhas.length) {
+          corpo.innerHTML = '<p style="color:var(--texto-secundario);">' + (linhasAlunos.length ? 'Ninguém neste filtro.' : 'Você ainda não cadastrou nenhum aluno.') + '</p>';
+          return;
+        }
+        var erroEl = el('pagamentos-erro');
+        function guardar(mapa) {
+          listaAlunosCache.pagamentos = mapa;
+          listaAlunosCache.pagamentosErro = null;
+          recalcularLinhasAlunos();
+          desenharPagamentos();
+        }
+        function falhou(e) { var x = el('pagamentos-erro'); if (x) { x.textContent = e && e.message ? e.message : 'Não deu para salvar agora.'; x.style.display = 'block'; } }
+        function botao(rotulo, classe, aoClicar, primario) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = classe; b.textContent = rotulo;
+          b.style.cssText = primario ? 'background:var(--gradiente,linear-gradient(90deg,#ff5b1a,#ffb238));color:#1a0f00;font-weight:800;border:none;border-radius:9px;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:0.8rem;'
+            : 'background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:9px;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:0.8rem;';
+          b.addEventListener('click', function (ev) { ev.stopPropagation(); erroEl.style.display = 'none'; aoClicar(); });
+          return b;
+        }
+        linhas.forEach(function (l) {
+          var pg = l.pagamento;
+          var s = PainelAlunos.statusPagamento(pg, hoje);
+          var cls = s ? (s.tipo === 'atrasado' ? 'r' : (s.tipo === 'em_dia' ? '' : 'a')) : '';
+          var caixa = document.createElement('div');
+          caixa.className = 'linha-pagamento';
+          caixa.setAttribute('data-chave', l.chave);
+          caixa.style.cssText = 'padding:11px 2px;border-bottom:1px solid var(--card-border);';
+          var topo = document.createElement('div');
+          topo.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
+          var esq = document.createElement('span');
+          var nome = document.createElement('a');
+          nome.href = '#'; nome.className = 'pg-nome'; nome.textContent = l.nome;
+          nome.style.cssText = 'color:var(--texto);text-decoration:none;font-weight:600;cursor:pointer;';
+          nome.addEventListener('click', function (ev) { ev.preventDefault(); abrirLinhaAluno(l); });
+          esq.appendChild(nome);
+          var det = PainelAlunos.detalhePagamento(pg, s);
+          if (det) {
+            var peq = document.createElement('small');
+            peq.style.cssText = 'display:block;color:var(--texto-secundario);font-size:0.74rem;';
+            peq.textContent = det;
+            esq.appendChild(peq);
+          }
+          var dir = document.createElement('span');
+          dir.className = 'situacao-pagamento';
+          dir.textContent = PainelAlunos.textoStatusPagamento(s);
+          dir.style.cssText = 'font-size:0.8rem;white-space:nowrap;text-align:right;' + estiloSituacao(cls);
+          topo.appendChild(esq); topo.appendChild(dir);
+          caixa.appendChild(topo);
+          if (pg && l.fichaId != null && !pg.so_leitura) {
+            var acoes = document.createElement('div');
+            acoes.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;';
+            var pendentes = PainelAlunos.mesesPendentes(pg, hoje);
+            var comp = pendentes.length ? pendentes[0] : pg.competencia_atual;
+            var pago = !pendentes.length && pg.pago_mes_atual;
+            if (!pago && l.telefone && PainelAlunos.numeroWhatsapp(l.telefone) && s && s.tipo !== 'em_dia') {
+              acoes.appendChild(botao('Cobrar', 'btn-cobrar-whatsapp', function () { abrirWhatsApp(l.telefone, PainelAlunos.mensagemCobranca(l.nome)); }, false));
+            }
+            if (pago) {
+              acoes.appendChild(botao('Desmarcar', 'btn-desmarcar-mes', function () {
+                PagamentosStore.marcarMes(l.fichaId, pg.competencia_atual, false).then(guardar).catch(falhou);
+              }, false));
+            } else {
+              acoes.appendChild(botao('Marcar pago', 'btn-marcar-mes', function () {
+                PagamentosStore.marcarMes(l.fichaId, comp, true).then(guardar).catch(falhou);
+              }, true));
+            }
+            caixa.appendChild(acoes);
+          }
+          corpo.appendChild(caixa);
+        });
+      };
+
+      // ---- Cobrança no cadastro do aluno ----
+      window.templateCobrancaAluno = function () {
+        return '<div class="cadastro-grupo" id="af-grupo-cobranca">' +
+          '<div class="titulo-grupo">Cobrança (opcional)</div>' +
+          '<p class="campo-nota" style="margin:0 0 8px;">Deixe em branco se não for cobrar este aluno pelo Fera Fit. É só o seu controle: o Fera Fit não processa pagamento.</p>' +
+          '<div class="campo"><label for="af-cob-valor">Valor (R$)</label><input id="af-cob-valor" type="text" inputmode="decimal" placeholder="150"></div>' +
+          '<div class="campo"><label for="af-cob-dia">Dia do vencimento</label><input id="af-cob-dia" type="number" min="1" max="31" placeholder="10"></div>' +
+          '</div>';
+      };
+
+      // Devolve {vazio:true} | {valor_centavos, dia_vencimento} | {erro}
+      window.lerCobrancaFormulario = function () {
+        var vt = (el('af-cob-valor') ? el('af-cob-valor').value : '').trim();
+        var dt = (el('af-cob-dia') ? el('af-cob-dia').value : '').trim();
+        if (!vt && !dt) { return { vazio: true }; }
+        var valor = PainelAlunos.valorParaCentavos(vt);
+        if (valor === null) { return { erro: 'Cobrança: digite um valor maior que zero (exemplo: 150 ou 150,50) ou deixe valor e dia em branco.' }; }
+        var dia = Number(dt);
+        if (!dt || !(dia >= 1 && dia <= 31) || Math.floor(dia) !== dia) { return { erro: 'Cobrança: o dia do vencimento precisa ser de 1 a 31.' }; }
+        return { valor_centavos: valor, dia_vencimento: dia };
+      };
+
+      window.preencherCobrancaFormulario = function (fichaId) {
+        var pg = listaAlunosCache.pagamentos && listaAlunosCache.pagamentos['f:' + fichaId];
+        if (!pg || !el('af-cob-valor')) { return; }
+        el('af-cob-valor').value = String(pg.valor_centavos / 100).replace('.', ',');
+        el('af-cob-dia').value = pg.dia_vencimento;
+      };
+
+      // Depois que a ficha foi salva. Devolve texto de aviso ('' = tudo certo).
+      window.salvarCobrancaDoFormulario = function (resultadoFicha, cobranca) {
+        var fichaId = alunoAbertoId || (resultadoFicha && resultadoFicha.id);
+        if (!window.PagamentosStore || !fichaId) { return Promise.resolve(''); }
+        var tinha = !!(listaAlunosCache.pagamentos && listaAlunosCache.pagamentos['f:' + fichaId]);
+        if (cobranca.vazio) {
+          if (!tinha) { return Promise.resolve(''); }
+          return PagamentosStore.remover(fichaId).then(function (mapa) { listaAlunosCache.pagamentos = mapa; return ''; })
+            .catch(function (e) { return 'O aluno foi salvo, mas a cobrança não pôde ser removida: ' + (e && e.message ? e.message : 'tente de novo.'); });
+        }
+        return PagamentosStore.salvarCobranca(fichaId, { valor_centavos: cobranca.valor_centavos, dia_vencimento: cobranca.dia_vencimento })
+          .then(function (mapa) { listaAlunosCache.pagamentos = mapa; return ''; })
+          .catch(function (e) { return 'O aluno foi salvo, mas a cobrança não foi: ' + (e && e.message ? e.message : 'tente de novo.') + ' Abra o aluno e edite para tentar de novo.'; });
+      };
+
+      window.mostrarAvisoNaLista = function (texto) {
+        var e = el('alunos-lista-erro');
+        if (!e || !texto) { return; }
+        e.textContent = texto; e.style.color = '#c0392b'; e.style.display = 'block';
+      };
+
+      // =========================================================
+      // Assistente "Criar treino base"
+      // =========================================================
+      function cartaoEscolha(id, titulo, texto, on, desligado) {
+        return '<button type="button" id="' + id + '" aria-pressed="' + (on ? 'true' : 'false') + '"' + (desligado ? ' data-desligado="1"' : '') + ' style="flex:1 1 220px;text-align:left;background:var(--card);border:1px solid ' + (on ? 'var(--laranja)' : 'var(--card-border)') + ';border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;color:var(--texto);' + (desligado ? 'opacity:0.65;' : '') + '">' +
+          '<strong style="display:block;font-size:0.95rem;">' + escaparHtmlAluno(titulo) + '</strong>' +
+          '<span style="display:block;font-size:0.8rem;color:var(--texto-secundario);margin-top:3px;">' + escaparHtmlAluno(texto) + '</span></button>';
+      }
+      function botaoSec(rotulo, onclick, id) {
+        return '<button type="button"' + (id ? ' id="' + id + '"' : '') + ' onclick="' + onclick + '" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:8px;padding:9px 18px;cursor:pointer;font-family:inherit;">' + rotulo + '</button>';
+      }
+      function botaoPri(rotulo, onclick, id) {
+        return '<button type="button" class="botao-primario"' + (id ? ' id="' + id + '"' : '') + ' onclick="' + onclick + '" style="width:auto;padding:10px 22px;border:none;cursor:pointer;font-family:inherit;">' + rotulo + '</button>';
+      }
+      function erroWz() { return '<p id="wz-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:12px 0 0;"></p>'; }
+      function mostrarErroWz(msg) { var e = el('wz-erro'); if (e) { e.textContent = msg; e.style.display = 'block'; } }
+      function cabecalhoWz(passo, total) {
+        var t = wz.fichaAlvo ? 'Treino do Fera para ' + wz.fichaAlvoNome : (wz.editId ? 'Editar treino base' : 'Criar treino base');
+        return '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 2px;">' + escaparHtmlAluno(t) + '</h2>' +
+          '<p id="wz-passo" style="color:var(--texto-secundario);font-size:0.8rem;margin:0 0 14px;">Passo ' + passo + ' de ' + total + '</p>';
+      }
+
+      window.abrirCriarTreinoBase = function (planoInicial, editId, opcoes) {
+        opcoes = opcoes || {};
+        esconderTelasAntigas(); esconderTelasNovas();
+        marcarMenu('treinos', opcoes.sub || 'criar');
+        mostrar('criar-treino-view', true);
+        wz = { plano: planoInicial || PT.novoPlano('meu', null, ''), passo: 1, diaAtivo: 0, editId: editId || null, busca: '', pickerAberto: false,
+          fichaAlvo: opcoes.fichaAlvo || null, fichaAlvoNome: opcoes.fichaAlvoNome || '' };
+        if (planoInicial && (editId || opcoes.fichaAlvo)) { wz.passo = opcoes.fichaAlvo ? 3 : 1; }
+        el('criar-treino-view').innerHTML = '<p style="color:var(--texto-secundario);">Carregando catálogo…</p>';
+        carregarCatalogoTreino().then(function () { desenharWz(); }).catch(function (e) {
+          el('criar-treino-view').innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(e) + '</p>';
+        });
+      };
+
+      function desenharWz() {
+        if (!wz) { return; }
+        if (wz.passo === 1) { desenharWz1(); } else if (wz.passo === 2) { desenharWz2(); } else { desenharWz3(); }
+      }
+
+      function desenharWz1() {
+        var p = wz.plano;
+        var html = cabecalhoWz(1, 3);
+        if (!wz.editId) {
+          html += '<p class="campo-nota" style="margin:0 0 6px;">Como você quer montar?</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">' +
+            cartaoEscolha('wz-caminho-meu', 'Meu treino', 'Você escolhe os músculos e os exercícios de cada dia.', p.caminho === 'meu', false) +
+            cartaoEscolha('wz-caminho-fera', 'Treino do Fera', 'O motor do Fera monta para um aluno. Use "Vincular Treino Fera".', false, true) +
+            '</div>';
+        }
+        html += '<p class="campo-nota" style="margin:0 0 6px;">Divisão</p><div id="wz-divisoes" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
+        PT.DIVISOES.forEach(function (d) {
+          var on = p.divisao === d;
+          html += '<button type="button" class="wz-divisao" data-div="' + d + '" aria-pressed="' + (on ? 'true' : 'false') + '"' + (wz.editId ? ' disabled' : '') + ' style="' + estiloAba(on) + (wz.editId ? 'opacity:0.6;cursor:default;' : '') + '">' + d + '</button>';
+        });
+        html += '</div>';
+        if (wz.editId) { html += '<p class="campo-nota" style="margin:-8px 0 14px;">A divisão de um treino já salvo não muda. Para outra divisão, crie um novo.</p>'; }
+        html += '<div class="campo"><label for="wz-nome">Nome do treino base</label><input id="wz-nome" type="text" maxlength="' + PT.MAX_NOME + '" placeholder="Ex.: Base iniciante ABC" value="' + escaparAtributo(p.nome) + '"></div>' +
+          erroWz() +
+          '<div style="display:flex;gap:10px;margin-top:14px;">' + botaoPri('Continuar', 'wzIr(2)', 'wz-continuar') + botaoSec('Cancelar', 'wzCancelar()', 'wz-cancelar') + '</div>';
+        var v = el('criar-treino-view');
+        v.innerHTML = html;
+        Array.prototype.forEach.call(v.querySelectorAll('.wz-divisao'), function (b) {
+          b.addEventListener('click', function () { wzEscolherDivisao(b.getAttribute('data-div')); });
+        });
+        var fera = el('wz-caminho-fera');
+        if (fera) { fera.addEventListener('click', function () { mostrarErroWz('O Treino do Fera é montado para um aluno específico: use "Vincular Treino Fera", no menu Treinos.'); }); }
+        var meu = el('wz-caminho-meu');
+        if (meu) { meu.addEventListener('click', function () { p.caminho = 'meu'; }); }
+      }
+
+      function wzEscolherDivisao(d) {
+        var nome = el('wz-nome') ? el('wz-nome').value : wz.plano.nome;
+        wz.plano = PT.novoPlano('meu', d, nome);
+        desenharWz1();
+      }
+
+      window.wzCancelar = function () { wz = null; mostrarTreinosBase(); };
+
+      window.wzIr = function (passo) {
+        if (!wz) { return; }
+        if (wz.passo === 1 && passo > 1) {
+          if (el('wz-nome')) { wz.plano.nome = el('wz-nome').value; }
+          var e1 = PT.validarPasso1(wz.plano);
+          if (e1) { mostrarErroWz(e1); return; }
+        }
+        if (wz.passo === 2 && passo > 2) {
+          var e2 = PT.validarPasso2(wz.plano);
+          if (e2) { mostrarErroWz(e2); return; }
+        }
+        wz.passo = passo; wz.diaAtivo = 0; wz.pickerAberto = false; wz.busca = '';
+        desenharWz();
+      };
+
+      function desenharWz2() {
+        var html = cabecalhoWz(2, 3) + '<p class="campo-nota" style="margin:0 0 10px;">Escolha os músculos de cada dia. No próximo passo, só aparecem exercícios desses músculos.</p>';
+        wz.plano.dias.forEach(function (d, i) {
+          html += '<div class="wz-dia-musculos" data-dia="' + i + '" style="margin-bottom:14px;"><strong style="font-size:0.9rem;">Treino ' + d.letra + '</strong><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">';
+          PT.GRUPOS.forEach(function (g) {
+            var on = d.grupos.indexOf(g) !== -1;
+            html += '<button type="button" class="wz-musculo" data-dia="' + i + '" data-grupo="' + escaparAtributo(g) + '" aria-pressed="' + (on ? 'true' : 'false') + '" style="' + (on ? 'background:var(--laranja);color:#1a0f00;font-weight:800;border:1px solid var(--laranja);' : CSS_BTN_OFF) + 'border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.8rem;">' + escaparHtmlAluno(g) + '</button>';
+          });
+          html += '</div></div>';
+        });
+        html += erroWz() + '<div style="display:flex;gap:10px;margin-top:6px;">' + botaoSec('Voltar', 'wzIr(1)', 'wz-voltar') + botaoPri('Continuar', 'wzIr(3)', 'wz-continuar') + '</div>';
+        var v = el('criar-treino-view');
+        v.innerHTML = html;
+        Array.prototype.forEach.call(v.querySelectorAll('.wz-musculo'), function (b) {
+          b.addEventListener('click', function () {
+            PT.alternarGrupo(wz.plano.dias[Number(b.getAttribute('data-dia'))], b.getAttribute('data-grupo'));
+            desenharWz2();
+          });
+        });
+      }
+
+      function desenharWz3() {
+        var plano = wz.plano;
+        var dia = plano.dias[wz.diaAtivo];
+        var html = cabecalhoWz(3, wz.fichaAlvo ? 1 : 3);
+        html += '<div id="wz-abas-dias" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">';
+        plano.dias.forEach(function (d, i) {
+          html += '<button type="button" class="wz-aba-dia" data-dia="' + i + '" aria-pressed="' + (i === wz.diaAtivo ? 'true' : 'false') + '" style="' + estiloAba(i === wz.diaAtivo) + '">Treino ' + d.letra + ' <small>(' + d.exercicios.length + ')</small></button>';
+        });
+        html += '</div><p class="campo-nota" style="margin:0 0 8px;">Músculos do treino ' + dia.letra + ': ' + escaparHtmlAluno(dia.grupos.join(', ')) + '</p>';
+        html += '<div id="wz-selecionados"></div>';
+        html += '<div style="margin:10px 0;"><button type="button" id="wz-adicionar" style="background:none;border:1px dashed var(--card-border);color:var(--texto);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;">+ Adicionar exercício</button></div>';
+        html += '<div id="wz-picker" style="display:' + (wz.pickerAberto ? 'block' : 'none') + ';"><div class="campo" style="margin-bottom:8px;"><input id="wz-busca" type="text" placeholder="Buscar exercício" value="' + escaparAtributo(wz.busca) + '"></div><div id="wz-catalogo" style="max-height:340px;overflow:auto;"></div></div>';
+        html += erroWz();
+        html += '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">' + (wz.fichaAlvo ? botaoSec('Cancelar', 'wzCancelar()', 'wz-cancelar') : botaoSec('Voltar', 'wzIr(2)', 'wz-voltar')) +
+          botaoPri(wz.fichaAlvo ? 'Salvar no aluno' : 'Salvar treino base', 'wzSalvar()', 'wz-salvar') + '</div>';
+        var v = el('criar-treino-view');
+        v.innerHTML = html;
+        Array.prototype.forEach.call(v.querySelectorAll('.wz-aba-dia'), function (b) {
+          b.addEventListener('click', function () { wz.diaAtivo = Number(b.getAttribute('data-dia')); wz.pickerAberto = false; wz.busca = ''; desenharWz3(); });
+        });
+        el('wz-adicionar').addEventListener('click', function () { wz.pickerAberto = !wz.pickerAberto; el('wz-picker').style.display = wz.pickerAberto ? 'block' : 'none'; desenharCatalogoWz(); });
+        el('wz-busca').addEventListener('input', function () { wz.busca = this.value; desenharCatalogoWz(); });
+        desenharSelecionadosWz();
+        desenharCatalogoWz();
+      }
+
+      function desenharSelecionadosWz() {
+        var dia = wz.plano.dias[wz.diaAtivo];
+        var c = el('wz-selecionados');
+        if (!c) { return; }
+        if (!dia.exercicios.length) { c.innerHTML = '<p class="estado-vazio" style="color:var(--texto-secundario);">Nenhum exercício neste treino ainda.</p>'; return; }
+        c.innerHTML = '';
+        dia.exercicios.forEach(function (item, idx) {
+          var ex = exercicioCatalogoDoSrc(item.src);
+          var linha = document.createElement('div');
+          linha.className = 'wz-exercicio';
+          linha.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--card-border);';
+          if (ex) { var im = document.createElement('img'); im.src = urlImagemCatalogoTreino(ex.arquivo); im.alt = ''; im.loading = 'lazy'; im.style.cssText = 'width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;'; linha.appendChild(im); }
+          var nome = document.createElement('span'); nome.style.cssText = 'flex:1 1 170px;font-weight:600;'; nome.textContent = nomeDoExercicioEmEdicao(ex); linha.appendChild(nome);
+          [['series', 'Séries', 54], ['repeticoes', 'Reps', 54], ['descanso', 'Descanso (s)', 60]].forEach(function (cp) {
+            var lb = document.createElement('label'); lb.style.cssText = 'font-size:0.75rem;color:var(--texto-secundario);';
+            lb.appendChild(document.createTextNode(cp[1] + ' '));
+            var inp = document.createElement('input'); inp.type = 'number'; inp.min = '1'; inp.value = item[cp[0]]; inp.className = 'wz-' + cp[0]; inp.style.cssText = 'width:' + cp[2] + 'px;background:var(--card);color:var(--texto);border:1px solid var(--card-border);border-radius:6px;padding:4px 6px;';
+            inp.addEventListener('change', function () { if (!PT.ajustarPrescricao(item, cp[0], inp.value)) { inp.value = item[cp[0]]; } });
+            lb.appendChild(inp); linha.appendChild(lb);
+          });
+          var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'wz-remover'; rm.textContent = 'Remover';
+          rm.style.cssText = 'background:none;border:1px solid var(--card-border);color:#c0392b;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;font-size:0.78rem;';
+          rm.addEventListener('click', function () { dia.exercicios.splice(idx, 1); desenharWz3(); });
+          linha.appendChild(rm);
+          c.appendChild(linha);
+        });
+      }
+
+      function desenharCatalogoWz() {
+        var c = el('wz-catalogo');
+        if (!c || !wz.pickerAberto) { return; }
+        var dia = wz.plano.dias[wz.diaAtivo];
+        var termo = (wz.busca || '').trim().toLowerCase();
+        var lista = PT.catalogoDoDia(catalogoTreinoCompleto, dia).filter(function (ex) { return !termo || ex.nome.toLowerCase().indexOf(termo) !== -1; });
+        c.innerHTML = '';
+        if (!lista.length) { c.innerHTML = '<p class="estado-vazio" style="color:var(--texto-secundario);">Nenhum exercício encontrado.</p>'; return; }
+        lista.forEach(function (ex) {
+          var sel = dia.exercicios.some(function (e) { return e.src === mapaSrcPorIdCatalogo[ex.id]; });
+          var chip = criarChipCatalogoTreino(ex, sel);
+          var novo = chip.cloneNode(true); // tira o clique antigo (que mexe na lista global) e põe o do assistente
+          novo.addEventListener('click', function () {
+            var r = PT.alternarExercicio(dia, ex, mapaSrcPorIdCatalogo);
+            if (r === 'limite') { mostrarErroWz('Cada treino aceita até ' + PT.MAX_EXERCICIOS_POR_DIA + ' exercícios.'); return; }
+            wz.pickerAberto = true;
+            desenharSelecionadosWz(); desenharCatalogoWz();
+            var d = document.querySelectorAll('.wz-aba-dia small'); if (d[wz.diaAtivo]) { d[wz.diaAtivo].textContent = '(' + dia.exercicios.length + ')'; }
+          });
+          c.appendChild(novo);
+        });
+      }
+
+      window.wzSalvar = function () {
+        if (!wz) { return; }
+        var e3 = PT.validarPasso3(wz.plano);
+        if (e3) { mostrarErroWz(e3); return; }
+        var lista = PT.planoParaLista(wz.plano);
+        var botao = el('wz-salvar'); botao.disabled = true; botao.textContent = 'Salvando…';
+        var acao;
+        if (wz.fichaAlvo) { acao = FichasStore.aplicarTreinoPersonalizado(wz.fichaAlvo, lista); }
+        else if (wz.editId) { acao = TreinosStore.atualizarTreinoBase(wz.editId, { nome: wz.plano.nome.trim(), exercicios: lista }); }
+        else { acao = TreinosStore.criarTreinoBase(parceiroAtual, wz.plano.nome.trim(), lista); }
+        var alvo = wz.fichaAlvo;
+        acao.then(function () {
+          wz = null;
+          if (alvo) { abrirDetalheAluno(alvo); } else { mostrarTreinosBase(); }
+        }).catch(function (erro) {
+          botao.disabled = false; botao.textContent = wz && wz.fichaAlvo ? 'Salvar no aluno' : 'Salvar treino base';
+          if (wz && wz.fichaAlvo && tratarAlunoIndisponivel(erro)) { return; }
+          mostrarErroWz(mensagemSeguraErro(erro));
+        });
+      };
+
+      // Editar um treino base: se foi feito pelo assistente (tem dia), reabre nele; senão, o editor simples de antes.
+      var editarOriginal = window.abrirFormularioEdicaoTreinoBase;
+      window.abrirFormularioEdicaoTreinoBase = function (id) {
+        var tb = (treinosBaseCache || []).filter(function (t) { return t.id === id; })[0];
+        var plano = tb ? PT.listaParaPlano(tb.nome, tb.exercicios) : null;
+        if (plano) { return abrirCriarTreinoBase(plano, id, { sub: 'lista' }); }
+        return editarOriginal.apply(this, arguments);
+      };
+      window.abrirFormularioNovoTreinoBase = function () { abrirCriarTreinoBase(); };
+
+      // ---- Lista "Meus treinos-base": botão Aplicar a alunos ----
+      window.abrirAplicarAlunos = function (treinoBaseId) {
+        var tb = (treinosBaseCache || []).filter(function (t) { return t.id === treinoBaseId; })[0];
+        if (!tb || !parceiroAtual) { return; }
+        esconderTelasAntigas(); esconderTelasNovas();
+        marcarMenu('treinos', 'lista');
+        mostrar('aplicar-alunos-view', true);
+        var v = el('aplicar-alunos-view');
+        v.innerHTML = '<p style="color:var(--texto-secundario);">Carregando alunos…</p>';
+        FichasStore.listarFichas(parceiroAtual, { pagina: 1, porPagina: 1000 }).then(function (r) {
+          var fichas = (r.itens || []).filter(function (f) { return !f.desvinculada_em; });
+          var html = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 2px;">Aplicar a alunos</h2>' +
+            '<p style="color:var(--texto-secundario);font-size:0.84rem;margin:0 0 12px;">Treino base: <strong>' + escaparHtmlAluno(tb.nome) + '</strong>. Cada aluno recebe uma cópia; mudar o treino base depois não muda quem já recebeu.</p>';
+          if (!fichas.length) {
+            html += '<p style="color:var(--texto-secundario);">Você ainda não tem alunos com ficha. Cadastre um aluno em Alunos &gt; + Novo aluno.</p>' + botaoSec('Voltar', 'mostrarTreinosBase()', 'aa-voltar');
+            v.innerHTML = html; return;
+          }
+          html += '<div id="aa-lista">';
+          fichas.forEach(function (f) {
+            html += '<label style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--card-border);cursor:pointer;"><input type="checkbox" class="aa-aluno" value="' + escaparAtributo(f.id) + '" data-nome="' + escaparAtributo(f.nome) + '"> <span>' + escaparHtmlAluno(f.nome) + '</span></label>';
+          });
+          html += '</div><p class="campo-nota" style="margin:10px 0 0;">Aluno do app que ainda não tem ficha: abra o aluno e crie a ficha para poder aplicar o treino.</p>' +
+            '<p id="aa-resultado" style="display:none;font-size:0.85rem;margin:12px 0 0;"></p>' +
+            '<div style="display:flex;gap:10px;margin-top:14px;">' + botaoPri('Aplicar', 'aplicarAosAlunos(' + Number(treinoBaseId) + ')', 'aa-aplicar') + botaoSec('Voltar', 'mostrarTreinosBase()', 'aa-voltar') + '</div>';
+          v.innerHTML = html;
+        }).catch(function (e) {
+          v.innerHTML = '<p style="color:#c0392b;">' + mensagemSeguraErro(e) + '</p>' + botaoSec('Voltar', 'mostrarTreinosBase()', 'aa-voltar');
+        });
+      };
+
+      window.aplicarAosAlunos = function (treinoBaseId) {
+        var tb = (treinosBaseCache || []).filter(function (t) { return t.id === treinoBaseId; })[0];
+        var marcados = Array.prototype.slice.call(document.querySelectorAll('#aa-lista .aa-aluno')).filter(function (c) { return c.checked; });
+        var res = el('aa-resultado');
+        if (!marcados.length) { res.textContent = 'Marque ao menos um aluno.'; res.style.color = '#c0392b'; res.style.display = 'block'; return; }
+        var botao = el('aa-aplicar'); botao.disabled = true; botao.textContent = 'Aplicando…';
+        var ok = [], falhas = [];
+        marcados.reduce(function (cadeia, c) {
+          return cadeia.then(function () {
+            return FichasStore.aplicarTreinoBase(Number(c.value), treinoBaseId, tb.exercicios).then(function () { ok.push(c.getAttribute('data-nome')); }, function (e) { falhas.push(c.getAttribute('data-nome') + ' (' + ((e && e.message) || 'não deu') + ')'); });
+          });
+        }, Promise.resolve()).then(function () {
+          botao.disabled = false; botao.textContent = 'Aplicar';
+          var t = ok.length ? ('Aplicado a ' + ok.length + (ok.length === 1 ? ' aluno.' : ' alunos.')) : '';
+          if (falhas.length) { t += (t ? ' ' : '') + 'Não aplicou em: ' + falhas.join('; ') + '.'; }
+          res.textContent = t; res.style.color = falhas.length ? '#c0392b' : 'var(--texto)'; res.style.display = 'block';
+        });
+      };
+
+      // ---- Vincular Treino Fera (opção A: escolhe o aluno, o motor gera, o personal edita antes de salvar) ----
+      // O motor oficial ainda NÃO está no site. Contrato para quando chegar:
+      //   window.MotorFeraSite = { versao: "x.y", gerarTreino(aluno) -> Promise|objeto { dias:[{letra:"A", exercicios:[{grupo,subgrupo,src,series,repeticoes,descanso}]}] } }
+      // `aluno` = a ficha do aluno (sexo, nível, dias de treino etc.). Nada de regra de treino é inventada aqui.
+      window.abrirVincularFera = function () {
+        esconderTelasAntigas(); esconderTelasNovas();
+        marcarMenu('treinos', 'fera');
+        mostrar('vincular-fera-view', true);
+        var v = el('vincular-fera-view');
+        var motor = window.MotorFeraSite && typeof window.MotorFeraSite.gerarTreino === 'function';
+        var html = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 6px;">Vincular Treino Fera</h2>' +
+          '<p style="color:var(--texto-secundario);font-size:0.86rem;margin:0 0 14px;">Escolha o aluno. O motor do Fera monta o treino e você ajusta antes de salvar.</p>';
+        if (!motor) {
+          html += '<div id="fera-aviso" style="border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:0.86rem;color:var(--texto-secundario);">' +
+            '<strong style="color:var(--texto);">Ainda não disponível aqui.</strong> O motor oficial do Fera ainda não foi entregue para o painel. Assim que chegar, esta tela passa a gerar o treino. Enquanto isso, use <em>Criar treino base</em> e aplique ao aluno.</div>';
+        }
+        html += '<div class="campo" style="max-width:360px;"><label for="fera-aluno">Aluno</label><select id="fera-aluno"><option value="">Carregando…</option></select></div>' +
+          '<p id="fera-erro" style="display:none;color:#c0392b;font-size:0.85rem;margin:8px 0 0;"></p>' +
+          '<div style="margin-top:12px;"><button type="button" id="fera-gerar" class="botao-primario"' + (motor ? '' : ' disabled') + ' style="width:auto;padding:10px 22px;border:none;cursor:' + (motor ? 'pointer' : 'not-allowed') + ';font-family:inherit;' + (motor ? '' : 'opacity:0.5;') + '">Gerar treino do Fera</button></div>';
+        v.innerHTML = html;
+        FichasStore.listarFichas(parceiroAtual, { pagina: 1, porPagina: 1000 }).then(function (r) {
+          var fichas = (r.itens || []).filter(function (f) { return !f.desvinculada_em; });
+          var s = el('fera-aluno');
+          if (!s) { return; }
+          s.innerHTML = '<option value="">' + (fichas.length ? 'Escolha o aluno' : 'Nenhum aluno com ficha ainda') + '</option>' +
+            fichas.map(function (f) { return '<option value="' + escaparAtributo(f.id) + '">' + escaparHtmlAluno(f.nome) + '</option>'; }).join('');
+        }).catch(function (e) { var s = el('fera-aluno'); if (s) { s.innerHTML = '<option value="">Não deu para carregar os alunos</option>'; } });
+        el('fera-gerar').addEventListener('click', function () { gerarTreinoFera(); });
+      };
+
+      function gerarTreinoFera() {
+        var motor = window.MotorFeraSite;
+        var erro = el('fera-erro'); erro.style.display = 'none';
+        var id = Number(el('fera-aluno').value);
+        function falha(t) { erro.textContent = t; erro.style.display = 'block'; }
+        if (!motor || typeof motor.gerarTreino !== 'function') { falha('O motor do Fera ainda não está disponível.'); return; }
+        if (!id) { falha('Escolha o aluno.'); return; }
+        var botao = el('fera-gerar'); botao.disabled = true; botao.textContent = 'Gerando…';
+        FichasStore.buscarFicha(id).then(function (ficha) {
+          return Promise.resolve(motor.gerarTreino(ficha)).then(function (resp) { return { ficha: ficha, resp: resp }; });
+        }).then(function (x) {
+          var plano = PT.respostaDoMotorParaPlano('Treino Fera - ' + x.ficha.nome, x.resp);
+          if (!plano) { throw new Error('O motor devolveu um treino num formato que o painel não entende. Nada foi salvo.'); }
+          abrirCriarTreinoBase(plano, null, { fichaAlvo: id, fichaAlvoNome: x.ficha.nome, sub: 'fera' });
+        }).catch(function (e) {
+          botao.disabled = false; botao.textContent = 'Gerar treino do Fera';
+          if (tratarAlunoIndisponivel(e)) { return; }
+          falha(mensagemSeguraErro(e));
+        });
+      }
+
+      // Estado inicial do menu (a tela de Início é mostrada por renderMeusAlunos).
+      marcarMenu('inicio', null);
     })();
   </script>
 </body>
