@@ -1863,6 +1863,7 @@
       html += '<div class="cadastro-grupo"><div class="titulo-grupo">Medições</div>';
       html += '<div id="medicoes-lista"><p style="color:var(--texto-secundario);">Carregando…</p></div>';
       if (!lerSo) {
+      if (FichasStore.fichaPendenteDeDeclaracao && FichasStore.fichaPendenteDeDeclaracao(ficha)) { html += '<p id="aviso-declaracao-pendente-detalhe" style="color:var(--texto-secundario);font-size:0.85rem;margin:0 0 8px;">Para registrar medidas, abra Editar, marque a declaração de consentimento e salve a ficha.</p>'; }
       html += '<button type="button" onclick="abrirFormularioMedicao()" style="background:none;border:1px solid var(--card-border);color:var(--texto);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:0.82rem;margin-top:8px;">+ Registrar medição</button>';
       html += '<div id="medicao-form" style="display:none;margin-top:12px;"></div>';
       }
@@ -1925,6 +1926,9 @@
         var view = document.getElementById('aluno-form-view');
         view.innerHTML = '<h2 style="font-size:1.05rem;font-weight:800;margin:0 0 14px;">Editar ' + escaparHtmlAluno(ficha.nome) + '</h2>' + templateFormAluno();
         preencherFormularioAluno(ficha);
+        if (FichasStore.fichaPendenteDeDeclaracao && FichasStore.fichaPendenteDeDeclaracao(ficha)) { // D088/054
+          view.insertAdjacentHTML('afterbegin', '<p id="aviso-declaracao-pendente" style="background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:10px 12px;font-size:0.85rem;margin:0 0 14px;">Este aluno veio do app. Para registrar anamnese, testes físicos e medidas, marque a declaração de consentimento no fim do formulário e salve a ficha. Isso vem antes de qualquer registro.</p>');
+        }
         preencherCobrancaFormulario(fichaId);
         document.getElementById('aluno-detalhe-view').style.display = 'none';
         view.style.display = 'block';
@@ -1987,6 +1991,12 @@
       };
       var erroEl = document.getElementById('med-erro');
       erroEl.style.display = 'none';
+      // D088/054: ficha de aluno do app ainda com a marca -> o banco recusaria a medida.
+      if (FichasStore.fichaPendenteDeDeclaracao && FichasStore.fichaPendenteDeDeclaracao(fichaDetalheAtual)) {
+        erroEl.textContent = FichasStore.mensagemDaRecusa054('declaracao_do_parceiro_obrigatoria');
+        erroEl.style.display = 'block';
+        return;
+      }
       var botao = document.getElementById('med-botao-salvar');
       botao.disabled = true;
       botao.textContent = 'Registrando…';

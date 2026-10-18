@@ -208,6 +208,20 @@
     return !!(global.AlunoIndisponivel && global.AlunoIndisponivel.ehErroDoBanco(erroDoBanco, { gravacao: !!gravacao }));
   }
 
+  // D088/054 -- recusas do banco da migration 054 (ficha de aluno do app).
+  // Decide-se pela IGUALDADE EXATA da mensagem (nunca pelo codigo 42501, que
+  // tambem e usado por RLS). Devolve texto em portugues ou null.
+  var MARCA_VINCULO_APP = "vinculo_app_aceito";
+  var MENSAGENS_054 = {
+    declaracao_do_parceiro_obrigatoria: "Antes de registrar anamnese, testes físicos ou medidas deste aluno, abra Editar, marque a declaração de consentimento e salve a ficha.",
+    marca_so_para_aluno_do_app: "Esta marca só vale para aluno vinculado pelo app. Não foi possível salvar.",
+    marca_so_na_criacao: "Esta marca só pode existir na criação da ficha. Não foi possível salvar."
+  };
+  function mensagem054(erroDoBanco) {
+    var m = (typeof erroDoBanco === "string") ? erroDoBanco : (erroDoBanco && erroDoBanco.message);
+    return (typeof m === "string" && Object.prototype.hasOwnProperty.call(MENSAGENS_054, m)) ? MENSAGENS_054[m] : null;
+  }
+
   function funcaoAindaNaoExiste(erro) {
     var texto = ((erro && erro.message) || "").toLowerCase();
     return (erro && erro.code === "PGRST202") || texto.indexOf("could not find the function") !== -1;
@@ -298,6 +312,8 @@
     return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
       .then(function (resultado) {
         if (resultado.error) {
+          var m054 = mensagem054(resultado.error); // D088/054
+          if (m054) { throw new Error(m054); }
           if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
           throw new Error("Não deu para salvar essa ficha agora.");
         }
@@ -508,6 +524,8 @@
       return cliente.from("medidas_parceiro").insert(corpo).select("id").single()
         .then(function (resultado) {
           if (resultado.error) {
+            var m054 = mensagem054(resultado.error); // D088/054
+            if (m054) { throw new Error(m054); }
             if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
             throw new Error("Não deu para registrar essa medição agora.");
           }
@@ -519,6 +537,14 @@
   // IMC nunca é gravado (coluna não existe de propósito) -- só
   // calculado aqui, para exibição. Devolve null se faltar peso/altura
   // ou se a altura for zero (evita divisão por zero).
+  // D088/054: ficha de aluno do app nasce com a marca; enquanto existir, o banco
+  // recusa anamnese, testes fisicos e medidas. A marca sai ao salvar a ficha
+  // com a declaracao (atualizarFicha ja grava a versao do Termo).
+  FichasStoreSupabase.fichaPendenteDeDeclaracao = function (ficha) {
+    return !!(ficha && ficha.versao_termo_parceiro === MARCA_VINCULO_APP);
+  };
+  FichasStoreSupabase.mensagemDaRecusa054 = mensagem054;
+
   FichasStoreSupabase.calcularImc = function (pesoKg, alturaCm) {
     var peso = Number(pesoKg);
     var altura = Number(alturaCm);
