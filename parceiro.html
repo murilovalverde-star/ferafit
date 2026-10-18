@@ -2384,7 +2384,7 @@
           '<select id="seletor-grupo" onchange="renderCatalogoSeletorExercicios()" style="flex:0 1 180px;">' + optsGrupo + '</select>' +
         '</div>' +
         '<div style="display:flex;gap:16px;flex-wrap:wrap;">' +
-          '<div style="flex:1 1 260px;"><p class="campo-nota" style="margin:0 0 6px;">Catálogo (clique para adicionar)</p><div id="seletor-catalogo-lista" style="max-height:320px;overflow:auto;"></div></div>' +
+          '<div style="flex:3 1 420px;min-width:0;"><p class="campo-nota" style="margin:0 0 6px;">Catálogo (clique para adicionar)</p><div id="seletor-catalogo-lista" class="wz-grade-exercicios" style="max-height:560px;overflow:auto;"></div></div>' +
           '<div style="flex:1 1 260px;"><p class="campo-nota" style="margin:0 0 6px;">Exercícios escolhidos</p><div id="seletor-selecionados-lista"></div></div>' +
         '</div>';
     }
@@ -4950,7 +4950,7 @@
         esconderTelasAntigas(); esconderTelasNovas();
         marcarMenu('treinos', opcoes.sub || 'criar');
         mostrar('criar-treino-view', true);
-        wz = { plano: planoInicial || PT.novoPlano('meu', null, ''), passo: 1, diaAtivo: 0, editId: editId || null, busca: '', pickerAberto: false,
+        wz = { plano: planoInicial || PT.novoPlano('meu', null, ''), passo: 1, diaAtivo: 0, editId: editId || null, busca: '', filtro: '', pickerAberto: false,
           fichaAlvo: opcoes.fichaAlvo || null, fichaAlvoNome: opcoes.fichaAlvoNome || '' };
         if (planoInicial && (editId || opcoes.fichaAlvo)) { wz.passo = opcoes.fichaAlvo ? 3 : 1; }
         el('criar-treino-view').innerHTML = '<p style="color:var(--texto-secundario);">Carregando catálogo…</p>';
@@ -4973,12 +4973,19 @@
             cartaoEscolha('wz-caminho-fera', 'Treino do Fera', 'O motor do Fera monta para um aluno. Use "Vincular Treino Fera".', false, true) +
             '</div>';
         }
-        html += '<p class="campo-nota" style="margin:0 0 6px;">Divisão</p><div id="wz-divisoes" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
-        PT.DIVISOES.forEach(function (d) {
-          var on = p.divisao === d;
-          html += '<button type="button" class="wz-divisao" data-div="' + d + '" aria-pressed="' + (on ? 'true' : 'false') + '"' + (wz.editId ? ' disabled' : '') + ' style="' + estiloAba(on) + (wz.editId ? 'opacity:0.6;cursor:default;' : '') + '">' + d + '</button>';
+        html += '<p class="campo-nota" style="margin:0 0 6px;">Divisão (as mesmas do app)</p><div id="wz-divisoes" class="wz-grade-divisoes">';
+        var divisoesLista = PT.DIVISOES.slice();
+        var divAtual = PT.divisaoPorId(p.divisao);
+        if (divAtual && divAtual.legado) { divisoesLista.push(divAtual); } // treino antigo ABCD continua editavel
+        divisoesLista.forEach(function (d) {
+          var on = p.divisao === d.id;
+          html += '<button type="button" class="wz-divisao wz-card-divisao" data-div="' + d.id + '" aria-pressed="' + (on ? 'true' : 'false') + '"' + (wz.editId ? ' disabled style="opacity:0.6;cursor:default;"' : '') + '>' +
+            '<strong>' + escaparHtmlAluno(d.nome) + '</strong><span class="wz-sub">' + escaparHtmlAluno(d.subtitulo) + '</span>' +
+            (d.descricao ? '<span class="wz-desc">' + escaparHtmlAluno(d.descricao) + '</span>' : '') +
+            '<span class="wz-pecas">' + d.dias.map(function (x) { return '<span class="wz-peca">' + escaparHtmlAluno(x.letra) + '</span>'; }).join('') + '</span></button>';
         });
         html += '</div>';
+        if (divAtual && divAtual.nota) { html += '<p id="wz-nota-divisao" class="campo-nota" style="margin:-6px 0 14px;">' + escaparHtmlAluno(divAtual.nota) + '</p>'; }
         if (wz.editId) { html += '<p class="campo-nota" style="margin:-8px 0 14px;">A divisão de um treino já salvo não muda. Para outra divisão, crie um novo.</p>'; }
         html += '<div class="campo"><label for="wz-nome">Nome do treino base</label><input id="wz-nome" type="text" maxlength="' + PT.MAX_NOME + '" placeholder="Ex.: Base iniciante ABC" value="' + escaparAtributo(p.nome) + '"></div>' +
           erroWz() +
@@ -5013,14 +5020,29 @@
           var e2 = PT.validarPasso2(wz.plano);
           if (e2) { mostrarErroWz(e2); return; }
         }
-        wz.passo = passo; wz.diaAtivo = 0; wz.pickerAberto = false; wz.busca = '';
+        wz.passo = passo; wz.diaAtivo = 0; wz.pickerAberto = false; wz.busca = ''; wz.filtro = '';
         desenharWz();
       };
 
+      // D091 -- Full Body: de 3 a 7 treinos. "+ Adicionar dia" e "Remover último dia" (só aparecem nessa divisão).
+      function controlesDiasWz() {
+        var pl = wz.plano; var dv = PT.divisaoPorId(pl.divisao);
+        if (!dv || !dv.variavel) { return ''; }
+        var h = '<div id="wz-controle-dias" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px;">';
+        if (PT.podeAdicionarDia(pl)) { h += '<button type="button" id="wz-add-dia" style="background:none;border:1px dashed var(--laranja);color:var(--laranja);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;font-weight:700;">+ Adicionar dia</button>'; }
+        if (PT.podeRemoverDia(pl)) { h += '<button type="button" id="wz-rem-dia" style="background:none;border:1px solid var(--card-border);color:var(--texto-secundario);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;">Remover último dia</button>'; }
+        return h + '<small style="color:var(--texto-secundario);">' + pl.dias.length + ' de ' + dv.max + ' dias (mínimo ' + dv.min + ')</small></div>';
+      }
+      function ligarControlesDiasWz(redesenhar) {
+        var a = el('wz-add-dia'), r = el('wz-rem-dia');
+        if (a) { a.addEventListener('click', function () { PT.adicionarDia(wz.plano); wz.diaAtivo = wz.plano.dias.length - 1; redesenhar(); }); }
+        if (r) { r.addEventListener('click', function () { PT.removerUltimoDia(wz.plano); if (wz.diaAtivo >= wz.plano.dias.length) { wz.diaAtivo = wz.plano.dias.length - 1; } redesenhar(); }); }
+      }
+
       function desenharWz2() {
-        var html = cabecalhoWz(2, 3) + '<p class="campo-nota" style="margin:0 0 10px;">Escolha os músculos de cada dia. No próximo passo, só aparecem exercícios desses músculos.</p>';
+        var html = cabecalhoWz(2, 3) + '<p class="campo-nota" style="margin:0 0 10px;">Escolha os músculos de cada dia (já vêm sugeridos como no app; ajuste se quiser). No próximo passo, só aparecem exercícios desses músculos.</p>' + controlesDiasWz();
         wz.plano.dias.forEach(function (d, i) {
-          html += '<div class="wz-dia-musculos" data-dia="' + i + '" style="margin-bottom:14px;"><strong style="font-size:0.9rem;">Treino ' + d.letra + '</strong><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">';
+          html += '<div class="wz-dia-musculos" data-dia="' + i + '" style="margin-bottom:14px;"><strong style="font-size:0.9rem;">' + escaparHtmlAluno(d.rotulo) + (d.foco ? ' <small style="font-weight:400;color:var(--texto-secundario);">· ' + escaparHtmlAluno(d.foco) + '</small>' : '') + '</strong><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">';
           PT.GRUPOS.forEach(function (g) {
             var on = d.grupos.indexOf(g) !== -1;
             html += '<button type="button" class="wz-musculo" data-dia="' + i + '" data-grupo="' + escaparAtributo(g) + '" aria-pressed="' + (on ? 'true' : 'false') + '" style="' + (on ? 'background:var(--laranja);color:#1a0f00;font-weight:800;border:1px solid var(--laranja);' : CSS_BTN_OFF) + 'border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:0.8rem;">' + escaparHtmlAluno(g) + '</button>';
@@ -5030,6 +5052,7 @@
         html += erroWz() + '<div style="display:flex;gap:10px;margin-top:6px;">' + botaoSec('Voltar', 'wzIr(1)', 'wz-voltar') + botaoPri('Continuar', 'wzIr(3)', 'wz-continuar') + '</div>';
         var v = el('criar-treino-view');
         v.innerHTML = html;
+        ligarControlesDiasWz(desenharWz2);
         Array.prototype.forEach.call(v.querySelectorAll('.wz-musculo'), function (b) {
           b.addEventListener('click', function () {
             PT.alternarGrupo(wz.plano.dias[Number(b.getAttribute('data-dia'))], b.getAttribute('data-grupo'));
@@ -5042,21 +5065,24 @@
         var plano = wz.plano;
         var dia = plano.dias[wz.diaAtivo];
         var html = cabecalhoWz(3, wz.fichaAlvo ? 1 : 3);
+        html += controlesDiasWz();
         html += '<div id="wz-abas-dias" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">';
         plano.dias.forEach(function (d, i) {
-          html += '<button type="button" class="wz-aba-dia" data-dia="' + i + '" aria-pressed="' + (i === wz.diaAtivo ? 'true' : 'false') + '" style="' + estiloAba(i === wz.diaAtivo) + '">Treino ' + d.letra + ' <small>(' + d.exercicios.length + ')</small></button>';
+          html += '<button type="button" class="wz-aba-dia" data-dia="' + i + '" aria-pressed="' + (i === wz.diaAtivo ? 'true' : 'false') + '" style="' + estiloAba(i === wz.diaAtivo) + '">' + escaparHtmlAluno(d.rotulo) + ' <small>(' + d.exercicios.length + ')</small></button>';
         });
-        html += '</div><p class="campo-nota" style="margin:0 0 8px;">Músculos do treino ' + dia.letra + ': ' + escaparHtmlAluno(dia.grupos.join(', ')) + '</p>';
+        html += '</div><p class="campo-nota" style="margin:0 0 8px;">Músculos de ' + escaparHtmlAluno(dia.rotulo) + ': ' + escaparHtmlAluno(dia.grupos.join(', ')) + '</p>';
+        if (PT.divisaoPorId(plano.divisao) && PT.divisaoPorId(plano.divisao).id === 'legs_everyday') { html += '<p id="wz-dica-legs" class="campo-nota" style="margin:0 0 8px;">Legs Everyday: no app, o primeiro e o último exercício de cada dia são de perna.</p>'; }
         html += '<div id="wz-selecionados"></div>';
         html += '<div style="margin:10px 0;"><button type="button" id="wz-adicionar" style="background:none;border:1px dashed var(--card-border);color:var(--texto);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;">+ Adicionar exercício</button></div>';
-        html += '<div id="wz-picker" style="display:' + (wz.pickerAberto ? 'block' : 'none') + ';"><div class="campo" style="margin-bottom:8px;"><input id="wz-busca" type="text" placeholder="Buscar exercício" value="' + escaparAtributo(wz.busca) + '"></div><div id="wz-catalogo" style="max-height:340px;overflow:auto;"></div></div>';
+        html += '<div id="wz-picker" style="display:' + (wz.pickerAberto ? 'block' : 'none') + ';"><div class="campo" style="margin-bottom:8px;"><input id="wz-busca" type="text" placeholder="Buscar exercício" value="' + escaparAtributo(wz.busca) + '"></div><div id="wz-filtro" class="wz-filtro-musculos"></div><div id="wz-catalogo" class="wz-grade-exercicios"></div></div>';
         html += erroWz();
         html += '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">' + (wz.fichaAlvo ? botaoSec('Cancelar', 'wzCancelar()', 'wz-cancelar') : botaoSec('Voltar', 'wzIr(2)', 'wz-voltar')) +
           botaoPri(wz.fichaAlvo ? 'Salvar no aluno' : 'Salvar treino base', 'wzSalvar()', 'wz-salvar') + '</div>';
         var v = el('criar-treino-view');
         v.innerHTML = html;
+        ligarControlesDiasWz(desenharWz3);
         Array.prototype.forEach.call(v.querySelectorAll('.wz-aba-dia'), function (b) {
-          b.addEventListener('click', function () { wz.diaAtivo = Number(b.getAttribute('data-dia')); wz.pickerAberto = false; wz.busca = ''; desenharWz3(); });
+          b.addEventListener('click', function () { wz.diaAtivo = Number(b.getAttribute('data-dia')); wz.pickerAberto = false; wz.busca = ''; wz.filtro = ''; desenharWz3(); });
         });
         el('wz-adicionar').addEventListener('click', function () { wz.pickerAberto = !wz.pickerAberto; el('wz-picker').style.display = wz.pickerAberto ? 'block' : 'none'; desenharCatalogoWz(); });
         el('wz-busca').addEventListener('input', function () { wz.busca = this.value; desenharCatalogoWz(); });
@@ -5075,7 +5101,7 @@
           var linha = document.createElement('div');
           linha.className = 'wz-exercicio';
           linha.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--card-border);';
-          if (ex) { var im = document.createElement('img'); im.src = urlImagemCatalogoTreino(ex.arquivo); im.alt = ''; im.loading = 'lazy'; im.style.cssText = 'width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;'; linha.appendChild(im); }
+          if (ex) { var im = document.createElement('img'); im.src = urlImagemCatalogoTreino(ex.arquivo); im.alt = ''; im.loading = 'lazy'; im.style.cssText = 'width:72px;height:54px;border-radius:8px;object-fit:cover;flex-shrink:0;'; linha.appendChild(im); }
           var nome = document.createElement('span'); nome.style.cssText = 'flex:1 1 170px;font-weight:600;'; nome.textContent = nomeDoExercicioEmEdicao(ex); linha.appendChild(nome);
           [['series', 'Séries', 54], ['repeticoes', 'Reps', 54], ['descanso', 'Descanso (s)', 60]].forEach(function (cp) {
             var lb = document.createElement('label'); lb.style.cssText = 'font-size:0.75rem;color:var(--texto-secundario);';
@@ -5097,21 +5123,45 @@
         if (!c || !wz.pickerAberto) { return; }
         var dia = wz.plano.dias[wz.diaAtivo];
         var termo = (wz.busca || '').trim().toLowerCase();
-        var lista = PT.catalogoDoDia(catalogoTreinoCompleto, dia).filter(function (ex) { return !termo || ex.nome.toLowerCase().indexOf(termo) !== -1; });
+        if (wz.filtro && dia.grupos.indexOf(wz.filtro) === -1) { wz.filtro = ''; }
+        // filtro por um dos musculos do dia (so aparece quando o dia tem mais de um)
+        var f = el('wz-filtro');
+        if (f) {
+          f.innerHTML = '';
+          if (dia.grupos.length > 1) {
+            [''].concat(dia.grupos).forEach(function (g) {
+              var b = document.createElement('button'); b.type = 'button'; b.className = 'wz-filtro-btn'; b.setAttribute('data-grupo', g);
+              b.setAttribute('aria-pressed', (wz.filtro || '') === g ? 'true' : 'false');
+              b.textContent = g || 'Todos'; b.style.cssText = estiloAba((wz.filtro || '') === g) + 'padding:5px 12px;font-size:0.78rem;';
+              b.addEventListener('click', function () { wz.filtro = g; desenharCatalogoWz(); });
+              f.appendChild(b);
+            });
+          }
+        }
+        var lista = PT.catalogoDoDia(catalogoTreinoCompleto, dia).filter(function (ex) {
+          return (!termo || ex.nome.toLowerCase().indexOf(termo) !== -1) && (!wz.filtro || ex.grupo === wz.filtro);
+        });
         c.innerHTML = '';
-        if (!lista.length) { c.innerHTML = '<p class="estado-vazio" style="color:var(--texto-secundario);">Nenhum exercício encontrado.</p>'; return; }
+        if (!lista.length) { c.style.display = 'block'; c.innerHTML = '<p class="estado-vazio" style="color:var(--texto-secundario);">Nenhum exercício encontrado.</p>'; return; }
+        c.style.display = '';
         lista.forEach(function (ex) {
           var sel = dia.exercicios.some(function (e) { return e.src === mapaSrcPorIdCatalogo[ex.id]; });
-          var chip = criarChipCatalogoTreino(ex, sel);
-          var novo = chip.cloneNode(true); // tira o clique antigo (que mexe na lista global) e põe o do assistente
-          novo.addEventListener('click', function () {
+          var card = document.createElement('div');
+          card.className = 'wz-ex-card' + (sel ? ' no-treino' : '');
+          card.setAttribute('data-ex', ex.id);
+          var im = document.createElement('img'); im.loading = 'lazy'; im.alt = ex.nome; im.src = urlImagemCatalogoTreino(ex.arquivo);
+          var nome = document.createElement('span'); nome.className = 'wz-ex-nome'; nome.textContent = ex.nome;
+          var sub = document.createElement('span'); sub.className = 'wz-ex-sub'; sub.textContent = ex.grupo;
+          var acao = document.createElement('span'); acao.className = 'wz-ex-acao'; acao.textContent = sel ? '− Remover' : '+ Adicionar';
+          card.appendChild(im); card.appendChild(nome); card.appendChild(sub); card.appendChild(acao);
+          card.addEventListener('click', function () {
             var r = PT.alternarExercicio(dia, ex, mapaSrcPorIdCatalogo);
             if (r === 'limite') { mostrarErroWz('Cada treino aceita até ' + PT.MAX_EXERCICIOS_POR_DIA + ' exercícios.'); return; }
             wz.pickerAberto = true;
             desenharSelecionadosWz(); desenharCatalogoWz();
             var d = document.querySelectorAll('.wz-aba-dia small'); if (d[wz.diaAtivo]) { d[wz.diaAtivo].textContent = '(' + dia.exercicios.length + ')'; }
           });
-          c.appendChild(novo);
+          c.appendChild(card);
         });
       }
 

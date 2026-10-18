@@ -2473,3 +2473,36 @@ footer.site-footer a:hover {
 @media (max-width: 640px) {
   .numeros-livre-datas input[type="date"] { max-width: 118px; }
 }
+
+/* D090 -- "Criar treino base": divisoes do app e escolha de exercicios em grade com imagem grande */
+.wz-grade-divisoes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+@media (min-width: 721px) { .wz-grade-divisoes { grid-template-columns: repeat(3, 1fr); } }
+.wz-card-divisao { text-align: left; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; cursor: pointer; font-family: inherit; color: var(--texto); }
+.wz-card-divisao[aria-pressed="true"] { border: 2px solid var(--laranja); padding: 11px; }
+.wz-card-divisao strong { display: block; font-size: 1rem; }
+.wz-card-divisao .wz-sub { display: block; font-size: 0.75rem; color: var(--texto-secundario); margin: 2px 0 6px; }
+.wz-card-divisao .wz-desc { display: block; font-size: 0.74rem; color: var(--texto-secundario); line-height: 1.35; }
+.wz-pecas { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.wz-peca { min-width: 24px; padding: 2px 6px; text-align: center; border-radius: 7px; border: 1px solid var(--card-border); font-size: 0.72rem; font-weight: 800; }
+.wz-card-divisao[aria-pressed="true"] .wz-peca { border-color: var(--laranja); }
+
+.wz-grade-exercicios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 721px) { .wz-grade-exercicios { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1000px) { .wz-grade-exercicios { grid-template-columns: repeat(4, 1fr); } }
+.wz-ex-card { display: flex; flex-direction: column; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: var(--card); cursor: pointer; }
+.wz-ex-card.no-treino { border: 2px solid var(--laranja); }
+.wz-ex-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #111; }
+.wz-ex-card .wz-ex-nome { font-size: 0.82rem; font-weight: 600; padding: 8px 10px 4px; line-height: 1.25; flex: 1; }
+.wz-ex-card .wz-ex-sub { font-size: 0.7rem; color: var(--texto-secundario); padding: 0 10px; }
+.wz-ex-card .wz-ex-acao { margin: 8px 10px 10px; padding: 7px 0; text-align: center; border-radius: 8px; font-size: 0.78rem; font-weight: 800; background: var(--laranja); color: #1a0f00; }
+.wz-ex-card.no-treino .wz-ex-acao { background: none; color: #ff6a6a; border: 1px solid #ff6a6a; }
+.wz-filtro-musculos { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
+
+/* D091 -- seletor de exercicios da ficha (treino personalizado): mesma grade de imagem grande do assistente */
+#seletor-catalogo-lista .chip-exercicio { flex-direction: column; align-items: stretch; gap: 0; padding: 0; margin: 0; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: var(--card); }
+#seletor-catalogo-lista .chip-exercicio.no-treino { border: 2px solid var(--laranja); }
+#seletor-catalogo-lista .chip-exercicio img { width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 0; background: #111; }
+#seletor-catalogo-lista .chip-exercicio .chip-nome { padding: 8px 10px 4px; line-height: 1.25; flex: 1; font-weight: 600; }
+#seletor-catalogo-lista .chip-exercicio .chip-acao { margin: 8px 10px 10px; padding: 7px 0; text-align: center; border-radius: 8px; background: var(--laranja); color: #1a0f00; }
+#seletor-catalogo-lista .chip-exercicio.no-treino .chip-acao { background: none; color: #ff6a6a; border: 1px solid #ff6a6a; }
+#seletor-catalogo-lista.wz-grade-exercicios { align-content: start; }

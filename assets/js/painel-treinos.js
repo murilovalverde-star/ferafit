@@ -17,28 +17,131 @@
   P.GRUPOS = ["Peito", "Costas", "Ombros", "Bíceps", "Tríceps", "Antebraço", "Abdômen", "Oblíquos", "Lombar",
     "Trapézio", "Quadríceps", "Posteriores de coxa", "Glúteos", "Adutores", "Panturrilha"];
 
-  P.DIVISOES = ["AB", "ABC", "ABCD", "ABCDE"];
+  // D090/D091 -- divisoes oferecidas (decisao de Murilo 18/10, iguais as da App D282): Full Body, AB, ABC, ABCDE e
+  // Legs Everyday. Nomes/descricoes/musculos = os do app (V37/src/domain/splits.js e onboarding/Divisao.js).
+  // `dia` gravado: "A".."G" em todas (Legs Everyday grava A..E e mostra "Dia 1".."Dia 5").
+  // Full Body e variavel: de 3 a 7 dias (`min`/`max`), cada dia com a sua lista.
+  var TODOS = ["Peito", "Costas", "Ombros", "Bíceps", "Tríceps", "Antebraço", "Abdômen", "Oblíquos", "Lombar",
+    "Trapézio", "Quadríceps", "Posteriores de coxa", "Glúteos", "Adutores", "Panturrilha"];
+  P.LETRAS = ["A", "B", "C", "D", "E", "F", "G"];
+  function dia(letra, rotulo, foco, grupos) { return { letra: letra, rotulo: rotulo, foco: foco, grupos: grupos }; }
+  var LE_SUP = ["Abdômen", "Oblíquos", "Lombar", "Peito", "Ombros", "Tríceps", "Costas", "Trapézio", "Bíceps"];
+  P.DIVISOES = [
+    { id: "full_body", nome: "Full Body", subtitulo: "Corpo inteiro, de 3 a 7 treinos", variavel: true, min: 3, max: 7,
+      descricao: "Corpo todo em um único treino: ganhe força, queime calorias e otimize seu tempo ao máximo.",
+      nota: "Você monta de 3 a 7 treinos de corpo inteiro (A, B, C…), cada um com a sua lista. Para o aluno, eles se alternam em ciclo.",
+      dias: [0, 1, 2].map(function (i) { return dia(P.LETRAS[i], "Treino " + P.LETRAS[i], "Corpo inteiro", TODOS.slice()); }) },
+    { id: "upper_lower", nome: "AB", subtitulo: "Upper / Lower",
+      descricao: "Divisão inteligente: treine metade do corpo no dia A e a outra metade no dia B com eficácia.",
+      dias: [dia("A", "Treino A", "Superior", ["Peito", "Costas", "Trapézio", "Ombros", "Bíceps", "Tríceps", "Antebraço"]),
+             dia("B", "Treino B", "Inferior", ["Quadríceps", "Posteriores de coxa", "Glúteos", "Adutores", "Panturrilha", "Abdômen", "Oblíquos", "Lombar"])] },
+    { id: "abc", nome: "ABC", subtitulo: "Push / Pull / Legs",
+      descricao: "Três treinos diferentes na semana: ideal para dar estímulos intensos e focar na hipertrofia.",
+      dias: [dia("A", "Treino A", "Push", ["Peito", "Tríceps", "Ombros"]),
+             dia("B", "Treino B", "Pull", ["Costas", "Trapézio", "Bíceps", "Antebraço", "Lombar"]),
+             dia("C", "Treino C", "Legs + Core", ["Quadríceps", "Posteriores de coxa", "Glúteos", "Abdômen", "Adutores", "Panturrilha", "Oblíquos"])] },
+    { id: "abcde", nome: "ABCDE", subtitulo: "5 dias",
+      descricao: "Divisão em 5 dias. No Dia E: foco especial em superiores para homens e inferiores para mulheres.",
+      nota: "No app o Treino E depende do sexo do aluno (superiores para homens, inferiores para mulheres). Aqui você escolhe os músculos do Treino E.",
+      dias: [dia("A", "Treino A", "Peito + Tríceps", ["Peito", "Tríceps"]),
+             dia("B", "Treino B", "Costas + Bíceps", ["Costas", "Bíceps", "Antebraço"]),
+             dia("C", "Treino C", "Pernas", ["Quadríceps", "Posteriores de coxa", "Glúteos", "Adutores", "Panturrilha"]),
+             dia("D", "Treino D", "Ombros + Core", ["Ombros", "Trapézio", "Abdômen", "Oblíquos", "Lombar"]),
+             dia("E", "Treino E", "Especialização", [])] },
+    { id: "legs_everyday", nome: "Legs Everyday", subtitulo: "5 dias seguidos, pernas todo dia",
+      descricao: "Para quem tem foco e quer treinar pernas todos os dias.",
+      nota: "São 5 dias corridos, com pernas em todos eles (mais um pouco de core e superiores). No app, o primeiro e o último exercício de cada dia são de perna.",
+      dias: [dia("A", "Dia 1", "Quadríceps + Adutores", ["Quadríceps", "Adutores"].concat(LE_SUP)),
+             dia("B", "Dia 2", "Glúteos + Posteriores", ["Glúteos", "Posteriores de coxa", "Panturrilha"].concat(LE_SUP)),
+             dia("C", "Dia 3", "Posteriores + Quadríceps", ["Posteriores de coxa", "Quadríceps"].concat(LE_SUP)),
+             dia("D", "Dia 4", "Glúteos + Adutores", ["Glúteos", "Adutores", "Panturrilha"].concat(LE_SUP)),
+             dia("E", "Dia 5", "Quadríceps + Glúteos", ["Quadríceps", "Glúteos"].concat(LE_SUP))] }
+  ];
+  // Treinos salvos antes da D090 com a divisao ABCD (4 dias) continuam abrindo para edicao; ela nao e mais oferecida.
+  P.DIVISOES_LEGADO = [
+    { id: "abcd", nome: "ABCD", subtitulo: "4 dias", descricao: "", legado: true,
+      dias: [dia("A", "Treino A", "", []), dia("B", "Treino B", "", []), dia("C", "Treino C", "", []), dia("D", "Treino D", "", [])] }
+  ];
   P.MAX_NOME = 80;
   P.MAX_EXERCICIOS_POR_DIA = 12;
   P.PADRAO = { series: 3, repeticoes: 10, descanso: 60 };
+  var LEGADO_NOME_PARA_ID = { "AB": "upper_lower", "ABC": "abc", "ABCD": "abcd", "ABCDE": "abcde" };
 
-  P.letrasDaDivisao = function (divisao) {
-    return P.DIVISOES.indexOf(divisao) === -1 ? [] : divisao.split("");
+  // Aceita o id ("abc", "legs_everyday"...) ou o nome antigo ("ABC").
+  P.divisaoPorId = function (id) {
+    var todas = P.DIVISOES.concat(P.DIVISOES_LEGADO);
+    var alvo = LEGADO_NOME_PARA_ID[id] || id;
+    for (var i = 0; i < todas.length; i++) { if (todas[i].id === alvo) { return todas[i]; } }
+    return null;
   };
 
-  // Plano de trabalho do assistente.
-  P.novoPlano = function (caminho, divisao, nome) {
-    return {
+  function letrasDe(d) { return d.dias.map(function (x) { return x.letra; }); }
+  function mesmasLetras(a, b) { return a.length === b.length && a.every(function (l) { return b.indexOf(l) !== -1; }); }
+
+  // Codigos de dia gravados (["A","B","C"...]) -> divisao. `dica` = id gravado nos itens (`divisao`), quando houver.
+  // Sem dica, A,B,C e A..E sao ambiguos (ABC x Full Body, ABCDE x Legs x Full Body): vale a divisao de dias fixos mais
+  // antiga (AB, ABC, ABCDE, ABCD); 6 ou 7 dias so podem ser Full Body.
+  P.divisaoPorLetras = function (letras, dica) {
+    var d = dica ? P.divisaoPorId(dica) : null;
+    if (d) {
+      if (d.variavel) { if (letras.length >= d.min && letras.length <= d.max && letras.join("") === P.LETRAS.slice(0, letras.length).join("")) { return d; } }
+      else if (mesmasLetras(letrasDe(d), letras)) { return d; }
+    }
+    var ordem = ["upper_lower", "abc", "abcde", "abcd", "full_body"];
+    for (var i = 0; i < ordem.length; i++) {
+      var c = P.divisaoPorId(ordem[i]);
+      if (c.variavel) { if (letras.length >= c.min && letras.length <= c.max && letras.join("") === P.LETRAS.slice(0, letras.length).join("")) { return c; } }
+      else if (mesmasLetras(letrasDe(c), letras)) { return c; }
+    }
+    return null;
+  };
+
+  P.letrasDaDivisao = function (divisao) {
+    var d = P.divisaoPorId(divisao);
+    return d ? letrasDe(d) : [];
+  };
+
+  // Plano de trabalho do assistente. Os musculos de cada dia ja vem com a sugestao do app (editavel);
+  // `semSugestao` deixa os dias vazios (usado ao reabrir um treino salvo).
+  // `qtdDias` so vale para divisao variavel (Full Body): de min a max.
+  P.novoPlano = function (caminho, divisao, nome, semSugestao, qtdDias) {
+    var d = P.divisaoPorId(divisao);
+    var plano = {
       caminho: caminho === "fera" ? "fera" : "meu",
-      divisao: P.DIVISOES.indexOf(divisao) === -1 ? null : divisao,
+      divisao: d ? d.id : null,
       nome: nome || "",
-      dias: P.letrasDaDivisao(divisao).map(function (l) { return { letra: l, grupos: [], exercicios: [] }; })
+      dias: []
     };
+    if (!d) { return plano; }
+    var base = d.dias.slice();
+    if (d.variavel) {
+      var n = Math.max(d.min, Math.min(d.max, parseInt(qtdDias, 10) || d.min));
+      while (base.length < n) { var l = P.LETRAS[base.length]; base.push(dia(l, "Treino " + l, base[0].foco, base[0].grupos.slice())); }
+      plano.minDias = d.min; plano.maxDias = d.max;
+    }
+    plano.dias = base.map(function (x) {
+      return { letra: x.letra, rotulo: x.rotulo, foco: x.foco, grupos: semSugestao ? [] : x.grupos.slice(), exercicios: [] };
+    });
+    return plano;
+  };
+
+  // Full Body: + Adicionar dia (ate 7) e remover o ultimo (ate 3). Devolve true se mudou.
+  P.podeAdicionarDia = function (plano) { var d = P.divisaoPorId(plano && plano.divisao); return !!(d && d.variavel && plano.dias.length < d.max); };
+  P.podeRemoverDia = function (plano) { var d = P.divisaoPorId(plano && plano.divisao); return !!(d && d.variavel && plano.dias.length > d.min); };
+  P.adicionarDia = function (plano) {
+    if (!P.podeAdicionarDia(plano)) { return false; }
+    var l = P.LETRAS[plano.dias.length]; var d = P.divisaoPorId(plano.divisao);
+    plano.dias.push({ letra: l, rotulo: "Treino " + l, foco: d.dias[0].foco, grupos: d.dias[0].grupos.slice(), exercicios: [] });
+    return true;
+  };
+  P.removerUltimoDia = function (plano) {
+    if (!P.podeRemoverDia(plano)) { return false; }
+    plano.dias.pop(); return true;
   };
 
   // Passo 1 -> pode seguir?
   P.validarPasso1 = function (plano) {
-    if (!plano || !plano.divisao) { return "Escolha a divisão do treino (AB, ABC, ABCD ou ABCDE)."; }
+    if (!plano || !plano.divisao) { return "Escolha a divisão do treino."; }
     var nome = (plano.nome || "").trim();
     if (!nome) { return "Dê um nome ao treino base."; }
     if (nome.length > P.MAX_NOME) { return "O nome pode ter até " + P.MAX_NOME + " letras."; }
@@ -48,15 +151,17 @@
   // Passo 2 -> cada dia precisa de ao menos 1 musculo.
   P.validarPasso2 = function (plano) {
     for (var i = 0; i < plano.dias.length; i++) {
-      if (!plano.dias[i].grupos.length) { return "Escolha ao menos um músculo no treino " + plano.dias[i].letra + "."; }
+      if (!plano.dias[i].grupos.length) { return "Escolha ao menos um músculo em " + plano.dias[i].rotulo + "."; }
     }
     return null;
   };
 
   // Passo 3 -> cada dia precisa de ao menos 1 exercicio.
   P.validarPasso3 = function (plano) {
+    var dv = P.divisaoPorId(plano && plano.divisao);
+    if (dv && dv.variavel && plano.dias.length < dv.min) { return "O " + dv.nome + " precisa de pelo menos " + dv.min + " treinos."; }
     for (var i = 0; i < plano.dias.length; i++) {
-      if (!plano.dias[i].exercicios.length) { return "Escolha ao menos um exercício no treino " + plano.dias[i].letra + "."; }
+      if (!plano.dias[i].exercicios.length) { return "Escolha ao menos um exercício em " + plano.dias[i].rotulo + "."; }
     }
     return null;
   };
@@ -71,8 +176,11 @@
   };
 
   // So entram no seletor do dia os exercicios dos musculos escolhidos.
+  // D090: na ordem dos musculos do dia (a do app: ex. Legs Everyday comeca pelas pernas); dentro do musculo, a ordem do catalogo.
   P.catalogoDoDia = function (catalogo, dia) {
-    return (catalogo || []).filter(function (ex) { return dia.grupos.indexOf(ex.grupo) !== -1; });
+    var lista = (catalogo || []).map(function (ex, i) { return { ex: ex, i: i }; }).filter(function (x) { return dia.grupos.indexOf(x.ex.grupo) !== -1; });
+    lista.sort(function (a, b) { return (dia.grupos.indexOf(a.ex.grupo) - dia.grupos.indexOf(b.ex.grupo)) || (a.i - b.i); });
+    return lista.map(function (x) { return x.ex; });
   };
 
   // Item gravavel. `mapaSrc` = idCatalogoSite -> srcMotor (MAPA_ID_MOTOR_PARA_CATALOGO_190.json).
@@ -112,7 +220,7 @@
     var lista = [];
     plano.dias.forEach(function (d) {
       d.exercicios.forEach(function (e) {
-        lista.push({ grupo: e.grupo, subgrupo: e.subgrupo, src: e.src, series: e.series, repeticoes: e.repeticoes, descanso: e.descanso, dia: d.letra });
+        lista.push({ grupo: e.grupo, subgrupo: e.subgrupo, src: e.src, series: e.series, repeticoes: e.repeticoes, descanso: e.descanso, dia: d.letra, divisao: plano.divisao });
       });
     });
     return lista;
@@ -120,7 +228,7 @@
 
   // Lista gravada -> plano (para editar). Lista sem `dia` em algum item = treino antigo (editor simples).
   P.ehTreinoComDias = function (lista) {
-    return Array.isArray(lista) && lista.length > 0 && lista.every(function (e) { return typeof e.dia === "string" && /^[A-E]$/.test(e.dia); });
+    return Array.isArray(lista) && lista.length > 0 && lista.every(function (e) { return typeof e.dia === "string" && /^[A-G]$/.test(e.dia); });
   };
 
   P.listaParaPlano = function (nome, lista) {
@@ -128,9 +236,10 @@
     var letras = [];
     lista.forEach(function (e) { if (letras.indexOf(e.dia) === -1) { letras.push(e.dia); } });
     letras.sort();
-    var divisao = letras.join("");
-    if (P.DIVISOES.indexOf(divisao) === -1) { return null; }
-    var plano = P.novoPlano("meu", divisao, nome);
+    var dica = null; lista.forEach(function (e) { if (!dica && typeof e.divisao === "string") { dica = e.divisao; } });
+    var div = P.divisaoPorLetras(letras, dica);
+    if (!div) { return null; }
+    var plano = P.novoPlano("meu", div.id, nome, true, letras.length);
     lista.forEach(function (e) {
       var dia = plano.dias.filter(function (d) { return d.letra === e.dia; })[0];
       if (dia.grupos.indexOf(e.grupo) === -1) { dia.grupos.push(e.grupo); }
@@ -144,9 +253,9 @@
   P.respostaDoMotorParaPlano = function (nome, resposta) {
     if (!resposta || !Array.isArray(resposta.dias) || !resposta.dias.length) { return null; }
     var letras = resposta.dias.map(function (d) { return d && d.letra; });
-    var divisao = letras.join("");
-    if (P.DIVISOES.indexOf(divisao) === -1) { return null; }
-    var plano = P.novoPlano("fera", divisao, nome);
+    var div = P.divisaoPorLetras(letras, resposta.divisao);
+    if (!div || (!div.variavel && div.dias.map(function (x) { return x.letra; }).join() !== letras.join())) { return null; }
+    var plano = P.novoPlano("fera", div.id, nome, true, letras.length);
     for (var i = 0; i < resposta.dias.length; i++) {
       var exs = resposta.dias[i].exercicios;
       if (!Array.isArray(exs) || !exs.length) { return null; }
