@@ -224,7 +224,7 @@
       var senhaIgualAnterior = erro && erro.code === "same_password";
 
       var mensagem = senhaVazada
-        ? "Senha de fácil dedução, troque por uma senha mais segura."
+        ? "Essa senha já apareceu em vazamentos de dados na internet. Escolha outra. Uma frase com 3 ou 4 palavras funciona bem."
         : senhaCurtaOuCaracteres
           ? "A senha precisa de " + MIN_CARACTERES + " caracteres, com uma combinação mais forte."
           : senhaIgualAnterior

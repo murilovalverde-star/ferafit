@@ -331,6 +331,40 @@
     return Array.isArray(exercicios) ? exercicios : [];
   }
 
+  // D092 -- contrato unico da divisao com o app: `treino_config.divisao` E `divisao` em cada item.
+  // Nunca mais `treino_config: null`: preserva as outras chaves ja gravadas (tipoDivisao, tempoMinutos, series,
+  // descanso -- migration 022) e troca so `divisao`. Valores: full_body, ab, abc, abcde, legs_everyday (abcd = legado).
+  // Sem `divisao` nos itens, tenta pelas letras dos dias; sem nada, tira so a chave `divisao` (nao fica a de outro treino).
+  function divisaoDosExercicios(exercicios) {
+    var lista = listaDeExerciciosDaFicha(exercicios);
+    var PT = global.PainelTreinos;
+    if (PT && PT.divisaoGravada) { var g = PT.divisaoGravada(null, lista); if (g) { return g; } }
+    if (PT && PT.divisaoPorLetras && PT.ehTreinoComDias && PT.ehTreinoComDias(lista)) {
+      var letras = [];
+      lista.forEach(function (e) { if (letras.indexOf(e.dia) === -1) { letras.push(e.dia); } });
+      letras.sort();
+      var d = PT.divisaoPorLetras(letras, null);
+      if (d) { return d.id; }
+    }
+    return null;
+  }
+  function montarTreinoConfig(configAtual, exercicios) {
+    var cfg = {};
+    if (configAtual && typeof configAtual === "object" && !Array.isArray(configAtual)) {
+      Object.keys(configAtual).forEach(function (k) { cfg[k] = configAtual[k]; });
+    }
+    var div = divisaoDosExercicios(exercicios);
+    if (div) { cfg.divisao = div; } else { delete cfg.divisao; }
+    return Object.keys(cfg).length ? cfg : null;
+  }
+  FichasStoreSupabase.montarTreinoConfig = montarTreinoConfig;
+  function lerTreinoConfigAtual(cliente, fichaId) {
+    try {
+      return cliente.from("fichas_aluno_parceiro").select("treino_config").eq("id", fichaId).single()
+        .then(function (r) { return (r && !r.error && r.data) ? r.data.treino_config : null; }, function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+
   // Aplica um treino-base da biblioteca (`treinos_base_parceiro`,
   // ver `treinos-store.js`): grava uma CÓPIA da lista de exercícios
   // no momento da aplicação -- nunca um link vivo (conferido no
@@ -342,24 +376,25 @@
   // da 022) -- só aceita um treino-base do mesmo dono desta ficha.
   FichasStoreSupabase.aplicarTreinoBase = function (fichaId, treinoBaseId, exercicios) {
     var cliente = clienteSupabase();
-    var corpo = {
-      treino_modo: "base",
-      treino_base_id: treinoBaseId,
-      treino_exercicios: listaDeExerciciosDaFicha(exercicios),
-      treino_config: null,
-      treino_atualizado_em: new Date().toISOString()
-    };
-    return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
-      .then(function (resultado) {
-        if (resultado.error) {
-          if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
-          if ((resultado.error.message || "").indexOf("não pertence a este parceiro") !== -1) {
-            throw new Error("Esse treino-base não pertence a este parceiro.");
-          }
-          throw new Error("Não deu para aplicar esse treino-base agora.");
+    return lerTreinoConfigAtual(cliente, fichaId).then(function (configAtual) {
+      var corpo = {
+        treino_modo: "base",
+        treino_base_id: treinoBaseId,
+        treino_exercicios: listaDeExerciciosDaFicha(exercicios),
+        treino_config: montarTreinoConfig(configAtual, exercicios),
+        treino_atualizado_em: new Date().toISOString()
+      };
+      return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single();
+    }).then(function (resultado) {
+      if (resultado.error) {
+        if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
+        if ((resultado.error.message || "").indexOf("não pertence a este parceiro") !== -1) {
+          throw new Error("Esse treino-base não pertence a este parceiro.");
         }
-        return resultado.data;
-      });
+        throw new Error("Não deu para aplicar esse treino-base agora.");
+      }
+      return resultado.data;
+    });
   };
 
   // Monta/edita um treino personalizado direto na ficha, sem vínculo
@@ -370,20 +405,22 @@
   // isso acontece é responsabilidade da tela, não desta função.
   FichasStoreSupabase.aplicarTreinoPersonalizado = function (fichaId, exercicios) {
     var cliente = clienteSupabase();
-    var corpo = {
-      treino_modo: "personalizado",
-      treino_base_id: null,
-      treino_exercicios: listaDeExerciciosDaFicha(exercicios),
-      treino_atualizado_em: new Date().toISOString()
-    };
-    return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single()
-      .then(function (resultado) {
-        if (resultado.error) {
-          if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
-          throw new Error("Não deu para salvar esse treino agora.");
-        }
-        return resultado.data;
-      });
+    return lerTreinoConfigAtual(cliente, fichaId).then(function (configAtual) {
+      var corpo = {
+        treino_modo: "personalizado",
+        treino_base_id: null,
+        treino_exercicios: listaDeExerciciosDaFicha(exercicios),
+        treino_config: montarTreinoConfig(configAtual, exercicios),
+        treino_atualizado_em: new Date().toISOString()
+      };
+      return cliente.from("fichas_aluno_parceiro").update(corpo).eq("id", fichaId).select("id").single();
+    }).then(function (resultado) {
+      if (resultado.error) {
+        if (ficha_sumiu(resultado.error, true)) { throw global.AlunoIndisponivel.criarErro(); } // D080
+        throw new Error("Não deu para salvar esse treino agora.");
+      }
+      return resultado.data;
+    });
   };
 
   // D075 (2026-10-15) -- NAO existe excluir ficha no site (decisao de

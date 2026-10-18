@@ -31,7 +31,7 @@
       descricao: "Corpo todo em um único treino: ganhe força, queime calorias e otimize seu tempo ao máximo.",
       nota: "Você monta de 3 a 7 treinos de corpo inteiro (A, B, C…), cada um com a sua lista. Para o aluno, eles se alternam em ciclo.",
       dias: [0, 1, 2].map(function (i) { return dia(P.LETRAS[i], "Treino " + P.LETRAS[i], "Corpo inteiro", TODOS.slice()); }) },
-    { id: "upper_lower", nome: "AB", subtitulo: "Upper / Lower",
+    { id: "ab", nome: "AB", subtitulo: "Upper / Lower",
       descricao: "Divisão inteligente: treine metade do corpo no dia A e a outra metade no dia B com eficácia.",
       dias: [dia("A", "Treino A", "Superior", ["Peito", "Costas", "Trapézio", "Ombros", "Bíceps", "Tríceps", "Antebraço"]),
              dia("B", "Treino B", "Inferior", ["Quadríceps", "Posteriores de coxa", "Glúteos", "Adutores", "Panturrilha", "Abdômen", "Oblíquos", "Lombar"])] },
@@ -65,7 +65,7 @@
   P.MAX_NOME = 80;
   P.MAX_EXERCICIOS_POR_DIA = 12;
   P.PADRAO = { series: 3, repeticoes: 10, descanso: 60 };
-  var LEGADO_NOME_PARA_ID = { "AB": "upper_lower", "ABC": "abc", "ABCD": "abcd", "ABCDE": "abcde" };
+  var LEGADO_NOME_PARA_ID = { "upper_lower": "ab", "AB": "ab", "ABC": "abc", "ABCD": "abcd", "ABCDE": "abcde" };
 
   // Aceita o id ("abc", "legs_everyday"...) ou o nome antigo ("ABC").
   P.divisaoPorId = function (id) {
@@ -87,7 +87,7 @@
       if (d.variavel) { if (letras.length >= d.min && letras.length <= d.max && letras.join("") === P.LETRAS.slice(0, letras.length).join("")) { return d; } }
       else if (mesmasLetras(letrasDe(d), letras)) { return d; }
     }
-    var ordem = ["upper_lower", "abc", "abcde", "abcd", "full_body"];
+    var ordem = ["ab", "abc", "abcde", "abcd", "full_body"];
     for (var i = 0; i < ordem.length; i++) {
       var c = P.divisaoPorId(ordem[i]);
       if (c.variavel) { if (letras.length >= c.min && letras.length <= c.max && letras.join("") === P.LETRAS.slice(0, letras.length).join("")) { return c; } }
@@ -231,12 +231,23 @@
     return Array.isArray(lista) && lista.length > 0 && lista.every(function (e) { return typeof e.dia === "string" && /^[A-G]$/.test(e.dia); });
   };
 
-  P.listaParaPlano = function (nome, lista) {
+  // D092 -- contrato unico da divisao com o app. Ordem de leitura:
+  // treino_config.divisao -> `divisao` do primeiro item que tiver -> letras dos dias.
+  P.divisaoGravada = function (config, lista) {
+    if (config && typeof config === "object" && typeof config.divisao === "string" && P.divisaoPorId(config.divisao)) { return P.divisaoPorId(config.divisao).id; }
+    var itens = Array.isArray(lista) ? lista : [];
+    for (var i = 0; i < itens.length; i++) {
+      if (itens[i] && typeof itens[i].divisao === "string" && P.divisaoPorId(itens[i].divisao)) { return P.divisaoPorId(itens[i].divisao).id; }
+    }
+    return null;
+  };
+
+  P.listaParaPlano = function (nome, lista, config) {
     if (!P.ehTreinoComDias(lista)) { return null; }
     var letras = [];
     lista.forEach(function (e) { if (letras.indexOf(e.dia) === -1) { letras.push(e.dia); } });
     letras.sort();
-    var dica = null; lista.forEach(function (e) { if (!dica && typeof e.divisao === "string") { dica = e.divisao; } });
+    var dica = P.divisaoGravada(config, lista);
     var div = P.divisaoPorLetras(letras, dica);
     if (!div) { return null; }
     var plano = P.novoPlano("meu", div.id, nome, true, letras.length);
