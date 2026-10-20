@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /criar-senha.html
+
+Sitemap: https://ferafit.app.br/sitemap.xml
