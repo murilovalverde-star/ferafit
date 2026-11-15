@@ -2506,3 +2506,27 @@ footer.site-footer a:hover {
 #seletor-catalogo-lista .chip-exercicio .chip-acao { margin: 8px 10px 10px; padding: 7px 0; text-align: center; border-radius: 8px; background: var(--laranja); color: #1a0f00; }
 #seletor-catalogo-lista .chip-exercicio.no-treino .chip-acao { background: none; color: #ff6a6a; border: 1px solid #ff6a6a; }
 #seletor-catalogo-lista.wz-grade-exercicios { align-content: start; }
+
+/* D103: botoes das lojas (Dia D) */
+.lojas { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+.botao-loja {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-align: center;
+  background: var(--laranja);
+  color: #1a0f00;
+}
+.botao-loja:hover { filter: brightness(1.08); }
+.pagina-baixar { padding: 32px 0 40px; }
+.pagina-baixar .container { max-width: 560px; }
+.pagina-baixar h1 { font-size: 1.7rem; margin: 0 0 10px; font-weight: 800; line-height: 1.25; }
+.pagina-baixar .subtitulo { color: var(--texto-secundario); margin: 0 0 22px; font-size: 1rem; }
+.pagina-baixar .lojas { flex-direction: column; margin: 0 0 28px; }
+.pagina-baixar .botao-loja { display: block; width: 100%; box-sizing: border-box; }
+.pagina-baixar .nota-baixar { color: var(--texto-secundario); font-size: 0.86rem; margin: 0 0 10px; }
+.pagina-baixar .nota-baixar a { color: var(--ambar); }
+@media (min-width: 640px) { .pagina-baixar .lojas { flex-direction: row; } }
