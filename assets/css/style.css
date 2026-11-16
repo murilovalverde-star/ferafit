@@ -2530,3 +2530,13 @@ footer.site-footer a:hover {
 .pagina-baixar .nota-baixar { color: var(--texto-secundario); font-size: 0.86rem; margin: 0 0 10px; }
 .pagina-baixar .nota-baixar a { color: var(--ambar); }
 @media (min-width: 640px) { .pagina-baixar .lojas { flex-direction: row; } }
+
+/* D103-A: selos oficiais das lojas (imagens oficiais, sem alteracao). O PNG do Google Play ja traz area de respiro; alturas ajustadas para o selo visivel ter o mesmo tamanho. */
+.selo-loja { display: inline-block; line-height: 0; }
+.selo-loja img { display: block; width: auto; }
+.selo-apple img { height: 48px; }
+.selo-play img { height: 62px; }
+.lojas { align-items: center; }
+.pagina-baixar .lojas { align-items: center; }
+.pagina-baixar .selo-loja { align-self: center; }
+.cta-final .lojas { justify-content: center; margin: 20px 0 28px; }
