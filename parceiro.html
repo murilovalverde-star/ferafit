@@ -25,8 +25,11 @@
   <meta name="twitter:image" content="https://ferafit.app.br/assets/img/og-image.jpg">
   <meta name="twitter:image:alt" content="Fera Fit: logotipo e a onça mascote levantando uma barra com anilhas. Frase: Solta a fera.">
   <link rel="stylesheet" href="assets/css/style.css">
+  <!-- D104: PWA da Area do Parceiro (Microsoft Store). Somente esta pagina tem manifest. -->
+  <link rel="manifest" href="parceiro.webmanifest">
+  <meta name="theme-color" content="#0a0908">
 </head>
-<body>
+<body class="pwa-parceiro">
   <div class="tarja-demo">Login real para academia/personal (D045) — cadastro passa por aprovação. Alunos e Montar treino continuam em modo teste, com dados fictícios, até ligarmos essa parte ao banco. Sem indexação (noindex).</div>
 
   <header class="site-header">
@@ -5316,6 +5319,14 @@
       // Estado inicial do menu (a tela de Início é mostrada por renderMeusAlunos).
       marcarMenu('inicio', null);
     })();
+  </script>
+  <script>
+    // D104: service worker minimo (so arquivos estaticos; ver sw-parceiro.js). Escopo: apenas esta pagina.
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw-parceiro.js", { scope: "/parceiro.html" }).catch(function () {});
+      });
+    }
   </script>
 </body>
 </html>

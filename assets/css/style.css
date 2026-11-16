@@ -2540,3 +2540,8 @@ footer.site-footer a:hover {
 .pagina-baixar .lojas { align-items: center; }
 .pagina-baixar .selo-loja { align-self: center; }
 .cta-final .lojas { justify-content: center; margin: 20px 0 28px; }
+
+/* D104: Area do Parceiro instalada como app (Windows): esconde o menu do site institucional, que leva para fora do app. */
+@media (display-mode: standalone) {
+  body.pwa-parceiro .site-nav { display: none; }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "/parceiro.html",
+  "name": "Fera Fit Parceiros",
+  "short_name": "Fera Parceiros",
+  "description": "Entrada para academias e personal trainers parceiros do Fera Fit.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/parceiro.html",
+  "scope": "/parceiro.html",
+  "display": "standalone",
+  "background_color": "#0a0908",
+  "theme_color": "#0a0908",
+  "categories": [
+    "fitness",
+    "health",
+    "business"
+  ],
+  "icons": [
+    {
+      "src": "/assets/img/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/pwa/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
